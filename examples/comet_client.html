@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv=Content-Type content="text/html;charset=utf-8">
+    <script src="http://su.bdimg.com/static/superplus/js/lib/jquery-1.10.2_d88366fd.js"></script>
+    <script>
+        function cometRequest() {
+            $.ajax({
+                type: "POST",
+                dataType: "json",
+                url: "http://127.0.0.1:9443",
+                timeout: 80000,     //ajax请求超时时间80秒
+                data: {time: "80"}, //80秒后无论结果服务器都返回数据
+                success: function (data, textStatus) {
+                    //从服务器得到数据，显示数据并继续查询
+                    if (data.success == "1") {
+                        $("#msg").append("<br>[有数据]" + data.text);
+                    }
+                    //未从服务器得到数据，继续查询
+                    else if (data.success == "0") {
+                        $("#msg").append("<br>[无数据]");
+                    } else {
+                        console.log("ErrorMessage: " + data);
+                    }
+                    cometRequest();
+                },
+                //Ajax请求超时，继续查询
+                error: function (XMLHttpRequest, textStatus, errorThrown) {
+                    if (textStatus == "timeout") {
+                        $("#msg").append("<br>[超时]");
+                        cometRequest();
+                    } else {
+                        console.log("Server Error: " + textStatus);
+                    }
+                }
+            });
+        }
+        $(document).ready(cometRequest);
+    </script>
+    <title></title>
+</head>
+<body>
+信息：
+<div id="msg"></div>
+</body>
+</html>

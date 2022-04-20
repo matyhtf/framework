@@ -1,0 +1,39 @@
+@charset "utf-8";
+* {
+	font-family: Consolas, "微软雅黑", Courier New, Courier, monospace;
+	font-size: 14px;
+}
+
+body {
+	background-color: #fff;
+	margin: 40px;
+	color: #000;
+}
+
+.green {
+	color: green;
+}
+
+.red {
+	color: red;
+}
+
+#content {
+	border: #999 1px solid;
+	background-color: #fff;
+	padding: 20px 20px 12px 20px;
+}
+
+h1 {
+	font-weight: normal;
+	font-size: 14px;
+	color: #990000;
+	margin: 0 0 10px 0;
+}
+table{
+	border-collapse:collapse;
+	border:1px solid #ccc;
+}
+td{
+	padding:5px;
+}
