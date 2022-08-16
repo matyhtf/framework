@@ -30,7 +30,8 @@
     "symfony/console": "^4.1",
     "ext-swoole": ">=4.4",
     "ext-pdo": "*",
-    "ext-mysqli": "*"
+    "ext-mysqli": "*",
+    "swoole/ide-helper": "4.8.*"
   },
   "require-dev": {
     "phpunit/phpunit": "8.5.x-dev"

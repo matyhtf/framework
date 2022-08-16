@@ -104,11 +104,15 @@ class Controller extends BaseObject
         return $this->is_ajax ? $ret : json_encode($ret);
     }
 
+    /**
+     * @param $key
+     * @param $value
+     * @throws InvalidParam
+     */
     function assign($key, $value)
     {
         // Verify $key is reliable.
-        if (strpos($key, '_swoole') === 0)
-        {
+        if (strpos($key, '_swoole') === 0) {
             throw new InvalidParam("key is invalid.");
         }
 
@@ -117,20 +121,20 @@ class Controller extends BaseObject
 
     /**
      * render template file, then display it.
-     * @param string $_swoole_tpl_file
+     * @param string $tpl_file
      */
-    function display($_swoole_tpl_file = '')
+    function display($tpl_file = '')
     {
-        if (empty($_swoole_tpl_file))
+        if (empty($tpl_file))
         {
-            $_swoole_tpl_file = strtolower($this->app->env['mvc']['controller']) . '/' . strtolower($this->app->env['mvc']['view']) . '.php';
+            $tpl_file = strtolower($this->app->env['mvc']['controller']) . '/' . strtolower($this->app->env['mvc']['view']) . '.php';
         }
-        if (!is_file($this->template_dir . $_swoole_tpl_file))
+        if (!is_file($this->template_dir . $tpl_file))
         {
-            Error::info('template error', "template file[" . $this->template_dir . $_swoole_tpl_file . "] not found");
+            Error::info('template error', "template file[" . $this->template_dir . $tpl_file . "] not found");
         }
         extract($this->tpl_var);
-        include $this->template_dir . $_swoole_tpl_file;
+        include $this->template_dir . $tpl_file;
     }
 
     /**
