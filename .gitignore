@@ -11,3 +11,4 @@
 /.buildpath
 /.project
 /.phpunit.result.cache
+/.php_cs.cache
