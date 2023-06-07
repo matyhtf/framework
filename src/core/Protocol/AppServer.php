@@ -3,10 +3,6 @@ namespace SPF\Protocol;
 
 use SPF;
 
-class AppServerException extends \Exception
-{
-}
-
 class AppServer extends HttpServer
 {
     protected $router_function;

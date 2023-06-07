@@ -255,7 +255,7 @@ abstract class Base implements Driver
 
     public function log($log)
     {
-        echo $log, NL;
+        echo $log, PHP_EOL;
     }
 }
 

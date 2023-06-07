@@ -1,11 +1,5 @@
 <?php
-
-if (PHP_OS == 'WINNT') {
-    define("NL", "\r\n");
-} else {
-    define("NL", "\n");
-}
-define("BL", "<br />" . NL);
+define("BL", "<br />" . PHP_EOL);
 
 /**
  * 生产一个model接口，模型在注册树上为单例
@@ -64,8 +58,7 @@ function debug()
  */
 function error($error_id, $stop = true)
 {
-    $php = SPF\App::getInstance();
-    ;
+    $php = SPF\App::getInstance();;
     $error = new \SPF\Error($error_id);
     if (isset($php->error_call[$error_id])) {
         call_user_func($php->error_call[$error_id], $error);
@@ -114,4 +107,25 @@ if (!function_exists('env')) {
     {
         return SPF\App::getInstance()->getEnv($key, $default);
     }
+}
+
+if (!function_exists('config')) {
+    function config($key)
+    {
+        $app = SPF\App::getInstance();
+        $keys = explode('.', $key);
+        $value = $app->config;
+        foreach ($keys as $name) {
+            if (!isset($value[$name])) {
+                return null;
+            }
+            $value = $value[$name];
+        }
+        return $value;
+    }
+}
+
+function str_i_starts_with($haystack, $needle)
+{
+    return strcasecmp(substr($haystack, 0, strlen($needle)), $needle) === 0;
 }

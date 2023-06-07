@@ -17,8 +17,16 @@ class Loader
      * 命名空间的路径
      */
     protected $namespaces;
+    /**
+     * @var App
+     */
     protected $app;
     protected $objects;
+
+    protected static $appNameSpaces = [
+        'model',
+        'controller',
+    ];
 
     /**
      * Loader constructor.
@@ -36,12 +44,34 @@ class Loader
     /**
      * 自动载入类
      * @param $class
+     * @throws Error
      */
     public function autoload($class)
     {
-        $root = explode('\\', trim($class, '\\'), 2);
-        if (count($root) > 1 and isset($this->namespaces[$root[0]])) {
-            include $this->namespaces[$root[0]] . '/' . str_replace('\\', '/', $root[1]) . '.php';
+        $ns = explode('\\', ltrim($class, '\\'), 2);
+        if (count($ns) === 0) {
+            return;
+        }
+        $root = $ns[0];
+        if (isset($this->namespaces[$root])) {
+            include $this->namespaces[$root] . '/' . str_replace('\\', '/', $ns[1]) . '.php';
+        } elseif (strcasecmp($root, 'app') === 0) {
+            // controller, model 等应用的特殊命名空间
+            foreach (self::$appNameSpaces as $name) {
+                if (str_i_starts_with($ns[1], $name)) {
+                    $class_name = ltrim(substr($ns[1], strlen($name)), '\\');
+                    $class_file = $this->app->getPath() . '/' . $name . 's/' . str_replace('\\', '/', $class_name) . '.php';
+                    if (is_file($class_file)) {
+                        include $class_file;
+                        return;
+                    }
+                }
+            }
+            // 其他
+            $class_file = $this->app->getPath() . '/classes/' . str_replace('\\', '/', $ns[1]) . '.php';
+            if (is_file($class_file)) {
+                include $class_file;
+            }
         }
     }
 

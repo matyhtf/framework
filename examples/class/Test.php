@@ -1,7 +1,8 @@
 <?php
+
 namespace BL;
 
-use SPF\Protocol\SOAServer;
+use SPF\Protocol\RPCServer;
 
 class Test
 {

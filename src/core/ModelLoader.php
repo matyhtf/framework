@@ -43,32 +43,18 @@ class ModelLoader
     }
 
     /**
-     * 加载Model
-     * @param $model_name
-     * @param $db_key
-     * @return mixed
-     * @throws Error
+     * 加载 Model
+     * @param string $model_name
+     * @param string $db_key
+     * @return Model
      */
-    public function loadModel($model_name, $db_key = 'master')
+    public function loadModel(string $model_name, string $db_key = 'master'): Model
     {
-        if (isset($this->_models[$db_key][$model_name])) {
-            return $this->_models[$db_key][$model_name];
-        } else {
-            $model_file = App::getInstance()->app_path . '/models/' . str_replace('\\', '/', $model_name) . '.php';
+        if (!isset($this->_models[$db_key][$model_name])) {
             $model_class = '\\App\\Model\\' . $model_name;
-            if (!is_file($model_file)) {
-                //严格的psr4格式 大驼峰 命名空间和文件夹对应
-                $model_file = App::getInstance()->app_path . '/Models/' . str_replace('\\', '/', $model_name) . '.php';
-                $model_class = '\\App\\Models\\' . $model_name;
-            }
-            if (!is_file($model_file)) {
-                throw new Error("The model [<b>$model_name</b>] does not exist.");
-            }
-
-            require_once $model_file;
             $this->_models[$db_key][$model_name] = new $model_class($this->swoole, $db_key);
-            return $this->_models[$db_key][$model_name];
         }
+        return $this->_models[$db_key][$model_name];
     }
 
     /**

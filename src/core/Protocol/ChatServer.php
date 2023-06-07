@@ -1,5 +1,10 @@
 <?php
-class ChatServer implements Swoole_TCP_Server_Protocol
+
+namespace SPF\Protocol;
+
+use SPF\Filter;
+
+class ChatServer extends Base
 {
     public $default_port = 8080;
     //保存用户名称
@@ -11,7 +16,7 @@ class ChatServer implements Swoole_TCP_Server_Protocol
 
     public function log($msg)
     {
-        echo $msg,NL;
+        echo $msg, PHP_EOL;
     }
 
     public function sendMsg($msg, $from, $to, $client_id)
@@ -21,12 +26,13 @@ class ChatServer implements Swoole_TCP_Server_Protocol
         $data['msg'] = $msg;
         $data['type'] = 'msg';
         $send = json_encode($data);
-        if ($to==0) {
+        if ($to == 0) {
             $this->server->sendAll($client_id, $send);
         } else {
             $this->server->send($this->chat_client[$to], $send);
         }
     }
+
     public function sysNotice($msg, $client_id)
     {
         $data['msg'] = $msg;
@@ -34,11 +40,12 @@ class ChatServer implements Swoole_TCP_Server_Protocol
         $send = json_encode($data);
         $this->server->sendAll($client_id, $send);
     }
-    public function onRecive($client_id, $data)
+
+    public function onReceive($server, $client_id, $tid, $data)
     {
         $msg = explode(' ', $data, 3);
-        $this->log($client_id.$data);
-        if ($msg[0]=='/setname') {
+        $this->log($client_id . $data);
+        if ($msg[0] == '/setname') {
             $uid = (int)$msg[1];
             $uname = $msg[2];
             if (isset($this->chat_unames[$uid])) {
@@ -47,9 +54,9 @@ class ChatServer implements Swoole_TCP_Server_Protocol
                 $this->chat_client[$uid] = $client_id;
                 $this->chat_unames[$uid] = $uname;
                 $this->server->send($client_id, 'setname success');
-                $this->sysNotice('login:'.$uid.':'.$uname, $client_id);
+                $this->sysNotice('login:' . $uid . ':' . $uname, $client_id);
             }
-        } elseif ($msg[0]=='/sendto') {
+        } elseif ($msg[0] == '/sendto') {
             $to = (int)$msg[1];
             $from = array_search($client_id, $this->chat_client);
             $content = Filter::escape($msg[2]);
@@ -58,30 +65,32 @@ class ChatServer implements Swoole_TCP_Server_Protocol
             } else {
                 $this->server->send($client_id, 'user not exists');
             }
-        } elseif ($msg[0]=='/sendall') {
+        } elseif ($msg[0] == '/sendall') {
             $from = array_search($client_id, $this->chat_client);
             $content = Filter::escape($msg[1]);
             $this->sendMsg($content, $from, 0, $client_id);
-        } elseif ($msg[0]=='/getusers') {
-            $this->server->send($client_id, 'users:'.json_encode($this->chat_unames));
+        } elseif ($msg[0] == '/getusers') {
+            $this->server->send($client_id, 'users:' . json_encode($this->chat_unames));
         }
     }
 
-    public function onStart()
+    public function onStart($server)
     {
     }
 
-    public function onShutdown()
+    public function onShutdown($server)
     {
     }
-    public function onClose($client_id)
+
+    public function onClose($server, $client_id, $tid)
     {
         $uid = array_search($client_id, $this->chat_client);
-        unset($this->chat_client[$uid],$this->chat_unames[$uid]);
+        unset($this->chat_client[$uid], $this->chat_unames[$uid]);
         $this->log('user logout!');
-        $this->sysNotice('logout:'.$uid, $client_id);
+        $this->sysNotice('logout:' . $uid, $client_id);
     }
-    public function onConnect($client_id)
+
+    public function onConnect($server, $client_id, $tid)
     {
     }
 }

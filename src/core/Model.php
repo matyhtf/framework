@@ -432,10 +432,6 @@ class Model
         return Form::checkInput($input, $this->_form, $error);
     }
 
-    public function parseForm()
-    {
-    }
-
     /**
      * @param $fields
      * @return QueryBuilder

@@ -6,6 +6,8 @@ use Exception;
 use SPF\Exception\NotFound;
 use Symfony;
 use Dotenv\Dotenv;
+use Whoops\Handler\PrettyPageHandler;
+use Whoops\Run;
 
 /**
  * Swoole系统核心类，外部使用全局变量$php引用
@@ -59,7 +61,6 @@ class App
     public $response;
 
     public $app_path;
-    public $controller_path = '';
 
     /**
      * @var Http\ExtServer
@@ -186,19 +187,16 @@ class App
         }
 
         $this->app_path = $dir;
-
         if (is_dir(!$this->app_path)) {
             Error::info("core error", __CLASS__ . ": $dir is not exists.");
         }
 
         $this->loader = new Loader($this);
+        spl_autoload_register([$this->loader, 'autoload']);
         $this->modelLoader = new ModelLoader($this);
+
         $this->config = new Config;
         $this->config->setPath($this->app_path . '/configs');
-
-        // 将此目录作为App命名空间的根目录
-        $this->loader->addNameSpace('App', $this->app_path . '/classes');
-        spl_autoload_register([$this->loader, 'autoload']);
 
         // 添加默认路由器
         $this->addRouter(new Router\Rewrite());
@@ -286,11 +284,11 @@ class App
             $this->env['runtime']['mem'] = memory_get_usage();
             //使用whoops美化错误页面
             if (class_exists('\\Whoops\\Run')) {
-                $whoops = new \Whoops\Run;
+                $whoops = new Run;
                 if ($this->env['sapi_name'] == 'cli') {
                     $whoops->pushHandler(new \Whoops\Handler\PlainTextHandler());
                 } else {
-                    $whoops->pushHandler(new \Whoops\Handler\PrettyPageHandler);
+                    $whoops->pushHandler(new PrettyPageHandler);
                 }
                 $whoops->register();
             }
@@ -746,84 +744,49 @@ class App
             $this->request->initWithFastCGI();
         }
 
+        if (defined('DEBUG') and DEBUG === 'on') {
+            $whoops = new Run;
+            $whoops->pushHandler(new PrettyPageHandler);
+            $whoops->register();
+        }
+
         $mvc = call_user_func($this->router_function);
         if ($mvc === false) {
             $this->http->status(404);
             throw new NotFound("MVC Error: url route failed!");
         }
-        //check controller name
+        // check controller name
         if (!preg_match('/^[a-z0-9_]+$/i', $mvc['controller'])) {
-            throw new NotFound("MVC Error: controller[{$mvc['controller']}] name incorrect.Regx: /^[a-z0-9_]+$/i");
+            throw new NotFound("Controller[{$mvc['controller']}] name incorrect");
         }
-        //check view name
+        // check view name
         if (!preg_match('/^[a-z0-9_]+$/i', $mvc['view'])) {
-            throw new NotFound("MVC Error: view[{$mvc['view']}] name incorrect.Regx: /^[a-z0-9_]+$/i");
+            throw new NotFound("View[{$mvc['view']}] name incorrect");
         }
-        //directory
-        if (isset($mvc['directory']) and !preg_match('/^[a-z0-9_]+$/i', $mvc['directory'])) {
-            throw new NotFound("MVC Error: directory[{$mvc['view']}] incorrect. Regx: /^[a-z0-9_]+$/i");
-        }
-
         $this->env['mvc'] = $mvc;
 
-        //控制器名称
-        $controller_name = ucwords($mvc['controller']);
-        //控制器文件目录
-        if ($this->controller_path) {
-            $controller_dir = $this->controller_path;
-        } else {
-            $controller_dir = $this->app_path . '/controllers';
-            if (!is_dir($controller_dir)) {
-                $controller_dir = $this->app_path . '/Controllers';
-            }
-        }
-        //子目录
-        if (isset($mvc['directory'])) {
-            $directory = ucwords($mvc['directory']);
-            $controller_class = '\\App\\Controller\\' . $directory . '\\' . $controller_name;
-            $controller_dir .= '/' . $directory;
-        } else {
-            $controller_class = '\\App\\Controller\\' . $controller_name;
-        }
-        //控制器代码文件
-        $controller_file = $controller_dir . '/' . $controller_name . '.php';
-
-        if (class_exists($controller_class, false)) {
-            goto do_action;
-        } else {
-            if (is_file($controller_file)) {
-                require_once $controller_file;
-                goto do_action;
-            }
+        // 控制器名称
+        $controller_class = '\\App\\Controller\\' . ucwords($mvc['controller']);
+        if (!class_exists($controller_class)) {
+            $this->http->status(404);
+            throw new NotFound("Controller {$mvc['controller']}[{$controller_class}] not found");
         }
 
-        //file not found
-        $this->http->status(404);
-        throw new NotFound("MVC Error: Controller <b>{$mvc['controller']}</b>[{$controller_file}] not exist!<br />\nURL: {$_SERVER['REQUEST_URI']}");
-
-        do_action:
-
-        //服务器模式下，尝试重载入代码
-        if (defined('SWOOLE_SERVER')) {
-            $this->reloadController($mvc, $controller_file);
-        }
         $controller = new $controller_class($this);
         if (!method_exists($controller, $mvc['view'])) {
             $this->http->status(404);
-            $msg = "MVC Error:  {$mvc['controller']}->{$mvc['view']} Not Found!<br />\n";
-            $msg .= "URL: {$_SERVER['REQUEST_URI']}";
-            throw new NotFound($msg);
+            throw new NotFound("View {$mvc['controller']}->{$mvc['view']} not found");
         }
 
         $param = empty($mvc['param']) ? null : $mvc['param'];
         $method = $mvc['view'];
-        //before action
+        // before action
         $this->callHook(self::HOOK_BEFORE_ACTION);
-        //magic method
+        // magic method
         if (method_exists($controller, '__beforeAction')) {
             $controller->{'__beforeAction'}($mvc);
         }
-        //do action
+        // do action
         try {
             $return = $controller->$method($param);
         } catch (\Exception $e) {
@@ -846,13 +809,13 @@ class App
             }
             $return = '';
         }
-        //magic method
+        // magic method
         if (method_exists($controller, '__afterAction')) {
             $controller->{'__afterAction'}($return);
         }
-        //after action
+        // after action
         $this->callHook(self::HOOK_AFTER_ACTION);
-        //响应请求
+        // 响应请求
         if (!empty($controller->is_ajax)) {
             $this->http->header('Cache-Control', 'no-cache, must-revalidate');
             $this->http->header('Last-Modified', gmdate('D, d M Y H:i:s') . ' GMT');
@@ -863,21 +826,6 @@ class App
             return $return;
         } else {
             echo $return;
-        }
-    }
-
-    public function reloadController($mvc, $controller_file)
-    {
-        if (extension_loaded('runkit') and $this->server->config['apps']['auto_reload']) {
-            clearstatcache();
-            $fstat = stat($controller_file);
-            //修改时间大于加载时的时间
-            if (isset($this->env['controllers'][$mvc['controller']]) && $fstat['mtime'] > $this->env['controllers'][$mvc['controller']]['time']) {
-                runkit_import($controller_file, RUNKIT_IMPORT_CLASS_METHODS | RUNKIT_IMPORT_OVERRIDE);
-                $this->env['controllers'][$mvc['controller']]['time'] = time();
-            } else {
-                $this->env['controllers'][$mvc['controller']]['time'] = time();
-            }
         }
     }
 
