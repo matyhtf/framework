@@ -3,9 +3,9 @@ namespace SPF\Server;
 
 interface Driver
 {
-    function run($setting);
-    function send($client_id, $data);
-    function close($client_id);
-    function shutdown();
-    function setProtocol($protocol);
+    public function run($setting);
+    public function send($client_id, $data);
+    public function close($client_id);
+    public function shutdown();
+    public function setProtocol($protocol);
 }

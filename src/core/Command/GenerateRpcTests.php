@@ -26,7 +26,10 @@ class GenerateRpcTests extends Command
                 new InputDefinition(array(
                     new InputOption('source', 's', InputOption::VALUE_OPTIONAL, '要生产SDK的源码目录，默认为 src'),
                     new InputOption('output', 'o', InputOption::VALUE_OPTIONAL, 'SDK输出目录，默认为 tests'),
-                    new InputOption('mode', 'm', InputOption::VALUE_OPTIONAL, 
+                    new InputOption(
+                        'mode',
+                        'm',
+                        InputOption::VALUE_OPTIONAL,
                         '测试用例文件覆盖方式：replace(r)-新文件覆盖老文件；skip(s)-若老文件存在新文件自动跳过；'.
                         'backup(b)-备份老文件，然后覆盖新文件；confirm(c)-手动选择文件覆盖方式，默认为confirm(c)'
                     ),
@@ -61,11 +64,11 @@ class GenerateRpcTests extends Command
 
     /**
      * Get option value from input.
-     * 
+     *
      * @param InputInterface $input
      * @param string $name option`s name
      * @param string $default default value if the option null
-     * 
+     *
      * @return string
      */
     protected function getOption(InputInterface $input, $name, $default = null)
@@ -80,9 +83,9 @@ class GenerateRpcTests extends Command
 
     /**
      * Resolve path to full path.
-     * 
+     *
      * @param string $path
-     * 
+     *
      * @return string
      */
     protected function resolvePath($path)
@@ -94,9 +97,9 @@ class GenerateRpcTests extends Command
 
     /**
      * Resolve repeat file process mode.
-     * 
+     *
      * @param string $mode
-     * 
+     *
      * @return string
      */
     protected function resolveMode($mode)
@@ -121,7 +124,7 @@ class GenerateRpcTests extends Command
 
     /**
      * Validate the source`s value
-     * 
+     *
      * @param string $src
      */
     protected function validSource($src)

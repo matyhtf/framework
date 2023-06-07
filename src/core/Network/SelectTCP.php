@@ -8,7 +8,7 @@ class SelectTCP extends \SPF\Server\Base
     //客户端数量
     public $client_num = 0;
 
-    function __construct($host, $port, $timeout = 30)
+    public function __construct($host, $port, $timeout = 30)
     {
         parent::__construct($host, $port, $timeout);
     }
@@ -19,7 +19,7 @@ class SelectTCP extends \SPF\Server\Base
      * @param $data
      * @return unknown_type
      */
-    function send($client_id, $data)
+    public function send($client_id, $data)
     {
         return $this->sendData($this->client_sock[$client_id], $data);
     }
@@ -28,20 +28,20 @@ class SelectTCP extends \SPF\Server\Base
      * 向所有client发送数据
      * @return unknown_type
      */
-    function sendAll($client_id = null, $data)
+    public function sendAll($client_id = null, $data)
     {
-        foreach ($this->client_sock as $k => $sock)
-        {
-            if ($client_id and $k == $client_id) continue;
+        foreach ($this->client_sock as $k => $sock) {
+            if ($client_id and $k == $client_id) {
+                continue;
+            }
             $this->sendData($sock, $data);
         }
     }
 
-    function shutdown()
+    public function shutdown()
     {
         //关闭所有客户端
-        foreach ($this->client_sock as $k => $sock)
-        {
+        foreach ($this->client_sock as $k => $sock) {
             Stream::close($sock, $this->client_event[$k]);
         }
         //关闭服务器端
@@ -49,7 +49,7 @@ class SelectTCP extends \SPF\Server\Base
         $this->protocol->onShutdown($this);
     }
 
-    function close($client_id)
+    public function close($client_id)
     {
         Stream::close($this->client_sock[$client_id]);
         $this->client_sock[$client_id] = null;
@@ -59,33 +59,24 @@ class SelectTCP extends \SPF\Server\Base
         $this->client_num--;
     }
 
-    function server_loop()
+    public function server_loop()
     {
         while (true) {
             $read_fds = $this->fds;
             $write = $exp = null;
-            if (stream_select($read_fds, $write, $exp, null))
-            {
-                foreach ($read_fds as $socket)
-                {
+            if (stream_select($read_fds, $write, $exp, null)) {
+                foreach ($read_fds as $socket) {
                     $socket_id = (int)$socket;
-                    if ($socket_id == $this->server_socket_id)
-                    {
-                        if ($client_socket_id = parent::accept())
-                        {
+                    if ($socket_id == $this->server_socket_id) {
+                        if ($client_socket_id = parent::accept()) {
                             $this->fds[$client_socket_id] = $this->client_sock[$client_socket_id];
                             $this->protocol->onConnect($this, $client_socket_id, 0);
                         }
-                    }
-                    else
-                    {
+                    } else {
                         $data = Stream::read($socket, $this->buffer_size);
-                        if (!empty($data))
-                        {
+                        if (!empty($data)) {
                             $this->protocol->onReceive($this, $socket_id, 0, $data);
-                        }
-                        else
-                        {
+                        } else {
                             $this->close($socket_id);
                         }
                     }
@@ -94,7 +85,7 @@ class SelectTCP extends \SPF\Server\Base
         }
     }
 
-    function run($setting = array())
+    public function run($setting = array())
     {
         //建立服务器端Socket
         $this->server_sock = $this->create("tcp://{$this->host}:{$this->port}");

@@ -21,10 +21,10 @@ class Cache implements SPF\IFace\Queue
     public $name = 'swoole';
     public $prefix = 'queue_';
     private $cache_prefix;
-    static $cache_lifetime = 0;
-    static $mutex_loop = 100;
+    public static $cache_lifetime = 0;
+    public static $mutex_loop = 100;
 
-    function __construct($config)
+    public function __construct($config)
     {
         if (!empty($config['name'])) {
             $this->name = $config['name'];
@@ -54,7 +54,7 @@ class Cache implements SPF\IFace\Queue
         }
     }
 
-    function push($data)
+    public function push($data)
     {
         $c_id = $this->end_id;
         $this->cache->increment($this->cache_prefix . 'end');
@@ -63,12 +63,13 @@ class Cache implements SPF\IFace\Queue
         return true;
     }
 
-    function pop()
+    public function pop()
     {
         $c_id = $this->start_id;
         $data = $this->cache->get($this->cache_prefix . $c_id);
-        if ($data === false) return false;
-        else {
+        if ($data === false) {
+            return false;
+        } else {
             $this->cache->increment($this->cache_prefix . 'start');
             $this->cache->delete($this->cache_prefix . $c_id);
             $this->cache->save();
@@ -76,4 +77,3 @@ class Cache implements SPF\IFace\Queue
         }
     }
 }
-

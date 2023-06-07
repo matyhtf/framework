@@ -9,15 +9,15 @@ class Redis extends Base
 {
     protected $type = 'redis';
 
-    function __construct($config)
+    public function __construct($config)
     {
         parent::__construct($config);
-        \SPF\App::getInstance()->beforeAction([$this, '_createObject'],\SPF\App::coroModuleRedis);
-        \SPF\App::getInstance()->afterAction([$this, '_freeObject'],\SPF\App::coroModuleRedis);
+        \SPF\App::getInstance()->beforeAction([$this, '_createObject'], \SPF\App::coroModuleRedis);
+        \SPF\App::getInstance()->afterAction([$this, '_freeObject'], \SPF\App::coroModuleRedis);
     }
 
 
-    function create()
+    public function create()
     {
         return new CoRedis($this->config);
     }
@@ -28,11 +28,10 @@ class Redis extends Base
      * @param array $args
      * @return mixed
      */
-    function __call($method, $args = array())
+    public function __call($method, $args = array())
     {
         $redis = $this->_getObject();
-        if (!$redis)
-        {
+        if (!$redis) {
             return false;
         }
         return $redis->{$method}(...$args);

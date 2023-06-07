@@ -127,7 +127,7 @@ class RpcException extends Exception
     /**
      * 抛异常时一般可以仅填写已提供的错误码，如果错误码不是已提供的，会自动转为ERR_UNKNOWN
      * 异常信息如果没有提供，会使用异常字段的错误码描述信息
-     * 
+     *
      * @param int $code
      * @param array $context 上下文信息
      * @param string $message
@@ -135,7 +135,7 @@ class RpcException extends Exception
     public function __construct(int $code, array $context = [], string $message = null)
     {
         if (!isset($this->errMsg[$code])) {
-           $code = self::ERR_UNKNOWN; 
+            $code = self::ERR_UNKNOWN;
         }
 
         if (is_null($message)) {
@@ -149,7 +149,7 @@ class RpcException extends Exception
 
     /**
      * 获取异常上下文信息
-     * 
+     *
      * @return array
      */
     public function getContext()

@@ -24,7 +24,7 @@ class Loader
      * Loader constructor.
      * @param $app
      */
-    function __construct($app)
+    public function __construct($app)
     {
         $this->app = $app;
         $this->objects = array(

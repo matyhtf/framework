@@ -20,7 +20,7 @@ class FileCache implements SPF\IFace\Cache
      * @param $config
      * @throws \Exception
      */
-    function __construct($config)
+    public function __construct($config)
     {
         if (!isset($config['cache_dir'])) {
             throw new \Exception(__CLASS__ . ": require cache_dir");
@@ -41,7 +41,7 @@ class FileCache implements SPF\IFace\Cache
         return $file;
     }
 
-    function set($key, $value, $timeout = 0)
+    public function set($key, $value, $timeout = 0)
     {
         $file = $this->getFileName($key);
         $data["value"] = $value;
@@ -50,10 +50,12 @@ class FileCache implements SPF\IFace\Cache
         return file_put_contents($file, serialize($data));
     }
 
-    function get($key)
+    public function get($key)
     {
         $file = $this->getFileName($key);
-        if (!is_file($file)) return false;
+        if (!is_file($file)) {
+            return false;
+        }
         $data = unserialize(file_get_contents($file));
         if (empty($data) or !isset($data['timeout']) or !isset($data["value"])) {
             return false;
@@ -66,7 +68,7 @@ class FileCache implements SPF\IFace\Cache
         return $data['value'];
     }
 
-    function delete($key)
+    public function delete($key)
     {
         $file = $this->getFileName($key);
         return unlink($file);

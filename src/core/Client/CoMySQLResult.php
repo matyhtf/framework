@@ -24,7 +24,7 @@ class CoMySQLResult
     const ERR_TIMEOUT = 6002;
     const ERR_NO_OBJECT = 6003;
 
-    function __construct(mysqli $db, callable $callback = null)
+    public function __construct(mysqli $db, callable $callback = null)
     {
         $this->db = $db;
         $this->callback = $callback;

@@ -1,5 +1,6 @@
 <?php
 namespace SPF\Queue;
+
 use SPF;
 
 /**
@@ -10,15 +11,13 @@ class Redis implements SPF\IFace\Queue
     protected $redis_factory_key;
     protected $key = 'swoole:queue';
 
-    function __construct($config)
+    public function __construct($config)
     {
-        if (empty($config['id']))
-        {
+        if (empty($config['id'])) {
             $config['id'] = 'master';
         }
         $this->redis_factory_key = $config['id'];
-        if (!empty($config['key']))
-        {
+        if (!empty($config['key'])) {
             $this->key = $config['key'];
         }
     }
@@ -27,15 +26,12 @@ class Redis implements SPF\IFace\Queue
      * 出队
      * @return bool|mixed
      */
-    function pop()
+    public function pop()
     {
         $ret = SPF\App::getInstance()->redis($this->redis_factory_key)->lPop($this->key);
-        if ($ret)
-        {
+        if ($ret) {
             return unserialize($ret);
-        }
-        else
-        {
+        } else {
             return false;
         }
     }
@@ -45,7 +41,7 @@ class Redis implements SPF\IFace\Queue
      * @param $data
      * @return int
      */
-    function push($data)
+    public function push($data)
     {
         return SPF\App::getInstance()->redis($this->redis_factory_key)->lPush($this->key, serialize($data));
     }

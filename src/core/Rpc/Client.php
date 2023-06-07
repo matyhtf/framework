@@ -14,7 +14,7 @@ class Client
 
     /**
      * 默认配置
-     * 
+     *
      * @var array
      */
     public $config = [
@@ -38,35 +38,35 @@ class Client
 
     /**
      * 所有服务列表
-     * 
+     *
      * @var array
      */
     public $servers = [];
 
     /**
      * 中间件
-     * 
+     *
      * @var array
      */
     protected $middlewares = [];
 
     /**
      * 是否自定义请求handle
-     * 
+     *
      * @var callable|array
      */
     protected $requestHandle = null;
 
     /**
      * 实例列表
-     * 
+     *
      * @var self
      */
     protected static $instance = null;
 
     /**
      * 获取单例实例
-     * 
+     *
      * @return self
      */
     public static function getInstance()
@@ -93,7 +93,7 @@ class Client
 
     /**
      * @param callable|string|array $requestHandle
-     * 
+     *
      * @return self
      */
     public function registerRequestHandle($requestHandle)
@@ -134,7 +134,7 @@ class Client
      * @param string $class 完整类名，SDK会自动去除前缀进行转换
      * @param string $function 方法名
      * @param array $encodeBufs 编码之后的buffers数组
-     * 
+     *
      * @return mixed
      */
     public function call($class, $function, $encodeBufs = [])
@@ -152,7 +152,7 @@ class Client
      * @param string $class
      * @param string $funcName
      * @param array $encodeBufs
-     * 
+     *
      * @return mixed
      */
     protected function handleCall(Request $request)
@@ -166,7 +166,7 @@ class Client
         // 发送请求
         $resPacket = $this->sendRequest($reqPacket, $request->getConnection());
 
-        // 对包体解析32字节header 
+        // 对包体解析32字节header
         $resDecode = $this->decodePacket($resPacket);
 
         // 如果有异常，抛出相应异常
@@ -183,7 +183,7 @@ class Client
     /**
      * @param array $bufs
      * @param string $funcName
-     * 
+     *
      * @return string
      */
     protected function formatterEncode($bufs, $funcName)
@@ -193,7 +193,7 @@ class Client
 
     /**
      * @param string $bufs
-     * 
+     *
      * @return mixed
      */
     protected function formatterDecode($bufs)
@@ -225,10 +225,10 @@ class Client
 
     /**
      * 发送请求
-     * 
+     *
      * @param string $reqPacket 请求包体
      * @param array $conn 连接信息
-     * 
+     *
      * @return string 响应包体
      */
     protected function sendRequest($reqPacket, $conn)
@@ -287,7 +287,7 @@ class Client
     /**
      * 从服务发现取服务列表
      * // TODO
-     * 
+     *
      * @return array
      */
     protected function getServers()
@@ -313,7 +313,7 @@ class Client
      */
     protected function filterServersByPreferProtocol()
     {
-        $servers = array_filter($this->servers, function($server) {
+        $servers = array_filter($this->servers, function ($server) {
             return $server['protocol'] === $this->config['preferProtocol'];
         });
 
@@ -330,7 +330,7 @@ class Client
     {
         // TODO 实现权重算法
         $servers = $this->servers;
-        usort($servers, function($a, $b) {
+        usort($servers, function ($a, $b) {
             return $b['weight'] - $a['weight'] > 0 ? 1 : -1;
         });
 
@@ -339,10 +339,10 @@ class Client
 
     /**
      * 设置配置项
-     * 
+     *
      * @param string $key
      * @param mixed $value
-     * 
+     *
      * @return self
      */
     public function setConfig($key, $value)

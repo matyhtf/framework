@@ -1,5 +1,6 @@
 <?php
 namespace SPF;
+
 /**
  * 过滤类
  * 用于过滤过外部输入的数据，过滤数组或者变量中的不安全字符，以及HTML标签
@@ -9,30 +10,30 @@ namespace SPF;
  */
 class Filter
 {
-    static $error_url;
-    static $origin_get;
-    static $origin_post;
-    static $origin_cookie;
-    static $origin_request;
+    public static $error_url;
+    public static $origin_get;
+    public static $origin_post;
+    public static $origin_cookie;
+    public static $origin_request;
     public $mode;
 
-    function __construct($mode = 'deny', $error_url = false)
+    public function __construct($mode = 'deny', $error_url = false)
     {
         $this->mode = $mode;
         self::$error_url = $error_url;
     }
 
-    function post($param)
+    public function post($param)
     {
         $this->_check($_POST, $param);
     }
 
-    function get($param)
+    public function get($param)
     {
         $this->_check($_GET, $param);
     }
 
-    function cookie($param)
+    public function cookie($param)
     {
         $this->_check($_COOKIE, $param);
     }
@@ -43,86 +44,67 @@ class Filter
      * @param $param
      * @return string
      */
-    function _check(&$data, $param)
+    public function _check(&$data, $param)
     {
-        foreach ($param as $k => $p)
-        {
-            if (!isset($data[$k]))
-            {
-                if (isset($p['require']) and $p['require'])
-                {
+        foreach ($param as $k => $p) {
+            if (!isset($data[$k])) {
+                if (isset($p['require']) and $p['require']) {
                     self::raise('param require');
-                }
-                else
-                {
+                } else {
                     continue;
                 }
             }
 
-            if (isset($p['type']))
-            {
+            if (isset($p['type'])) {
                 $data[$k] = Validate::$p['type']($data[$k]);
-                if ($data[$k] === false)
-                {
+                if ($data[$k] === false) {
                     self::raise();
                 }
 
                 //最小值参数
-                if (isset($p['min']) and is_numeric($data[$k]) and $data[$k] < $p['min'])
-                {
+                if (isset($p['min']) and is_numeric($data[$k]) and $data[$k] < $p['min']) {
                     self::raise('num too small');
                 }
                 //最大值参数
-                if (isset($p['max']) and is_numeric($data[$k]) and $data[$k] > $p['max'])
-                {
+                if (isset($p['max']) and is_numeric($data[$k]) and $data[$k] > $p['max']) {
                     self::raise('num too big');
                 }
 
                 //最小值参数
-                if (isset($p['short']) and is_string($data[$k]) and mb_strlen($data[$k]) < $p['short'])
-                {
+                if (isset($p['short']) and is_string($data[$k]) and mb_strlen($data[$k]) < $p['short']) {
                     self::raise('string too short');
                 }
                 //最大值参数
-                if (isset($p['long']) and is_string($data[$k]) and mb_strlen($data[$k]) > $p['long'])
-                {
+                if (isset($p['long']) and is_string($data[$k]) and mb_strlen($data[$k]) > $p['long']) {
                     self::raise('string too long');
                 }
 
                 //自定义的正则表达式
-                if ($p['type'] == 'regx' and isset($p['regx']) and preg_match($p['regx'], $data[$k]) === false)
-                {
+                if ($p['type'] == 'regx' and isset($p['regx']) and preg_match($p['regx'], $data[$k]) === false) {
                     self::raise();
                 }
             }
         }
         //如果为拒绝模式，所有不在过滤参数$param中的键值都将被删除
-        if ($this->mode == 'deny')
-        {
+        if ($this->mode == 'deny') {
             $allow = array_keys($param);
             $have = array_keys($data);
-            foreach ($have as $ha)
-            {
-                if (!in_array($ha, $allow))
-                {
+            foreach ($have as $ha) {
+                if (!in_array($ha, $allow)) {
                     unset($data[$ha]);
                 }
             }
         }
     }
 
-    static function raise($text = false)
+    public static function raise($text = false)
     {
-        if (self::$error_url)
-        {
+        if (self::$error_url) {
             App::getInstance()->http->redirect(self::$error_url);
         }
-        if ($text)
-        {
+        if ($text) {
             exit($text);
-        }
-        else
-        {
+        } else {
             exit('Client input param error!');
         }
     }
@@ -130,7 +112,7 @@ class Filter
     /**
      * 过滤$_GET $_POST $_REQUEST $_COOKIE
      */
-    static function request()
+    public static function request()
     {
         self::$origin_get = $_GET;
         self::$origin_post = $_POST;
@@ -143,7 +125,7 @@ class Filter
         $_COOKIE = Filter::filterArray($_COOKIE);
     }
 
-    static function safe(&$content)
+    public static function safe(&$content)
     {
         $content = stripslashes($content);
         $content = html_entity_decode($content, ENT_QUOTES, App::$charset);
@@ -157,12 +139,11 @@ class Filter
      */
     public static function filterVar($var, $type)
     {
-        switch($type)
-        {
+        switch ($type) {
             case 'int':
                 return intval($var);
             case 'string':
-                return htmlspecialchars(strval($var),ENT_QUOTES);
+                return htmlspecialchars(strval($var), ENT_QUOTES);
             case 'float':
                 return floatval($var);
             default:
@@ -177,20 +158,15 @@ class Filter
      */
     public static function filterArray($array)
     {
-        if (!is_array($array))
-        {
+        if (!is_array($array)) {
             return false;
         }
 
         $clean = array();
-        foreach ($array as $key => $string)
-        {
-            if (is_array($string))
-            {
+        foreach ($array as $key => $string) {
+            if (is_array($string)) {
                 self::filterArray($string);
-            }
-            else
-            {
+            } else {
                 $string = self::escape($string);
                 $key = self::escape($key);
             }
@@ -206,8 +182,7 @@ class Filter
      */
     public static function escape($string)
     {
-        if (is_numeric($string))
-        {
+        if (is_numeric($string)) {
             return $string;
         }
         //HTML转义
@@ -216,8 +191,7 @@ class Filter
         $magic_exists = function_exists('get_magic_quotes_gpc');
         if (version_compare(PHP_VERSION, '7.0.0', '>') ||
             !$magic_exists ||
-            ($magic_exists && !\get_magic_quotes_gpc()))
-        {
+            ($magic_exists && !\get_magic_quotes_gpc())) {
             $string = addslashes($string);
         }
         return $string;

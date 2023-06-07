@@ -15,7 +15,6 @@ class ReloadServerCmd extends Command
             ->setName('reload')
             ->setDescription('reload server')
             ->setHelp('This command allow you to reload server');
-
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)

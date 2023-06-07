@@ -13,7 +13,7 @@ trait HttpProtocol
 {
     /**
      * 创建http服务
-     * 
+     *
      * @param array $conn 配置信息
      */
     protected function createHttpServer($conn)

@@ -1,5 +1,6 @@
 <?php
 namespace SPF;
+
 use SPF;
 
 class Response
@@ -11,7 +12,7 @@ class Response
     public $cookie;
     public $body;
 
-    static $HTTP_HEADERS = array(
+    public static $HTTP_HEADERS = array(
         100 => "100 Continue",
         101 => "101 Switching Protocols",
         200 => "200 OK",
@@ -47,7 +48,7 @@ class Response
      * 设置Http状态
      * @param $code
      */
-    function setHttpStatus($code)
+    public function setHttpStatus($code)
     {
         $this->head[0] = $this->http_protocol.' '.self::$HTTP_HEADERS[$code];
         $this->http_status = $code;
@@ -58,7 +59,7 @@ class Response
      * @param $key
      * @param $value
      */
-    function setHeader($key,$value)
+    public function setHeader($key, $value)
     {
         $this->head[$key] = $value;
     }
@@ -73,31 +74,25 @@ class Response
      * @param null $secure
      * @param null $httponly
      */
-    function setcookie($name, $value = null, $expire = null, $path = '/', $domain = null, $secure = null, $httponly = null)
+    public function setcookie($name, $value = null, $expire = null, $path = '/', $domain = null, $secure = null, $httponly = null)
     {
-        if ($value == null)
-        {
+        if ($value == null) {
             $value = 'deleted';
         }
         $cookie = "$name=$value";
-        if ($expire)
-        {
+        if ($expire) {
             $cookie .= "; expires=" . date("D, d-M-Y H:i:s T", $expire);
         }
-        if ($path)
-        {
+        if ($path) {
             $cookie .= "; path=$path";
         }
-        if ($secure)
-        {
+        if ($secure) {
             $cookie .= "; secure";
         }
-        if ($domain)
-        {
+        if ($domain) {
             $cookie .= "; domain=$domain";
         }
-        if ($httponly)
-        {
+        if ($httponly) {
             $cookie .= '; httponly';
         }
         $this->cookie[] = $cookie;
@@ -107,54 +102,42 @@ class Response
      * 添加http header
      * @param $header
      */
-    function addHeaders(array $header)
+    public function addHeaders(array $header)
     {
         $this->head = array_merge($this->head, $header);
     }
 
-    function getHeader($fastcgi = false)
+    public function getHeader($fastcgi = false)
     {
         $out = '';
-        if ($fastcgi)
-        {
+        if ($fastcgi) {
             $out .= 'Status: '.$this->http_status.' '.self::$HTTP_HEADERS[$this->http_status]."\r\n";
-        }
-        else
-        {
+        } else {
             //Protocol
-            if (isset($this->head[0]))
-            {
+            if (isset($this->head[0])) {
                 $out .= $this->head[0]."\r\n";
                 unset($this->head[0]);
-            }
-            else
-            {
+            } else {
                 $out = "HTTP/1.1 200 OK\r\n";
             }
         }
         //fill header
-        if (!isset($this->head['Server']))
-        {
+        if (!isset($this->head['Server'])) {
             $this->head['Server'] = SPF\Protocol\WebServer::SOFTWARE;
         }
-        if (!isset($this->head['Content-Type']))
-        {
+        if (!isset($this->head['Content-Type'])) {
             $this->head['Content-Type'] = 'text/html; charset='.\SPF\App::$charset;
         }
-        if (!isset($this->head['Content-Length']))
-        {
+        if (!isset($this->head['Content-Length'])) {
             $this->head['Content-Length'] = strlen($this->body);
         }
         //Headers
-        foreach($this->head as $k=>$v)
-        {
+        foreach ($this->head as $k=>$v) {
             $out .= $k.': '.$v."\r\n";
         }
         //Cookies
-        if (!empty($this->cookie) and is_array($this->cookie))
-        {
-            foreach($this->cookie as $v)
-            {
+        if (!empty($this->cookie) and is_array($this->cookie)) {
+            foreach ($this->cookie as $v) {
                 $out .= "Set-Cookie: $v\r\n";
             }
         }
@@ -163,10 +146,9 @@ class Response
         return $out;
     }
 
-    function noCache()
+    public function noCache()
     {
         $this->head['Cache-Control'] = 'no-store, no-cache, must-revalidate, post-check=0, pre-check=0';
         $this->head['Pragma'] = 'no-cache';
     }
 }
-

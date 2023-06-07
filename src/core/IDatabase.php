@@ -1,5 +1,6 @@
 <?php
 namespace SPF;
+
 /**
  * Database Driver接口
  * 数据库驱动类的接口
@@ -8,17 +9,17 @@ namespace SPF;
  */
 interface IDatabase
 {
-    function query($sql);
+    public function query($sql);
 
-    function connect();
+    public function connect();
 
-    function close();
+    public function close();
 
-    function lastInsertId();
+    public function lastInsertId();
 
-    function getAffectedRows();
+    public function getAffectedRows();
 
-    function errno();
+    public function errno();
 
-    function quote($str);
+    public function quote($str);
 }

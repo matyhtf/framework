@@ -27,42 +27,42 @@ class RpcSdk
 
     /**
      * Symfony console output instance
-     * 
+     *
      * @var OutputInterface
      */
     protected $output = null;
 
     /**
      * RPC Service name.
-     * 
+     *
      * @var string
      */
     protected static $serviceName = 'Demo';
 
     /**
      * SDK new namespace prefix.
-     * 
+     *
      * @var string
      */
     public static $newNamespacePrefix = 'Xes\\RpcSdk\\';
 
     /**
      * RPC API namespace prefix.
-     * 
+     *
      * @var string
      */
     public static $namespacePrefix = 'Demo\\';
 
     /**
      * Need remove namespace list.
-     * 
+     *
      * @var array
      */
     public static $removeNamespaces = [];
 
     /**
      * User defined stmts to filter sdk generate.
-     * 
+     *
      * @var array
      */
     protected static $udfStmts = [
@@ -86,7 +86,7 @@ protected static function staticCallRpc($method, $args)
     return RpcClient::call($method, $args, true);
 }
 CODE
-        ,    
+        ,
     ];
 
     /**
@@ -108,7 +108,7 @@ CODE
 
     /**
      * Set user defined stmts.
-     * 
+     *
      * @param string the stmts`s name
      * @param string the stmts`s code, don`t begin with '<?php' tag
      */
@@ -119,7 +119,7 @@ CODE
 
     /**
      * Set sdk append files.
-     * 
+     *
      * @param array $files
      */
     public static function setAppendFile(array $files)
@@ -129,7 +129,7 @@ CODE
 
     /**
      * Set RPC API`s namespace prefix. eg: Demo\\
-     * 
+     *
      * @param string $namespacePrefix
      */
     public static function setNamespacePrefix(string $namespacePrefix)
@@ -139,7 +139,7 @@ CODE
 
     /**
      * Set RPC API sdk`s new namespace prefix. eg: Xes\\RpcSdk\\
-     * 
+     *
      * @param string $newNamespacePrefix
      */
     public static function setNewNamespacePrefix(string $newNamespacePrefix)
@@ -149,7 +149,7 @@ CODE
 
     /**
      * Set RPC service name.
-     * 
+     *
      * @param string $serviceName
      */
     public static function setServiceName(string $serviceName)
@@ -159,7 +159,7 @@ CODE
 
     /**
      * Set RPC API sdk`s need removing namespace rules, supportting regex pattern. eg: Foo\Bar\* or Foo\Bar
-     * 
+     *
      * @param string $removeNamespaces
      */
     public static function setRemoveNamespaces(string $removeNamespaces)
@@ -169,7 +169,7 @@ CODE
 
     /**
      * Handle.
-     * 
+     *
      * @param string $src
      * @param string $output
      * @param string $output
@@ -195,7 +195,7 @@ CODE
 
     /**
      * Set default append files.
-     * 
+     *
      * @param string $libdir
      */
     protected function setDefaultAppendFiles($libdir)
@@ -210,7 +210,7 @@ CODE
 
     /**
      * Recursive handle generate opration.
-     * 
+     *
      * @param string $dirSrc
      * @param string $source the sdk source path
      * @param string $output the sdk output path
@@ -219,13 +219,13 @@ CODE
     protected function recursiveHandle($dirSrc, $source, $output, &$handleCount)
     {
         $dir = dir($dirSrc);
-        while($file = $dir->read()) {
+        while ($file = $dir->read()) {
             if (in_array($file, ['.', '..'])) {
                 continue;
             }
 
             $path = "$dirSrc/$file";
-            if(is_dir($path)) {
+            if (is_dir($path)) {
                 $this->recursiveHandle($path, $source, $output, $handleCount);
                 continue;
             }
@@ -245,12 +245,12 @@ CODE
 
     /**
      * Get the new code save path.
-     * 
+     *
      * @param string $cwd code path
      * @param string $source code source directory
      * @param string $output code save directory
      * @param bool $prependNamespacePrefix the class whether prepend namespace prefix
-     * 
+     *
      * @return string code new path
      */
     protected function getSavePath($cwd, $source, $output, $prependNamespacePrefix = true)
@@ -266,7 +266,7 @@ CODE
 
     /**
      * Append other new sdk files such as RpcClient class.
-     * 
+     *
      * @param string $output
      * @param string $libdir
      */
@@ -279,7 +279,7 @@ CODE
         $fullPrefixDouble = str_replace('\\', '\\\\', $fullPrefix);
         $fullNamespace = mb_substr($fullPrefix, -1) === '\\' ? mb_substr($fullPrefix, 0, -1) : $fullPrefix;
 
-        foreach(static::$appendFiles as $source => $target) {
+        foreach (static::$appendFiles as $source => $target) {
             // if the file is class name, then using reflection find the real filename
             if (strpos($source, '\\') !== false && class_exists($source)) {
                 $source = (new ReflectionClass($source))->getFileName();
@@ -318,7 +318,7 @@ CODE
 
     /**
      * Get the PHP-Parser instance.
-     * 
+     *
      * @return Parser
      */
     public function getParser()
@@ -336,7 +336,7 @@ CODE
 
     /**
      * Get the pretty instance.
-     * 
+     *
      * @return ForRpcSdk
      */
     public function getPretty()
@@ -346,7 +346,7 @@ CODE
 
     /**
      * Get the replace method content stmts.
-     * 
+     *
      * @return Stmt
      */
     protected function getCallInMethodStmts()
@@ -358,7 +358,7 @@ CODE
 
     /**
      * Get the replace static method content stmts.
-     * 
+     *
      * @return Stmt
      */
     protected function getCallInStaticMethodStmts()
@@ -370,7 +370,7 @@ CODE
 
     /**
      * Get the append namespace use stmts.
-     * 
+     *
      * @return Stmt
      */
     protected function getNamespaceUsingStmts()
@@ -382,7 +382,7 @@ CODE
 
     /**
      * Get the rpc static call method stmts appended the class.
-     * 
+     *
      * @return array
      */
     protected function getStaticRpcClientStmts()
@@ -396,7 +396,7 @@ CODE
         $stmts = $this->parseCodeToStmts($code);
 
         // extract the method from the class
-        foreach($stmts as $node) {
+        foreach ($stmts as $node) {
             if ($node instanceof Stmt\ClassMethod) {
                 $stmts = $node;
                 break;
@@ -406,7 +406,7 @@ CODE
             }
         }
 
-        foreach($stmts as $stmt) {
+        foreach ($stmts as $stmt) {
             // set the special flag and skip the next filter
             $stmt->setAttribute('special', true);
         }
@@ -416,9 +416,9 @@ CODE
 
     /**
      * Parse the template code to stmts.
-     * 
+     *
      * @param string $code
-     * 
+     *
      * @return Stmt[]|Stmt
      */
     protected function parseCodeToStmts($code)
@@ -435,7 +435,7 @@ CODE
     /**
      * Set the special stmts.
      * expose the $pretty object can be debug
-     * 
+     *
      * @param Standard $pretty
      */
     public function setSpecialStmts($pretty)
@@ -448,9 +448,9 @@ CODE
 
     /**
      * Process code.
-     * 
+     *
      * @param string $code the source code
-     * 
+     *
      * @return string the processed code
      */
     protected function processCode($code)
@@ -464,7 +464,7 @@ CODE
 
     /**
      * Get the symfony console instance.
-     * 
+     *
      * @return OutputInterface
      */
     public function getOutput()
@@ -474,7 +474,7 @@ CODE
 
     /**
      * Output log and line feed.
-     * 
+     *
      * @param string $msg
      */
     public function writeln($msg)
@@ -484,7 +484,7 @@ CODE
 
     /**
      * Output log.
-     * 
+     *
      * @param string $msg
      * @return string $method
      */

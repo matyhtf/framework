@@ -12,7 +12,7 @@ class FSProcess implements HotReloadable
 {
     /**
      * 回调
-     * 
+     *
      * @var callable|string|array
      */
     protected $callback;
@@ -33,7 +33,7 @@ class FSProcess implements HotReloadable
     
     /**
      * 根路径
-     * 
+     *
      * @var string
      */
     protected $rootPath;
@@ -70,7 +70,7 @@ class FSProcess implements HotReloadable
 
     /**
      * @param callable|string|array $callback
-     * 
+     *
      * @return self
      */
     public function setCallback($callback)
@@ -113,8 +113,8 @@ class FSProcess implements HotReloadable
             '%Y-%m-%d %H:%M:%S',
         ];
 
-        foreach($this->config['fswatch']['watchOptions'] as $option) {
-            foreach((array)$option as $opt) {
+        foreach ($this->config['fswatch']['watchOptions'] as $option) {
+            foreach ((array)$option as $opt) {
                 $configure[] = $opt;
             }
         }

@@ -9,5 +9,5 @@ interface Router
      * @param $uri
      * @return mixed
      */
-    function handle(&$uri);
+    public function handle(&$uri);
 }

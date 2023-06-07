@@ -15,13 +15,13 @@ class QueueServer implements SPF\IFace\Protocol
 
     const CRLF = "\r\n";
 
-    function __construct($queue)
+    public function __construct($queue)
     {
         $this->queue = $queue;
         $this->app = SPF\App::getInstance();
     }
 
-    function onReceive($server, $client_id, $tid, $data)
+    public function onReceive($server, $client_id, $tid, $data)
     {
         $request = explode(' ', $data, 2);
         $cmd = strtolower(trim($request[0]));
@@ -50,22 +50,22 @@ class QueueServer implements SPF\IFace\Protocol
         }
     }
 
-    function onConnect($server, $client_id, $tid)
+    public function onConnect($server, $client_id, $tid)
     {
         $this->app->log->info("login");
     }
 
-    function onClose($server, $client_id, $tid)
+    public function onClose($server, $client_id, $tid)
     {
         $this->app->log->info("logout");
     }
 
-    function onStart($server)
+    public function onStart($server)
     {
         $this->app->log->info("server running");
     }
 
-    function onShutdown($server)
+    public function onShutdown($server)
     {
         $this->app->log->info("server shutdown");
     }

@@ -31,7 +31,7 @@ class Response extends Map
     /**
      * @param int $code
      * @param string $msg
-     * 
+     *
      * @return self
      */
     public function error(int $code, string $msg = '')
@@ -78,9 +78,9 @@ class Response extends Map
 
     /**
      * Recusive to array
-     * 
+     *
      * @param array $data
-     * 
+     *
      * @return array
      */
     protected function toArrayRecusive($data)
@@ -89,7 +89,7 @@ class Response extends Map
             if (is_object($item) && method_exists($item, 'toArray')) {
                 $item = $item->toArray();
             }
-            if (is_array($item)) { 
+            if (is_array($item)) {
                 $item = $this->toArrayRecusive($item);
             }
         }

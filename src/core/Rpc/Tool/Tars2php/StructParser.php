@@ -37,7 +37,6 @@ class StructParser
         $preNamespaceEnums,
         $preNamespaceStructs
     ) {
-        
         $this->fp = $fp;
         $this->structName = $structName;
         $this->nsPrefix = $nsPrefix;
@@ -76,7 +75,7 @@ class StructParser
 
         $construct = Utils::indent(1) . 'public function __construct() ' . Utils::lineFeed(1)
             . Utils::indent(1) .'{' . Utils::lineFeed(1)
-            . Utils::indent(2) . "parent::__construct('" . $this->getStructClassUniqueName($this->structName) 
+            . Utils::indent(2) . "parent::__construct('" . $this->getStructClassUniqueName($this->structName)
             . "', self::\$_fields);" . Utils::lineFeed(1)
             . $this->extraContructs
             . $this->extraExtInit
@@ -122,7 +121,8 @@ class StructParser
 
                 if ($tmpChar === false) {
                     Utils::abnormalExit('error', '注释换行错误,请检查');
-                } elseif (Utils::isReturn($tmpChar)) { } elseif (($tmpChar) === '*') {
+                } elseif (Utils::isReturn($tmpChar)) {
+                } elseif (($tmpChar) === '*') {
                     $nextnextChar = fgetc($this->fp);
                     if ($nextnextChar == '/') {
                         $lineString .= $nextnextChar;
@@ -514,7 +514,7 @@ class StructParser
 
     protected function getStructClassHeader()
     {
-        return "<?php" . Utils::lineFeed(2) . "namespace " . $this->nsPrefix . '\\' . 
+        return "<?php" . Utils::lineFeed(2) . "namespace " . $this->nsPrefix . '\\' .
             $this->config['structNs'] . ';' . Utils::lineFeed(2);
     }
 

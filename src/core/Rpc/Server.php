@@ -22,7 +22,7 @@ class Server
 
     /**
      * Swoole Server对象
-     * 
+     *
      * @var \swoole_server|\swoole_http_server|\swoole_websocket_server
      */
     public $server = null;
@@ -34,7 +34,7 @@ class Server
 
     /**
      * 中间件，[protocol1 => [middleware1, middleware2], protocol2 => []]格式
-     * 
+     *
      * @var array
      */
     protected $middlewares = [];
@@ -50,17 +50,17 @@ class Server
     protected function initMiddlewares()
     {
         $common = Config::get('app.middleware', []);
-        foreach(Config::get('app.server') as $server) {
+        foreach (Config::get('app.server') as $server) {
             $this->middlewares[$server['protocol']] = array_merge($common, $server['middleware'] ?? []);
         }
     }
 
     /**
      * 执行中间件
-     * 
+     *
      * @param array $request
      * @param string $protocol
-     * 
+     *
      * @return mixed same as callFunction
      */
     protected function handleMiddleware(&$request, $protocol)
@@ -105,12 +105,12 @@ class Server
 
     /**
      * 初始化中间件管道
-     * 
+     *
      * @return \Closure
      */
     protected function initPipeline()
     {
-        return function(&$request) {
+        return function (&$request) {
             return $this->callFunction($request);
         };
     }
@@ -136,7 +136,6 @@ class Server
 
     protected function beforeStart(\swoole_server $server)
     {
-
     }
 
     /**
@@ -145,8 +144,8 @@ class Server
     public function start()
     {
         // 创建servers
-        foreach(Config::get('app.server', []) as $conn) {
-            switch($conn['protocol']) {
+        foreach (Config::get('app.server', []) as $conn) {
+            switch ($conn['protocol']) {
                 case 'tcp':
                     $this->createTcpServer($conn);
                     break;
@@ -256,7 +255,7 @@ class Server
 
     /**
      * Symfony终端输出美化组件
-     * 
+     *
      * @return \Symfony\Component\Console\Output\ConsoleOutput
      */
     protected function console()
@@ -270,7 +269,7 @@ class Server
 
     /**
      * 用于debug输出exception到终端
-     * 
+     *
      * @param \Throwable $e
      */
     protected function debugExceptionOutput(Throwable $e)
@@ -303,7 +302,7 @@ class Server
         $hotReload = new $driver(Config::$rootPath, Config::get('app.hotReload', []));
         $enableLog = Config::get('app.hotReload.log', true);
         
-        $hotReload->setCallback(function($logs) use($enableLog, $server) {
+        $hotReload->setCallback(function ($logs) use ($enableLog, $server) {
             if ($enableLog) {
                 foreach ($logs as $log) {
                     echo $log, PHP_EOL;

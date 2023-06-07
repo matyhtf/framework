@@ -6,10 +6,10 @@ class MockPhp
 {
     /**
      * 随机字符串
-     * 
+     *
      * @param string|integer $rule 规则：数字-指定长度字符串；1-2-1~2范围长度；默认-随机长度
      * @param string $dict 字典
-     * 
+     *
      * @return string
      */
     public static function string($rule = null, $dict = null)
@@ -39,9 +39,9 @@ class MockPhp
 
     /**
      * 随机数字
-     * 
+     *
      * @param string|integer $rule 规则：数字-指定长度字符串；1-2-1~2范围大小；默认-1~10为随机数字
-     * 
+     *
      * @return int|string
      */
     public static function number($rule = null)
@@ -61,9 +61,9 @@ class MockPhp
 
     /**
      * 随机英文字符
-     * 
+     *
      * @param string $rule 规则：数字-指定长度字符串；1-2-1~2范围长度；默认-随机长度
-     * 
+     *
      * @return string
      */
     public static function en($rule = null)
@@ -75,9 +75,9 @@ class MockPhp
 
     /**
      * 随机中文名
-     * 
+     *
      * @param string $rule 规则：数字-指定长度姓名；1-2-1~2范围长度；默认-随机长度2~3（复姓会+1）
-     * 
+     *
      * @return string
      */
     public static function cnName($rule = null)
@@ -143,10 +143,10 @@ class MockPhp
 
     /**
      * 随机浮点型
-     * 
+     *
      * @param string|integer $rule 整数位，规则：数字-指定长度字符串；1-2-1~2范围大小；默认-1~10为随机数字
      * @param string|integer $decimal 小数位，规则：数字-指定长度字符串；1-2-1~2范围大小；默认-1~10为随机数字
-     * 
+     *
      * @return float
      */
     public static function float($rule = null, $decimal = 3)
@@ -159,9 +159,9 @@ class MockPhp
 
     /**
      * 随机布尔值
-     * 
+     *
      * @param string|integer $rule 规则：指定值被转为boolean类型，未指定随机生成
-     * 
+     *
      * @return boolean
      */
     public static function boolean($rule = null)
@@ -175,9 +175,9 @@ class MockPhp
 
     /**
      * 随机日期时间
-     * 
+     *
      * @param string $format
-     * 
+     *
      * @return string
      */
     public static function date($format = 'Y-m-d H:i:s')
@@ -187,11 +187,11 @@ class MockPhp
 
     /**
      * 随机网址
-     * 
+     *
      * @param string $protocol
      * @param string $domain
      * @param string $suffix
-     * 
+     *
      * @return string
      */
     public static function url($protocol = null, $domain = null, $suffix = null)
@@ -216,7 +216,7 @@ class MockPhp
 
     /**
      * 随机邮箱
-     * 
+     *
      * @return string
      */
     public static function email()
@@ -236,7 +236,7 @@ class MockPhp
 
     /**
      * 随机手机号
-     * 
+     *
      * @return string
      */
     public static function mobile()
@@ -252,9 +252,9 @@ class MockPhp
 
     /**
      * 随机银行
-     * 
+     *
      * @param string $format
-     * 
+     *
      * @return string
      */
     public static function bank($format = 'title')
@@ -279,9 +279,9 @@ class MockPhp
 
     /**
      * 随机国家
-     * 
+     *
      * @param string $format
-     * 
+     *
      * @return string
      */
     public static function country($format = 'title')
@@ -307,7 +307,7 @@ class MockPhp
 
     /**
      * 随机区域
-     * 
+     *
      * @return string
      */
     public static function region()
@@ -321,9 +321,9 @@ class MockPhp
 
     /**
      * 随机省份
-     * 
+     *
      * @param string $format
-     * 
+     *
      * @return integer|string
      */
     public static function province($format = 'title')
@@ -372,9 +372,9 @@ class MockPhp
 
     /**
      * 随机城市
-     * 
+     *
      * @param string $format
-     * 
+     *
      * @return integer|string
      */
     public static function city($format = 'title')
@@ -421,9 +421,9 @@ class MockPhp
 
     /**
      * 随机区县
-     * 
+     *
      * @param string $format
-     * 
+     *
      * @return integer|string
      */
     public static function district($format = 'title')
@@ -471,7 +471,7 @@ class MockPhp
 
     /**
      * 随机IP(v4)
-     * 
+     *
      * @return string
      */
     public static function ip()

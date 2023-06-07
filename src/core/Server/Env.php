@@ -5,7 +5,7 @@ use SPF;
 
 class Env
 {
-    static function getEnv(): ?array
+    public static function getEnv(): ?array
     {
         if (!SPF\Network\Server::$useSwooleHttpServer) {
             return SPF\Protocol\RPCServer::$clientEnv;

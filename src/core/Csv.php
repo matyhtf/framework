@@ -9,9 +9,9 @@ namespace SPF;
  */
 class Csv
 {
-    static $row_sep = "\n";
-    static $col_sep = ",";
-    static $data_sep = ':';
+    public static $row_sep = "\n";
+    public static $col_sep = ",";
+    public static $data_sep = ':';
 
     public $data;
     public $text;
@@ -23,7 +23,7 @@ class Csv
      * @param string $col_sep
      * @param string $data_sep
      */
-    static function set_sep($row_sep = "\n", $col_sep = ",", $data_sep = ':')
+    public static function set_sep($row_sep = "\n", $col_sep = ",", $data_sep = ':')
     {
         self::$row_sep = $row_sep;
         self::$col_sep = $col_sep;
@@ -35,20 +35,17 @@ class Csv
      * @param $line
      * @return array
      */
-    static function parse_line($line)
+    public static function parse_line($line)
     {
         $line = trim($line);
         $result = array();
         $datas = explode(self::$col_sep, $line);
-        if (empty(self::$data_sep))
-        {
+        if (empty(self::$data_sep)) {
             return $datas;
         }
-        foreach ($datas as $data)
-        {
+        foreach ($datas as $data) {
             $d = self::parse_data($data);
-            if (empty($d[0]))
-            {
+            if (empty($d[0])) {
                 continue;
             }
             $result[trim($d[0])] = trim($d[1]);
@@ -56,10 +53,9 @@ class Csv
         return $result;
     }
 
-    static function parse_data($data)
+    public static function parse_data($data)
     {
-        if (self::$data_sep)
-        {
+        if (self::$data_sep) {
             $data = trim($data);
             return explode(self::$data_sep, $data);
         }
@@ -70,13 +66,12 @@ class Csv
      *
      * @return unknown_type
      */
-    static function parse_text($text)
+    public static function parse_text($text)
     {
         $text = trim($text);
         $result = array();
         $lines = explode(self::$row_sep, $text);
-        foreach ($lines as $line)
-        {
+        foreach ($lines as $line) {
             $result[] = self::parse_line($line);
         }
         return $result;
@@ -87,14 +82,13 @@ class Csv
      *
      * @return unknown_type
      */
-    static function parse_func($str, $param)
+    public static function parse_func($str, $param)
     {
         $str = trim($str);
         $_func = explode('(', $str, 2);
 
         //不是函数形式的，返回false
-        if (empty($_func))
-        {
+        if (empty($_func)) {
             return false;
         }
 
@@ -104,14 +98,10 @@ class Csv
 
         //实际要传的参数
         $arg = array();
-        foreach ($func_arg as $a)
-        {
-            if (isset($param[$a]))
-            {
+        foreach ($func_arg as $a) {
+            if (isset($param[$a])) {
                 $arg[] = $param[$a];
-            }
-            else
-            {
+            } else {
                 $arg[] = null;
             }
         }
@@ -125,19 +115,15 @@ class Csv
      *
      * @return string
      */
-    static function build_line($array)
+    public static function build_line($array)
     {
-        if (self::$data_sep)
-        {
+        if (self::$data_sep) {
             $line = '';
-            foreach ($array as $k => $v)
-            {
+            foreach ($array as $k => $v) {
                 $line .= $k . self::$data_sep . $v . self::$col_sep;
             }
             return rtrim($line, self::$col_sep);
-        }
-        else
-        {
+        } else {
             return implode(self::$col_sep, $array);
         }
     }
@@ -150,29 +136,23 @@ class Csv
      *
      * @return array
      */
-    static function str2array($str, $line_keys = null)
+    public static function str2array($str, $line_keys = null)
     {
         //切分成多行
         $lines = explode(self::$row_sep, $str);
         $result = array();
-        foreach ($lines as $li)
-        {
+        foreach ($lines as $li) {
             $li = trim($li);
-            if (!empty($li))
-            {
-                if (is_array($line_keys))
-                {
+            if (!empty($li)) {
+                if (is_array($line_keys)) {
                     //切分成多列
                     $data = self::parse_line($li);
                     $tmp = array();
-                    foreach ($line_keys as $index => $key)
-                    {
+                    foreach ($line_keys as $index => $key) {
                         $tmp[$key] = $data[$index];
                     }
                     $result[] = $tmp;
-                }
-                else
-                {
+                } else {
                     $result[] = self::parse_line($li);
                 }
             }
@@ -187,11 +167,10 @@ class Csv
      *
      * @return string
      */
-    static function array2str($array)
+    public static function array2str($array)
     {
         $str = '';
-        foreach ($array as $li)
-        {
+        foreach ($array as $li) {
             $str .= self::build_line($li) . self::$row_sep;
         }
         return $str;

@@ -39,12 +39,12 @@ class BaseObject
      */
     protected $app;
 
-    function __get($key)
+    public function __get($key)
     {
         return $this->app->$key;
     }
 
-    function __call($func, $param)
+    public function __call($func, $param)
     {
         return call_user_func_array(array($this->app, $func), $param);
     }

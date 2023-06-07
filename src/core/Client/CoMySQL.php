@@ -22,7 +22,7 @@ class CoMySQL
     protected $sqlIndex = 0;
     protected $pool = array();
 
-    function __construct($db_key = 'master')
+    public function __construct($db_key = 'master')
     {
         $this->config = SPF\App::getInstance()->config['db'][$db_key];
         //不能使用长连接，避免进程内占用大量连接
@@ -47,7 +47,7 @@ class CoMySQL
      * @param null $callback
      * @return bool|CoMySQLResult
      */
-    function query($sql, $callback = null)
+    public function query($sql, $callback = null)
     {
         $db = $this->getConnection();
         $result = $db->queryAsync($sql);
@@ -62,7 +62,7 @@ class CoMySQL
         return $retObj;
     }
 
-    function wait($timeout = 1.0)
+    public function wait($timeout = 1.0)
     {
         $_timeout_sec = intval($timeout);
         $_timeout_usec = intval(($timeout - $_timeout_sec) * 1000 * 1000);

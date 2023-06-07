@@ -15,7 +15,7 @@ class File implements SPF\IFace\Queue
     protected $name;
     protected $dir;
 
-    function __construct($config)
+    public function __construct($config)
     {
         if (!empty($config['name'])) {
             $this->name = $config['name'];
@@ -30,7 +30,7 @@ class File implements SPF\IFace\Queue
         $this->load();
     }
 
-    function load()
+    public function load()
     {
         if (!is_file($this->file)) {
             return false;
@@ -49,7 +49,7 @@ class File implements SPF\IFace\Queue
         return true;
     }
 
-    function save()
+    public function save()
     {
         $fp = fopen($this->file, 'w+');
         ftruncate($fp, 0);
@@ -59,12 +59,12 @@ class File implements SPF\IFace\Queue
         fclose($fp);
     }
 
-    function push($data)
+    public function push($data)
     {
         $this->queue->push(serialize($data));
     }
 
-    function pop()
+    public function pop()
     {
         if (count($this->queue) == 0) {
             return null;
@@ -72,7 +72,7 @@ class File implements SPF\IFace\Queue
         return $this->queue->shift();
     }
 
-    function __destruct()
+    public function __destruct()
     {
         $this->save();
     }

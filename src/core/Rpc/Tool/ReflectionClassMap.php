@@ -64,8 +64,8 @@ class ReflectionClassMap
             $cName = $refClass->name;
 
             // 方法的参数注释为了避免业务方修改，选择从interface中读取，参数验证从原类中读取
-            foreach($refClass->getInterfaces() as $refInterface) {
-                foreach($refInterface->getMethods(ReflectionMethod::IS_PUBLIC) as $refAbsMethod) {
+            foreach ($refClass->getInterfaces() as $refInterface) {
+                foreach ($refInterface->getMethods(ReflectionMethod::IS_PUBLIC) as $refAbsMethod) {
                     $mName = $refAbsMethod->name;
                     $mParams = self::parseMethodDocParams($refAbsMethod->getDocComment());
                     // 从原方法中读取参数验证等Annodation
@@ -85,16 +85,16 @@ class ReflectionClassMap
 
     /**
      * 解析注释中的参数
-     * 
+     *
      * @param string $doc
-     * 
+     *
      * @return array
      */
     protected static function parseMethodDocParams($doc)
     {
         $params = [];
         $return = [];
-        foreach(explode("\n", $doc) as $line) {
+        foreach (explode("\n", $doc) as $line) {
             if (preg_match('/@(param|var)\s+([^\s]+)\s+\$([^\s]+)(\s+#(&)?([^\s]+)?)?/', $line, $matches) > 0) {
                 // 参数注释
                 $params[] = [
@@ -121,9 +121,9 @@ class ReflectionClassMap
      * // TODO
      * 解析方法中文档参数注释
      * 必须包含 @param type? $fieldName {{rule1|rule2:param1|rule3:param2,param3}}
-     * 
+     *
      * @param string $doc 通过反射获取的文档注释 ReflectionMethod->getDocComment
-     * 
+     *
      * @return array
      */
     protected static function parseMethodDocValidates($doc)

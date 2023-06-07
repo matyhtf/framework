@@ -12,10 +12,9 @@ abstract class Observer implements \SplSubject
      * 添加观察者
      * @param \SplObserver $observer
      */
-    function attach(\SplObserver $observer)
+    public function attach(\SplObserver $observer)
     {
-        if ($this->_observers == null)
-        {
+        if ($this->_observers == null) {
             $this->_observers = new \SplObjectStorage();
         }
         $this->_observers->attach($observer);
@@ -27,8 +26,7 @@ abstract class Observer implements \SplSubject
      */
     public function detach(\SplObserver $observer)
     {
-        if ($this->_observers == null)
-        {
+        if ($this->_observers == null) {
             return;
         }
         $this->_observers->detach($observer);
@@ -39,12 +37,10 @@ abstract class Observer implements \SplSubject
      */
     public function notify()
     {
-        if ($this->_observers == null)
-        {
+        if ($this->_observers == null) {
             return;
         }
-        foreach ($this->_observers as $observer)
-        {
+        foreach ($this->_observers as $observer) {
             /**
              * @var  $observer \SplObserver
              */

@@ -15,9 +15,11 @@ class MakeConfig extends Command
             'type',
             InputArgument::REQUIRED,
             'What is your configuration type?'
-        )->addArgument('name',
+        )->addArgument(
+            'name',
             InputArgument::OPTIONAL,
-            'What is your configuration name?');
+            'What is your configuration name?'
+        );
 
         $this->setName('make:config');
         $this->setHelp("make:config type(db, redis, cache, etc.) [name](master, slave, etc.)");
@@ -29,42 +31,34 @@ class MakeConfig extends Command
         $args = $input->getArguments();
         $type = strtolower($args['type']);
         $name = strtolower($args['name']);
-        if (!is_dir(\SPF\App::getInstance()->app_path.'/configs'))
-        {
+        if (!is_dir(\SPF\App::getInstance()->app_path.'/configs')) {
             MakeApplication::init(\SPF\App::getInstance()->app_path);
         }
         $file = \SPF\App::getInstance()->app_path . '/configs/' . $type . '.php';
-        if (is_file($file) and empty($name))
-        {
+        if (is_file($file) and empty($name)) {
             $output->writeln("<error>Config[{$type}](file={$file}) already exists!</error>");
 
             return;
         }
-        if (!is_file($file) and !self::init($type, $file))
-        {
+        if (!is_file($file) and !self::init($type, $file)) {
             _write_error:
             $output->writeln("<error>file_put_content($file) failed.!</error>");
 
             return;
         }
 
-        if (!empty($name))
-        {
+        if (!empty($name)) {
             $config = Core::getInstance()->config[$type];
-            if (isset($config[$name]))
-            {
+            if (isset($config[$name])) {
                 _exists:
                 $output->writeln("<error>Config[{$type}][$name] already exists!</error>");
                 return;
             }
-        }
-        else
-        {
+        } else {
             $config = array();
         }
 
-        switch ($type)
-        {
+        switch ($type) {
             case 'redis':
                 $config[$name] = array(
                     'host' => "127.0.0.1",
@@ -94,19 +88,16 @@ class MakeConfig extends Command
                 break;
         }
 
-        if (file_put_contents($file, "<?php\nreturn " . var_export($config, true) . ";\n"))
-        {
+        if (file_put_contents($file, "<?php\nreturn " . var_export($config, true) . ";\n")) {
             $output->writeln("<info>success!</info>");
 
             return;
-        }
-        else
-        {
+        } else {
             goto _write_error;
         }
     }
 
-    static function init($name, $file)
+    public static function init($name, $file)
     {
         $code = "<?php\nreturn array(\n\t\n);";
         return file_put_contents($file, $code);

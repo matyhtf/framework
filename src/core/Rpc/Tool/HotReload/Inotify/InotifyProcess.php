@@ -11,7 +11,7 @@ class InotifyProcess implements HotReloadable
 {
     /**
      * 回调
-     * 
+     *
      * @var callable|string|array
      */
     protected $callback;
@@ -23,28 +23,28 @@ class InotifyProcess implements HotReloadable
 
     /**
      * Inotify文件资源
-     * 
+     *
      * @var resource
      */
     protected $fd = null;
 
     /**
      * 监控相对的根路径，用于处理相对路径参照
-     * 
+     *
      * @var string
      */
     protected $rootPath;
 
     /**
      * 监控的inotify wd资源
-     * 
+     *
      * @var array
      */
     protected $watches = [];
 
     /**
      * 是否已上锁
-     * 
+     *
      * @var bool
      */
     protected $locked = false;
@@ -59,7 +59,7 @@ class InotifyProcess implements HotReloadable
 
     /**
      * @param callable|string|array $callback
-     * 
+     *
      * @return self
      */
     public function setCallback($callback)
@@ -93,7 +93,7 @@ class InotifyProcess implements HotReloadable
      */
     public function make()
     {
-        return new \swoole_process(function($worker) {
+        return new \swoole_process(function ($worker) {
             $this->init();
             $this->addWatches();
             $this->handleWatch();
@@ -102,15 +102,15 @@ class InotifyProcess implements HotReloadable
 
     protected function handleWatch()
     {
-        while(true) {
+        while (true) {
             if (!$this->locked && $events = inotify_read($this->fd)) {
                 $this->locked = true;
 
                 $logs = [];
                 $date = date('Y-m-d H:i:s');
-                foreach($events as $event) {
+                foreach ($events as $event) {
                     $resourceType = 'File';
-                    switch($event['mask']) {
+                    switch ($event['mask']) {
                         case IN_CREATE:
                             $eventType = 'Created';
                             break;
@@ -173,14 +173,14 @@ class InotifyProcess implements HotReloadable
      */
     protected function addWatches()
     {
-        foreach($this->config['inotify']['watchOptions'] as $path) {
+        foreach ($this->config['inotify']['watchOptions'] as $path) {
             $this->addWatch($path);
         }
     }
 
     /**
      * 添加监控
-     * 
+     *
      * @param string $path
      */
     protected function addWatch($path)
@@ -205,7 +205,7 @@ class InotifyProcess implements HotReloadable
 
     /**
      * 移除监控，该文件夹被删除
-     * 
+     *
      * @param int $wd
      */
     protected function removeWatch($wd)
@@ -216,7 +216,7 @@ class InotifyProcess implements HotReloadable
 
     /**
      * 重启监控的文件，该文件夹创建了子文件夹，重启添加子文件夹监控
-     * 
+     *
      * @param int $wd
      */
     protected function reloadWatch($wd)
@@ -228,13 +228,13 @@ class InotifyProcess implements HotReloadable
 
     /**
      * 重启监控的父文件，用于文件夹重命名重启监控
-     * 
+     *
      * @param int $wd
      */
     protected function reloadParentWatch($wd)
     {
         $dir = dirname($this->watches[$wd]);
-        foreach($this->watches as $curWd => $path) {
+        foreach ($this->watches as $curWd => $path) {
             if (strpos($path, $dir) === 0) {
                 $this->removeWatch($curWd);
             }
@@ -260,7 +260,7 @@ class InotifyProcess implements HotReloadable
         $this->fd = inotify_init();
 
         // 将监控路径全部转为绝对路径
-        foreach($this->config['inotify']['watchOptions'] as &$item) {
+        foreach ($this->config['inotify']['watchOptions'] as &$item) {
             if (strpos($item, '/') !== 0) {
                 $item = $this->rootPath . '/' . $item;
             }

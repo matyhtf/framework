@@ -24,28 +24,28 @@ class ValidateRpcMethodParams
 
     /**
      * Symfony console output instance.
-     * 
+     *
      * @var OutputInterface
      */
     protected $output = null;
 
     /**
      * Test cases source path.
-     * 
+     *
      * @var string
      */
     protected $rootPath = null;
 
     /**
      * Find error count.
-     * 
+     *
      * @var int
      */
     protected $errorCount = 0;
 
     /**
      * Allowed class method return type
-     * 
+     *
      * @var array
      */
     protected static $allowedReturnType = [
@@ -54,14 +54,14 @@ class ValidateRpcMethodParams
 
     /**
      * Allowed class method return structObject
-     * 
+     *
      * @var bool
      */
     protected static $allowReturnStructObject = true;
 
     /**
      * Allowed class method param type
-     * 
+     *
      * @var array
      */
     protected static $allowedParamType = [
@@ -70,14 +70,14 @@ class ValidateRpcMethodParams
 
     /**
      * Allowed class method param structObject
-     * 
+     *
      * @var bool
      */
     protected static $allowParamStructObject = true;
 
     /**
      * Allowed whitelist include files and classes
-     * 
+     *
      * @param array
      */
     protected static $allowWhitelist = [
@@ -100,7 +100,7 @@ class ValidateRpcMethodParams
 
     /**
      * Set allowed params types.
-     * 
+     *
      * @param array $types
      */
     public static function setAllowedParamType(array $types)
@@ -110,7 +110,7 @@ class ValidateRpcMethodParams
 
     /**
      * Set allowed return types.
-     * 
+     *
      * @param array $types
      */
     public static function setAllowedReturnType(array $types)
@@ -120,7 +120,7 @@ class ValidateRpcMethodParams
 
     /**
      * Set allow return structObject type.
-     * 
+     *
      * @param bool $allow
      */
     public static function setAllowReturnStructObject(bool $allow = false)
@@ -130,7 +130,7 @@ class ValidateRpcMethodParams
 
     /**
      * Set allow param structObject type.
-     * 
+     *
      * @param bool $allow
      */
     public static function setAllowParamStuctObject(bool $allow = false)
@@ -140,7 +140,7 @@ class ValidateRpcMethodParams
 
     /**
      * Set allow whitelist.
-     * 
+     *
      * @param array $whitelist
      * @param string $categary file|class
      */
@@ -151,7 +151,7 @@ class ValidateRpcMethodParams
 
     /**
      * Handle.
-     * 
+     *
      * @param string $root
      */
     public function handle($root)
@@ -183,14 +183,14 @@ class ValidateRpcMethodParams
 
     /**
      * Determine if the file is a whitelist.
-     * 
+     *
      * @param string $file
-     * 
+     *
      * @return boolean
      */
     protected function isWhitelistFile($file)
     {
-        foreach(static::$allowWhitelist['file'] as $whiteFile) {
+        foreach (static::$allowWhitelist['file'] as $whiteFile) {
             $whiteFilename = strpos($whiteFile, '/') === 0 ? $whiteFile : $this->rootPath . '/' . $whiteFile;
             if (strpos($file, $whiteFilename) === 0) {
                 return true;
@@ -202,9 +202,9 @@ class ValidateRpcMethodParams
 
     /**
      * Determine if the class is a whitelist.
-     * 
+     *
      * @param string $class
-     * 
+     *
      * @return boolean
      */
     protected function isWhitelistClass($class)
@@ -243,7 +243,6 @@ class ValidateRpcMethodParams
 
                 // if class great than 1, then throw error
                 if ($classCount > 1) {
-
                     $this->writeln("<error>同一个文件 [{$file}] 中不允许定义超过一个类 [{$classFullName}]</error>");
                     $this->errorCount++;
                 }
@@ -268,7 +267,7 @@ class ValidateRpcMethodParams
     {
         $refClass = new ReflectionClass($classFullName);
         
-        foreach($refClass->getMethods() as $refMethod) {
+        foreach ($refClass->getMethods() as $refMethod) {
             // if not public, continue
             if (!$refMethod->isPublic() || $refMethod->class !== $classFullName) {
                 continue;
@@ -280,7 +279,7 @@ class ValidateRpcMethodParams
             $allowedParamType = $this->getAllowedParamType();
             $allowedParamTypeString = implode(', ', $allowedParamType);
 
-            foreach($refMethod->getParameters() as $refParam) {
+            foreach ($refMethod->getParameters() as $refParam) {
                 $paramName = $refParam->getName();
                 $paramType = (string)$refParam->getType();
 
@@ -380,11 +379,11 @@ class ValidateRpcMethodParams
 
     /**
      * Validate methods`s params type and return type.
-     * 
+     *
      * @param string $type
      * @param array $allowedTypes
      * @param bool $allowStructObject
-     * 
+     *
      * @return string
      */
     protected function validateTypeResult($type, array $allowedTypes, $allowStructObject = true)
@@ -399,7 +398,7 @@ class ValidateRpcMethodParams
             if ($allowStructObject) {
                 return $this->validateTypeStructObject($type, $allowedTypes);
             }
-        } 
+        }
         if (!in_array($type, $allowedTypes)) {
             return 'not_in_provided';
         }
@@ -409,16 +408,16 @@ class ValidateRpcMethodParams
 
     /**
      * Validate struct object.
-     * 
+     *
      * @param string $class
      * @param array $allowedTypes
-     * 
+     *
      * @return string
      */
     protected function validateTypeStructObject($class, $allowedTypes = [])
     {
         // Validate class in array or extends someone class in array
-        foreach($allowedTypes as $allowedType) {
+        foreach ($allowedTypes as $allowedType) {
             if (class_exists($allowedType) && ($class === $allowedType || is_subclass_of($class, $allowedType))) {
                 return 'ok';
             }
@@ -431,7 +430,7 @@ class ValidateRpcMethodParams
         if ($refClass->isInterface()) {
             return 'interface';
         }
-        foreach($refClass->getMethods() as $refMethod) {
+        foreach ($refClass->getMethods() as $refMethod) {
             if ($refMethod->getName() !== '__construct') {
                 return 'has_methods';
             }
@@ -442,7 +441,7 @@ class ValidateRpcMethodParams
         if (count($refClass->getConstants()) > 0) {
             return 'has_consts';
         }
-        foreach($refClass->getProperties() as $refProp) {
+        foreach ($refClass->getProperties() as $refProp) {
             if (!$refProp->isPublic()) {
                 return 'prop_not_public';
             }
@@ -453,10 +452,10 @@ class ValidateRpcMethodParams
 
     /**
      * Get class full name by namespace and class simple name
-     * 
+     *
      * @param string $class
      * @param string $namesapce
-     * 
+     *
      * @return string
      */
     protected function getClassFullName($class, $namespace = null)
@@ -470,7 +469,7 @@ class ValidateRpcMethodParams
 
     /**
      * Get allowed class method return type.
-     * 
+     *
      * @return array
      */
     protected function getAllowedReturnType()
@@ -480,7 +479,7 @@ class ValidateRpcMethodParams
 
     /**
      * Get allowed class method param type.
-     * 
+     *
      * @return array
      */
     protected function getAllowedParamType()
@@ -504,7 +503,7 @@ class ValidateRpcMethodParams
 
     /**
      * Get the PHP-Parser instance.
-     * 
+     *
      * @return Parser
      */
     public function getParser()
@@ -514,7 +513,7 @@ class ValidateRpcMethodParams
 
     /**
      * Get the symfony console instance.
-     * 
+     *
      * @return OutputInterface
      */
     public function getOutput()
@@ -524,7 +523,7 @@ class ValidateRpcMethodParams
 
     /**
      * Output log and line feed.
-     * 
+     *
      * @param string $msg
      */
     public function writeln($msg)
@@ -535,7 +534,7 @@ class ValidateRpcMethodParams
     /**
      * Output log.
      * if there doesn`s have symfony output instance, then console log by echo.
-     * 
+     *
      * @param string $msg
      * @return string $method
      */

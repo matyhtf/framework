@@ -9,5 +9,4 @@ use SPF\Exception\PropertyNotAllowedException;
  */
 abstract class BaseStruct
 {
-    
 }

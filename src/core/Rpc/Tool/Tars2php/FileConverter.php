@@ -33,21 +33,21 @@ class FileConverter
 
     /**
      * 项目根目录
-     * 
+     *
      * @var string
      */
     public $rootPath;
 
     /**
      * 生成文件输出目录
-     * 
+     *
      * @var string
      */
     public $outputDir;
     
     /**
      * 命名空间前缀
-     * 
+     *
      * @var string
      */
     protected $nsPrefix = '';
@@ -62,7 +62,7 @@ class FileConverter
 
         $this->outputDir = $this->resolvePath($this->config['dstPath']);
 
-        $this->nsPrefix = strrpos($this->config['nsPrefix'], '\\\\') === 0 
+        $this->nsPrefix = strrpos($this->config['nsPrefix'], '\\\\') === 0
             ? mb_substr($this->config['nsPrefix'], 0, -2) : $this->config['nsPrefix'];
 
         $this->initDir();
@@ -98,7 +98,7 @@ class FileConverter
             }
         } elseif (is_array($this->config['tarsFiles'])) {
             // 文件列表类型
-            foreach($this->config['tarsFiles'] as $tarsFile) {
+            foreach ($this->config['tarsFiles'] as $tarsFile) {
                 if (!($file = $this->resolvePath($tarsFile)) || !is_file($file)) {
                     throw new Exception('配置 tarsFiles 指定文件 ' . $file . '不存在');
                 }
@@ -115,7 +115,7 @@ class FileConverter
 
     /**
      * @param string $path
-     * 
+     *
      * @return string|bool
      */
     protected function resolvePath($path, $rootPath = null)
@@ -181,7 +181,7 @@ class FileConverter
     {
         $dir = new RecursiveDirectoryIterator($path, RecursiveDirectoryIterator::SKIP_DOTS);
         $files = new RecursiveIteratorIterator($dir);
-        foreach($files as $file) {
+        foreach ($files as $file) {
             $this->moduleScan((string) $file);
         }
     }
@@ -191,7 +191,7 @@ class FileConverter
      */
     protected function moduleScanByFiles($files)
     {
-        foreach($files as $file) {
+        foreach ($files as $file) {
             $file = $this->resolvePath($file);
             $this->moduleScan($file);
         }

@@ -20,22 +20,22 @@ class Auth
     public $errCode;
     public $errMessage;
 
-    static $login_url = '/login.php?';
-    static $username_field = 'username';
-    static $password_field = 'password';
-    static $userid_field = 'id';
+    public static $login_url = '/login.php?';
+    public static $username_field = 'username';
+    public static $password_field = 'password';
+    public static $userid_field = 'id';
 
-    static $lastlogin = 'lastlogin';
-    static $lastip = 'lastip';
-    static $session_prefix = '';
-    static $mk_password = 'username,password';
+    public static $lastlogin = 'lastlogin';
+    public static $lastip = 'lastip';
+    public static $session_prefix = '';
+    public static $mk_password = 'username,password';
     protected static $password_hash = 'sha1';
 
-    static $password_cost = 10;
-    static $password_salt_size = 22;
+    public static $password_cost = 10;
+    public static $password_salt_size = 22;
 
-    static $cookie_life = 2592000;
-    static $session_destroy = false;
+    public static $cookie_life = 2592000;
+    public static $session_destroy = false;
 
     protected $config;
     protected $login_table = '';
@@ -48,7 +48,7 @@ class Auth
     const HASH_SHA1 = 'sha1';
     const HASH_CRYPT = 'crypt';
 
-    function __construct($config)
+    public function __construct($config)
     {
         $this->config = $config;
         if (empty($config['login_table'])) {
@@ -65,7 +65,7 @@ class Auth
         $_SESSION[self::$session_prefix . 'save_key'] = array();
     }
 
-    function saveUserinfo($key = 'userinfo')
+    public function saveUserinfo($key = 'userinfo')
     {
         $_SESSION[self::$session_prefix . $key] = $this->user;
         $_SESSION[self::$session_prefix . 'save_key'][] = self::$session_prefix . $key;
@@ -76,7 +76,7 @@ class Auth
      * @param $set
      * @return bool
      */
-    function updateStatus($set = null)
+    public function updateStatus($set = null)
     {
         if (empty($set)) {
             $set = array(
@@ -87,7 +87,7 @@ class Auth
         return $this->db->update($this->user['id'], $set, $this->login_table);
     }
 
-    function setSession($key)
+    public function setSession($key)
     {
         $_SESSION[$key] = $this->user[$key];
         $_SESSION[self::$session_prefix . 'save_key'][] = self::$session_prefix . $key;
@@ -97,7 +97,7 @@ class Auth
      * 获取登录用户的UID
      * @return int
      */
-    function getUid()
+    public function getUid()
     {
         return $_SESSION[self::$session_prefix . 'user_id'];
     }
@@ -106,7 +106,7 @@ class Auth
      * 获取登录用户的信息
      * @return array
      */
-    function getUserInfo($key = 'userinfo')
+    public function getUserInfo($key = 'userinfo')
     {
         return $this->user;
     }
@@ -118,7 +118,7 @@ class Auth
      * @return bool
      * @throws \Exception
      */
-    function login($username, $password)
+    public function login($username, $password)
     {
         Cookie::set(self::$session_prefix . 'username', $username, time() + self::$cookie_life, '/');
         $this->user = $this->db->query('select ' . $this->select . ' from ' . $this->login_table . " where " . self::$username_field . "='$username' limit 1")->fetch();
@@ -142,7 +142,7 @@ class Auth
      * 检查是否登录
      * @return bool
      */
-    function isLogin()
+    public function isLogin()
     {
         if (isset($_SESSION[self::$session_prefix . 'isLogin']) and $_SESSION[self::$session_prefix . 'isLogin'] == 1) {
             return true;
@@ -158,7 +158,7 @@ class Auth
      * @return bool
      * @throws \Exception
      */
-    function changePassword($uid, $old_pwd, $new_pwd)
+    public function changePassword($uid, $old_pwd, $new_pwd)
     {
         $table = table($this->login_table, $this->login_db);
         $table->primary = self::$userid_field;
@@ -184,7 +184,7 @@ class Auth
      * 注销登录
      * @return bool
      */
-    function logout()
+    public function logout()
     {
         /**
          * 启动Session
@@ -298,4 +298,3 @@ class Auth
         return true;
     }
 }
-

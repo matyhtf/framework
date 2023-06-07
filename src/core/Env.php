@@ -10,34 +10,37 @@ namespace SPF;
  */
 class Env implements \ArrayAccess
 {
-	static $default_cache_life = 600;
-	public $cache_prefix = 'swoole_env_';
-	public $swoole;
-	
-	function __construct($swoole)
-	{
-		$this->swoole = $swoole;
-	}
-	function offsetGet($key)
-	{
-		return $this->swoole->cache->get($this->cache_prefix.$key);
-	}
-	function offsetSet($key,$value)
-	{
-		$this->swoole->cache->set($this->cache_prefix.$key,$value,self::$default_cache_life);
-	}
-	function offsetExists($key)
-	{
-		$v = $this->offsetGet($key);
-		if(is_numeric($v)) return true;
-		else return false;
-	}
-	function offsetUnset($key)
-	{
-		$this->swoole->cache->delete($this->cache_prefix.$key);
-	}
-	function __toString()
-	{
-		return "This is a memory Object!";
-	}
+    public static $default_cache_life = 600;
+    public $cache_prefix = 'swoole_env_';
+    public $swoole;
+    
+    public function __construct($swoole)
+    {
+        $this->swoole = $swoole;
+    }
+    public function offsetGet($key)
+    {
+        return $this->swoole->cache->get($this->cache_prefix.$key);
+    }
+    public function offsetSet($key, $value)
+    {
+        $this->swoole->cache->set($this->cache_prefix.$key, $value, self::$default_cache_life);
+    }
+    public function offsetExists($key)
+    {
+        $v = $this->offsetGet($key);
+        if (is_numeric($v)) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+    public function offsetUnset($key)
+    {
+        $this->swoole->cache->delete($this->cache_prefix.$key);
+    }
+    public function __toString()
+    {
+        return "This is a memory Object!";
+    }
 }

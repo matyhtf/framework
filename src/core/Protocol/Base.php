@@ -3,6 +3,7 @@ namespace SPF\Protocol;
 
 use SPF;
 use SPF\Coroutine\BaseContext as Context;
+
 /**
  * 协议基类，实现一些公用的方法
  * @package SPF\Protocol
@@ -24,7 +25,7 @@ abstract class Base implements SPF\IFace\Protocol
     const ERR_SEND              = 9301;   //发送客户端失败
 
 
-    static $errMsg = [
+    public static $errMsg = [
         0 => 'success',
 
         9001 => '错误的包头',
@@ -65,14 +66,11 @@ abstract class Base implements SPF\IFace\Protocol
     /**
      * @param $errorCode
      */
-    static function setErrorCode($errorCode)
+    public static function setErrorCode($errorCode)
     {
-        if (SPF\App::$enableCoroutine)
-        {
+        if (SPF\App::$enableCoroutine) {
             Context::put("rpc_error_code", $errorCode);
-        }
-        else
-        {
+        } else {
             self::$errorCode = $errorCode;
         }
     }
@@ -80,31 +78,25 @@ abstract class Base implements SPF\IFace\Protocol
     /**
      * @return int
      */
-    static function getErrorCode()
+    public static function getErrorCode()
     {
-        if (SPF\App::$enableCoroutine)
-        {
+        if (SPF\App::$enableCoroutine) {
             return Context::get("rpc_error_code");
-        }
-        else
-        {
+        } else {
             return self::$errorCode;
         }
     }
 
-    static function reSetError()
+    public static function reSetError()
     {
-        if (SPF\App::$enableCoroutine)
-        {
+        if (SPF\App::$enableCoroutine) {
             Context::delete("rpc_error_code");
-        }
-        else
-        {
+        } else {
             self::$errorCode = 0;
         }
     }
 
-    static function getErrorMsg($errorCode)
+    public static function getErrorMsg($errorCode)
     {
         return isset(self::$errMsg[$errorCode]) ? self::$errMsg[$errorCode] : "";
     }
@@ -113,18 +105,18 @@ abstract class Base implements SPF\IFace\Protocol
      * 设置Logger
      * @param $log
      */
-    function setLogger($log)
+    public function setLogger($log)
     {
         $this->log = $log;
     }
 
-    function run($array)
+    public function run($array)
     {
         SPF\Error::$echo_html = true;
         $this->server->run($array);
     }
 
-    function daemonize()
+    public function daemonize()
     {
         $this->server->daemonize();
     }
@@ -134,33 +126,29 @@ abstract class Base implements SPF\IFace\Protocol
      * @param $msg
      * @param string $type
      */
-    function log($msg)
+    public function log($msg)
     {
         $this->log->info($msg);
     }
 
-    function task($task, $dstWorkerId = -1, $callback = null)
+    public function task($task, $dstWorkerId = -1, $callback = null)
     {
         $this->server->task($task, $dstWorkerId = -1, $callback);
     }
 
-    function onStart($server)
+    public function onStart($server)
     {
-
     }
 
-    function onConnect($server, $client_id, $from_id)
+    public function onConnect($server, $client_id, $from_id)
     {
-
     }
 
-    function onClose($server, $client_id, $from_id)
+    public function onClose($server, $client_id, $from_id)
     {
-
     }
 
-    function onShutdown($server)
+    public function onShutdown($server)
     {
-
     }
 }

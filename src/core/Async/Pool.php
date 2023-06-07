@@ -54,7 +54,7 @@ class Pool
      * 加入到连接池中
      * @param $resource
      */
-    function join($resource)
+    public function join($resource)
     {
         //保存到空闲连接池中
         $this->resourcePool[spl_object_hash($resource)] = $resource;
@@ -64,7 +64,7 @@ class Pool
     /**
      * 失败计数
      */
-    function failure()
+    public function failure()
     {
         $this->resourceNum--;
         $this->failureCount++;
@@ -73,7 +73,7 @@ class Pool
     /**
      * @param $callback
      */
-    function create($callback)
+    public function create($callback)
     {
         $this->createFunction = $callback;
     }
@@ -82,7 +82,7 @@ class Pool
      * 修改连接池尺寸
      * @param $newSize
      */
-    function setPoolSize($newSize)
+    public function setPoolSize($newSize)
     {
         $this->poolSize = $newSize;
     }
@@ -92,11 +92,10 @@ class Pool
      * @param $resource
      * @return bool
      */
-    function remove($resource)
+    public function remove($resource)
     {
         $rid = spl_object_hash($resource);
-        if (!isset($this->resourcePool[$rid]))
-        {
+        if (!isset($this->resourcePool[$rid])) {
             return false;
         }
         //从resourcePool中删除
@@ -115,13 +114,11 @@ class Pool
         //入队列
         $this->taskQueue->enqueue($callback);
         //有可用资源
-        if (count($this->idlePool) > 0)
-        {
+        if (count($this->idlePool) > 0) {
             $this->doTask();
         }
         //没有可用的资源, 创建新的连接
-        elseif (count($this->resourcePool) < $this->poolSize and $this->resourceNum < $this->poolSize)
-        {
+        elseif (count($this->resourcePool) < $this->poolSize and $this->resourceNum < $this->poolSize) {
             call_user_func($this->createFunction);
             $this->resourceNum++;
         }
@@ -135,8 +132,7 @@ class Pool
     {
         $this->idlePool->enqueue($resource);
         //有任务要做
-        if (count($this->taskQueue) > 0)
-        {
+        if (count($this->taskQueue) > 0) {
             $this->doTask();
         }
     }
@@ -145,27 +141,21 @@ class Pool
     {
         $resource = null;
         //从空闲队列中取出可用的资源
-        while (count($this->idlePool) > 0)
-        {
+        while (count($this->idlePool) > 0) {
             $_resource = $this->idlePool->dequeue();
             $rid = spl_object_hash($_resource);
             //资源已经不可用了，连接已关闭
-            if (!isset($this->resourcePool[$rid]))
-            {
+            if (!isset($this->resourcePool[$rid])) {
                 continue;
-            }
-            else
-            {
+            } else {
                 //找到可用连接
                 $resource = $_resource;
                 break;
             }
         }
         //没有可用连接，继续等待
-        if (!$resource)
-        {
-            if (count($this->resourcePool) == 0)
-            {
+        if (!$resource) {
+            if (count($this->resourcePool) == 0) {
                 call_user_func($this->createFunction);
                 $this->resourceNum++;
             }
@@ -178,7 +168,7 @@ class Pool
     /**
      * @return array
      */
-    function getConfig()
+    public function getConfig()
     {
         return $this->config;
     }

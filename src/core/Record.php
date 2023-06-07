@@ -2,6 +2,7 @@
 namespace SPF;
 
 use SPF\Component\Observer;
+
 /**
  * Record类，表中的一条记录，通过对象的操作，映射到数据库表
  * 可以使用属性访问，也可以通过关联数组方式访问
@@ -43,7 +44,7 @@ class Record extends Observer implements \ArrayAccess
      * @param string $where
      * @param string $select
      */
-    function __construct($id, $db, $table, $primary, $where = '', $select = '*')
+    public function __construct($id, $db, $table, $primary, $where = '', $select = '*')
     {
         $this->db = $db;
         $this->_current_id = $id;
@@ -76,7 +77,7 @@ class Record extends Observer implements \ArrayAccess
      * 是否存在
      * @return bool
      */
-    function exist()
+    public function exist()
     {
         return !empty($this->_data);
     }
@@ -86,15 +87,12 @@ class Record extends Observer implements \ArrayAccess
      * @param $data
      * @return void
      */
-    function put($data)
+    public function put($data)
     {
-        if ($this->_change == self::STATE_INSERT)
-        {
+        if ($this->_change == self::STATE_INSERT) {
             $this->_change = self::STATE_UPDATE;
             $this->_update = $data;
-        }
-        elseif ($this->_change == self::STATE_EMPTY)
-        {
+        } elseif ($this->_change == self::STATE_EMPTY) {
             $this->_change = self::STATE_INSERT;
             $this->_data = $data;
         }
@@ -104,7 +102,7 @@ class Record extends Observer implements \ArrayAccess
      * 获取数据数组
      * @return array
      */
-    function get()
+    public function get()
     {
         return $this->_data;
     }
@@ -113,7 +111,7 @@ class Record extends Observer implements \ArrayAccess
      * 获取原始数据
      * @return null | array
      */
-    function getOriginalData()
+    public function getOriginalData()
     {
         return $this->_original_data;
     }
@@ -124,29 +122,23 @@ class Record extends Observer implements \ArrayAccess
      *
      * @return null
      */
-    function __get($property)
+    public function __get($property)
     {
-        if (isset($this->_data[$property]))
-        {
+        if (isset($this->_data[$property])) {
             return $this->_data[$property];
-        }
-        else
-        {
+        } else {
             Error::pecho("Record object no property: $property");
             return null;
         }
     }
 
-    function __set($property, $value)
+    public function __set($property, $value)
     {
-        if ($this->_change == self::STATE_INSERT or $this->_change == self::STATE_UPDATE)
-        {
+        if ($this->_change == self::STATE_INSERT or $this->_change == self::STATE_UPDATE) {
             $this->_change = self::STATE_UPDATE;
             $this->_update[$property] = $value;
             $this->_data[$property] = $value;
-        }
-        else
-        {
+        } else {
             $this->_data[$property] = $value;
         }
         $this->_save = true;
@@ -158,25 +150,20 @@ class Record extends Observer implements \ArrayAccess
      * 如果是已存在的记录，保持则会update，修改过的值，如果没有任何值被修改，则不执行SQL
      * @return bool
      */
-    function save()
+    public function save()
     {
         $this->_save = false;
-        if ($this->_change == 0 or $this->_change == 1)
-        {
-            if ($this->db->insert($this->_data, $this->table) === false)
-            {
+        if ($this->_change == 0 or $this->_change == 1) {
+            if ($this->db->insert($this->_data, $this->table) === false) {
                 return false;
             }
             //改变状态
             $this->_change = 1;
             $this->_current_id = $this->db->lastInsertId();
-        }
-        elseif ($this->_change == 2)
-        {
+        } elseif ($this->_change == 2) {
             $update = $this->_update;
             unset($update[$this->primary]);
-            if ($this->db->update($this->_current_id, $update, $this->table, $this->primary) === false)
-            {
+            if ($this->db->update($this->_current_id, $update, $this->table, $this->primary) === false) {
                 return false;
             }
         }
@@ -184,22 +171,20 @@ class Record extends Observer implements \ArrayAccess
         return true;
     }
 
-    function update()
+    public function update()
     {
         $update = $this->_data;
         unset($update[$this->primary]);
-        if ($this->db->update($this->_current_id, $this->_update, $this->table, $this->primary) === false)
-        {
+        if ($this->db->update($this->_current_id, $this->_update, $this->table, $this->primary) === false) {
             return false;
         }
         $this->notify();
         return true;
     }
 
-    function __destruct()
+    public function __destruct()
     {
-        if ($this->_save)
-        {
+        if ($this->_save) {
             $this->save();
         }
     }
@@ -208,10 +193,9 @@ class Record extends Observer implements \ArrayAccess
      * 删除数据库中的此条记录
      * @return bool
      */
-    function delete()
+    public function delete()
     {
-        if ($this->db->delete($this->_current_id, $this->table, $this->primary) === false)
-        {
+        if ($this->db->delete($this->_current_id, $this->table, $this->primary) === false) {
             return false;
         }
         $this->_delete = true;
@@ -219,22 +203,22 @@ class Record extends Observer implements \ArrayAccess
         return true;
     }
 
-    function offsetExists($key)
+    public function offsetExists($key)
     {
         return isset($this->_data[$key]);
     }
 
-    function offsetGet($key)
+    public function offsetGet($key)
     {
         return $this->_data[$key];
     }
 
-    function offsetSet($key, $value)
+    public function offsetSet($key, $value)
     {
         $this->_data[$key] = $value;
     }
 
-    function offsetUnset($key)
+    public function offsetUnset($key)
     {
         unset($this->_data[$key]);
     }

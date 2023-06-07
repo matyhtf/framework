@@ -9,9 +9,9 @@ namespace SPF;
  */
 class Image
 {
-    static $waterMarkFontFile = 'static/fonts/ant1.ttf';
-    static $verifyCodeFontFile = 'static/fonts/CONSOLA.TTF';
-    static $verifyCodeLength = 4;
+    public static $waterMarkFontFile = 'static/fonts/ant1.ttf';
+    public static $verifyCodeFontFile = 'static/fonts/CONSOLA.TTF';
+    public static $verifyCodeLength = 4;
 
     /**
      * 裁切图片
@@ -22,17 +22,15 @@ class Image
      * @param $qulitity int 质量
      * @return bool
      */
-    static function cut($pic, $dst_pic, $width, $height = null, $qulitity = 100)
+    public static function cut($pic, $dst_pic, $width, $height = null, $qulitity = 100)
     {
         $im = imagecreatefromjpeg($pic);
 
-        if (imagesx($im) > $width)
-        {
+        if (imagesx($im) > $width) {
             $old_w = imagesx($im);
             $old_h = imagesy($im);
 
-            if ($height == null)
-            {
+            if ($height == null) {
                 $w_h = $old_w / $old_h;
                 $height = $width * $w_h;
             }
@@ -43,9 +41,7 @@ class Image
             imagedestroy($im);
 
             return true;
-        }
-        elseif ($pic != $dst_pic)
-        {
+        } elseif ($pic != $dst_pic) {
             return copy($pic, $dst_pic);
         }
 
@@ -62,34 +58,27 @@ class Image
      * @param bool $copy
      * @return bool
      */
-    static function thumbnail($pic, $dst_pic, $max_width, $max_height = null, $qulitity = 100, $copy = true)
+    public static function thumbnail($pic, $dst_pic, $max_width, $max_height = null, $qulitity = 100, $copy = true)
     {
         $im = self::readfile($pic);
-        if ($im === false)
-        {
+        if ($im === false) {
             return false;
         }
 
         $old_w = imagesx($im);
         $old_h = imagesy($im);
 
-        if ($max_height == null)
-        {
+        if ($max_height == null) {
             $max_height = $max_width;
         }
 
-        if ($old_w > $max_width or $old_h > $max_height)
-        {
-
+        if ($old_w > $max_width or $old_h > $max_height) {
             $w_h = $old_w / $old_h;
             $h_w = $old_h / $old_w;
-            if ($w_h > $h_w)
-            {
+            if ($w_h > $h_w) {
                 $width = $max_width;
                 $height = $width * $h_w;
-            }
-            else
-            {
+            } else {
                 $height = $max_height;
                 $width = $height * $w_h;
             }
@@ -98,13 +87,9 @@ class Image
             imagejpeg($newim, $dst_pic, $qulitity);
             imagedestroy($im);
             return true;
-        }
-        elseif ($pic != $dst_pic and $copy)
-        {
+        } elseif ($pic != $dst_pic and $copy) {
             return copy($pic, $dst_pic);
-        }
-        else
-        {
+        } else {
             return false;
         }
     }
@@ -114,13 +99,11 @@ class Image
      * @param $pic
      * @return resource | false
      */
-    static function readfile($pic)
+    public static function readfile($pic)
     {
         $image_info = getimagesize($pic);
-        if ($image_info["mime"] == "image/jpeg" || $image_info["mime"] == "image/gif" || $image_info["mime"] == "image/png")
-        {
-            switch ($image_info["mime"])
-            {
+        if ($image_info["mime"] == "image/jpeg" || $image_info["mime"] == "image/gif" || $image_info["mime"] == "image/png") {
+            switch ($image_info["mime"]) {
                 case "image/jpeg":
                     $im = imagecreatefromjpeg($pic);
                     break;
@@ -159,11 +142,10 @@ class Image
         $minWidth = 100,
         $minHeight = 100,
         $alpha = 0.9
-    )
-    {
-        if (!class_exists('\Imagick', false))
-        {
-            return self::addWaterMark2($groundImage,
+    ) {
+        if (!class_exists('\Imagick', false)) {
+            return self::addWaterMark2(
+                $groundImage,
                 $waterPos,
                 $waterImage,
                 $waterText,
@@ -171,19 +153,18 @@ class Image
                 $textColor,
                 $minWidth,
                 $minHeight,
-                $alpha);
+                $alpha
+            );
         }
 
-        if (empty($waterText) and !is_file($waterImage))
-        {
+        if (empty($waterText) and !is_file($waterImage)) {
             return false;
         }
 
         $bg = null;
         $bg_h = $bg_w = $water_h = $water_w = 0;
         //获取背景图的高，宽
-        if (is_file($groundImage) && !empty($groundImage))
-        {
+        if (is_file($groundImage) && !empty($groundImage)) {
             $bg = new \Imagick();
             $bg->readImage($groundImage);
             $bg_h = $bg->getImageHeight();
@@ -195,27 +176,22 @@ class Image
         $water_h = $water->getImageHeight();
         $water_w = $water->getImageWidth();
         //如果背景图的高宽小于水印图的高宽或指定的高和宽则不加水印
-        if ($bg_h < $minHeight || $bg_w < $minWidth || $bg_h < $water_h || $bg_w < $water_w)
-        {
+        if ($bg_h < $minHeight || $bg_w < $minWidth || $bg_h < $water_h || $bg_w < $water_w) {
             return false;
         }
 
         //加水印
         $dw = new \ImagickDraw();
         //加图片水印
-        if (is_file($waterImage))
-        {
+        if (is_file($waterImage)) {
             $water->setImageOpacity($alpha);
             $dw->setGravity($waterPos);
             $dw->composite($water->getImageCompose(), 0, 0, 50, 0, $water);
             $bg->drawImage($dw);
-            if (!$bg->writeImage($groundImage))
-            {
+            if (!$bg->writeImage($groundImage)) {
                 return false;
             }
-        }
-        else
-        {
+        } else {
             //加文字水印
             $dw->setFontSize($textFont);
             $dw->setFillColor($textColor);
@@ -223,8 +199,7 @@ class Image
             $dw->setFillAlpha($alpha);
             $dw->annotation(0, 0, $waterText);
             $bg->drawImage($dw);
-            if (!$bg->writeImage($groundImage))
-            {
+            if (!$bg->writeImage($groundImage)) {
                 return false;
             }
         }
@@ -256,27 +231,24 @@ class Image
         $textColor = "#FF0000",
         $minwidth = 100,
         $minheight = 100
-    )
-    {
+    ) {
         $isWaterImage = false;
         $formatMsg = "暂不支持该文件格式，请用图片处理软件将图片转换为GIF、JPG、PNG格式。";
         //读取水印文件
-        if (!empty($waterImage) && file_exists($waterImage))
-        {
+        if (!empty($waterImage) && file_exists($waterImage)) {
             $isWaterImage = true;
             $water_info = getimagesize($waterImage);
             $water_w = $water_info [0]; //取得水印图片的宽
             $water_h = $water_info [1]; //取得水印图片的高
 
-            switch ($water_info [2]) //取得水印图片的格式
-            {
-                case 1 :
+            switch ($water_info [2]) { //取得水印图片的格式
+                case 1:
                     $water_im = imagecreatefromgif($waterImage);
                     break;
-                case 2 :
+                case 2:
                     $water_im = imagecreatefromjpeg($waterImage);
                     break;
-                case 3 :
+                case 3:
                     $water_im = imagecreatefrompng($waterImage);
                     break;
                 default:
@@ -284,40 +256,34 @@ class Image
             }
         }
         //读取背景图片
-        if (!empty($groundImage) && file_exists($groundImage))
-        {
+        if (!empty($groundImage) && file_exists($groundImage)) {
             $ground_info = getimagesize($groundImage);
             $ground_w = $ground_info [0]; //取得背景图片的宽
             $ground_h = $ground_info [1]; //取得背景图片的高
 
-            switch ($ground_info [2]) //取得背景图片的格式
-            {
-                case 1 :
+            switch ($ground_info [2]) { //取得背景图片的格式
+                case 1:
                     $ground_im = imagecreatefromgif($groundImage);
                     break;
-                case 2 :
+                case 2:
                     $ground_im = imagecreatefromjpeg($groundImage);
                     break;
-                case 3 :
+                case 3:
                     $ground_im = imagecreatefrompng($groundImage);
                     break;
                 default:
                     return false;
             }
-        }
-        else
-        {
+        } else {
             return false;
         }
         //水印位置
-        if ($isWaterImage) //图片水印
-        {
+        if ($isWaterImage) { //图片水印
             $w = $water_w;
             $h = $water_h;
         }
         //文字水印
-        else
-        {
+        else {
             //取得使用 TrueType 字体的文本的范围
             $temp = imagettfbbox(ceil($textFont * 2.5), 0, self::$waterMarkFontFile, $waterText);
             $w = $temp [2] - $temp [6];
@@ -325,49 +291,47 @@ class Image
             unset($temp);
         }
         // add
-        if (($ground_w < $w) || ($ground_h < $h) || ($ground_w < $minwidth) || ($ground_h < $minheight))
-        {
+        if (($ground_w < $w) || ($ground_h < $h) || ($ground_w < $minwidth) || ($ground_h < $minheight)) {
             return false;
         }
-        switch ($waterPos)
-        {
-            case 0 : //随机
+        switch ($waterPos) {
+            case 0: //随机
                 $posX = rand(0, ($ground_w - $w));
                 $posY = rand(0, ($ground_h - $h));
                 break;
-            case 1 : //1为顶端居左
+            case 1: //1为顶端居左
                 $posX = 0;
                 $posY = 0;
                 break;
-            case 2 : //2为顶端居中
+            case 2: //2为顶端居中
                 $posX = ($ground_w - $w) / 2;
                 $posY = 0;
                 break;
-            case 3 : //3为顶端居右
+            case 3: //3为顶端居右
                 $posX = $ground_w - $w;
                 $posY = 0;
                 break;
-            case 4 : //4为中部居左
+            case 4: //4为中部居左
                 $posX = 0;
                 $posY = ($ground_h - $h) / 2;
                 break;
-            case 5 : //5为中部居中
+            case 5: //5为中部居中
                 $posX = ($ground_w - $w) / 2;
                 $posY = ($ground_h - $h) / 2;
                 break;
-            case 6 : //6为中部居右
+            case 6: //6为中部居右
                 $posX = $ground_w - $w;
                 $posY = ($ground_h - $h) / 2;
                 break;
-            case 7 : //7为底端居左
+            case 7: //7为底端居左
                 $posX = 0;
                 $posY = $ground_h - $h;
                 break;
-            case 8 : //8为底端居中
+            case 8: //8为底端居中
                 $posX = ($ground_w - $w) / 2;
                 $posY = $ground_h - $h;
                 break;
-            case 9 : //9为底端居右
+            case 9: //9为底端居右
                 $posX = $ground_w - $w;
                 $posY = $ground_h - $h;
                 break;
@@ -378,47 +342,38 @@ class Image
         }
         //设定图像的混色模式
         imagealphablending($ground_im, true);
-        if ($isWaterImage) //图片水印
-        {
+        if ($isWaterImage) { //图片水印
             imagecopy($ground_im, $water_im, $posX, $posY, 0, 0, $water_w, $water_h); //拷贝水印到目标文件
-        }
-        else //文字水印
-        {
-            if (!empty($textColor) && (strlen($textColor) == 7))
-            {
+        } else { //文字水印
+            if (!empty($textColor) && (strlen($textColor) == 7)) {
                 $R = hexdec(substr($textColor, 1, 2));
                 $G = hexdec(substr($textColor, 3, 2));
                 $B = hexdec(substr($textColor, 5));
-            }
-            else
-            {
+            } else {
                 return false;
             }
             imagestring($ground_im, $textFont, $posX, $posY, $waterText, imagecolorallocate($ground_im, $R, $G, $B));
         }
         //生成水印后的图片
         @unlink($groundImage);
-        switch ($ground_info [2]) //取得背景图片的格式
-        {
-            case 1 :
+        switch ($ground_info [2]) { //取得背景图片的格式
+            case 1:
                 imagegif($ground_im, $groundImage);
                 break;
-            case 2 :
+            case 2:
                 imagejpeg($ground_im, $groundImage);
                 break;
-            case 3 :
+            case 3:
                 imagepng($ground_im, $groundImage);
                 break;
             default:
                 return false;
         }
         //释放内存
-        if (isset($water_info))
-        {
+        if (isset($water_info)) {
             unset($water_info);
         }
-        if (isset($water_im))
-        {
+        if (isset($water_im)) {
             imagedestroy($water_im);
         }
         unset($ground_info);
@@ -432,23 +387,32 @@ class Image
      * @param $img_height
      * @return array
      */
-    static function verifycode_gd($img_width = 80, $img_height = 30)
+    public static function verifycode_gd($img_width = 80, $img_height = 30)
     {
         $code = strtoupper(RandomKey::string(self::$verifyCodeLength));
 
         $aimg = imageCreate($img_width, $img_height);       //生成图片
         ImageColorAllocate($aimg, 255, 255, 255);            //图片底色，ImageColorAllocate第1次定义颜色PHP就认为是底色了
 
-        for ($i = 1; $i <= 128; $i++)
-        {
-            imageString($aimg, 1, mt_rand(1, $img_width), mt_rand(1, $img_height), "*",
-                imageColorAllocate($aimg, mt_rand(200, 255), mt_rand(200, 255), mt_rand(200, 255)));
+        for ($i = 1; $i <= 128; $i++) {
+            imageString(
+                $aimg,
+                1,
+                mt_rand(1, $img_width),
+                mt_rand(1, $img_height),
+                "*",
+                imageColorAllocate($aimg, mt_rand(200, 255), mt_rand(200, 255), mt_rand(200, 255))
+            );
         }
-        for ($i = 0; $i < strlen($code); $i++)
-        {
-            imageString($aimg, mt_rand(8, 12), $i * $img_width / 4 + mt_rand(1, 8), mt_rand(1, $img_height / 4),
+        for ($i = 0; $i < strlen($code); $i++) {
+            imageString(
+                $aimg,
+                mt_rand(8, 12),
+                $i * $img_width / 4 + mt_rand(1, 8),
+                mt_rand(1, $img_height / 4),
                 $code[$i],
-                imageColorAllocate($aimg, mt_rand(0, 100), mt_rand(0, 150), mt_rand(0, 200)));
+                imageColorAllocate($aimg, mt_rand(0, 100), mt_rand(0, 150), mt_rand(0, 200))
+            );
         }
 
         ob_start();
@@ -458,7 +422,7 @@ class Image
         return array('code' => $code, 'image' => $data);
     }
 
-    static function haveImagick()
+    public static function haveImagick()
     {
         return class_exists('\Imagick', false);
     }
@@ -471,14 +435,14 @@ class Image
      * @param bool $swirl
      * @return array
      */
-    static function verifycode_imagick($img_width = 80, $img_height = 30, $addRandomLines = true, $swirl = true)
+    public static function verifycode_imagick($img_width = 80, $img_height = 30, $addRandomLines = true, $swirl = true)
     {
         $fontSize = 24;
 
         /* imagick对象 */
         $Imagick = new \Imagick();
 
-         /* 背景对象 */
+        /* 背景对象 */
         $bg = new \ImagickPixel();
 
         /* Set the pixel color to white */
@@ -487,8 +451,7 @@ class Image
         /* 画刷 */
         $ImagickDraw = new \ImagickDraw();
 
-        if (is_file(self::$verifyCodeFontFile))
-        {
+        if (is_file(self::$verifyCodeFontFile)) {
             $ImagickDraw->setFont(self::$verifyCodeFontFile);
         }
 
@@ -504,14 +467,12 @@ class Image
         $Imagick->annotateImage($ImagickDraw, 4, 20, 0, $code);
 
         /* 变形 */
-        if ($swirl)
-        {
+        if ($swirl) {
             $Imagick->swirlImage(10);
         }
 
         /* 随即线条 */
-        if ($addRandomLines)
-        {
+        if ($addRandomLines) {
             $ImagickDraw->line(rand(0, 70), rand(0, 30), rand(0, 70), rand(0, 30));
             $ImagickDraw->line(rand(0, 70), rand(0, 30), rand(0, 70), rand(0, 30));
             $ImagickDraw->line(rand(0, 70), rand(0, 30), rand(0, 70), rand(0, 30));
@@ -536,7 +497,7 @@ class Image
      * @param $height
      * @return array
      */
-    static function verifycode_chinese($font, $width = 180, $height = 60)
+    public static function verifycode_chinese($font, $width = 180, $height = 60)
     {
         $length = 4;
         $angle = 45;
@@ -548,26 +509,39 @@ class Image
         imagefill($im, 0, 0, $bkcolor);
         imagerectangle($im, 0, 0, $width - 1, $height - 1, $borderColor);
         // 干扰
-        for ($i = 0; $i < 5; $i++)
-        {
+        for ($i = 0; $i < 5; $i++) {
             $fontcolor = imagecolorallocate($im, mt_rand(0, 255), mt_rand(0, 255), mt_rand(0, 255));
-            imagearc($im, mt_rand(-10, $width), mt_rand(-10, $height), mt_rand(30, 300), mt_rand(20, 200), 55, 44,
-                $fontcolor);
+            imagearc(
+                $im,
+                mt_rand(-10, $width),
+                mt_rand(-10, $height),
+                mt_rand(30, 300),
+                mt_rand(20, 200),
+                55,
+                44,
+                $fontcolor
+            );
         }
-        for ($i = 0; $i < 255; $i++)
-        {
+        for ($i = 0; $i < 255; $i++) {
             $fontcolor = imagecolorallocate($im, mt_rand(0, 255), mt_rand(0, 255), mt_rand(0, 255));
             imagesetpixel($im, mt_rand(0, $width), mt_rand(0, $height), $fontcolor);
         }
 
         $code = '';
-        for ($i = 0; $i < $length; $i++)
-        {
+        for ($i = 0; $i < $length; $i++) {
             $fontcolor = imagecolorallocate($im, mt_rand(0, 120), mt_rand(0, 120), mt_rand(0, 120)); //这样保证随机出来的颜色较深。
             $codex =  RandomKey::getChineseCharacter(1);
             $code .= $codex;
-            @imagettftext($im, mt_rand(16, 20), mt_rand(-$angle, $angle), 40 * $i + 20, mt_rand(30, 35), $fontcolor, $font,
-                $codex);
+            @imagettftext(
+                $im,
+                mt_rand(16, 20),
+                mt_rand(-$angle, $angle),
+                40 * $i + 20,
+                mt_rand(30, 35),
+                $fontcolor,
+                $font,
+                $codex
+            );
         }
         ob_start();
         ImagePng($im);
@@ -577,7 +551,7 @@ class Image
         return array('code' => $code, 'image' => $data);
     }
 
-    static function thumb_name($file_name, $insert = 'thumb')
+    public static function thumb_name($file_name, $insert = 'thumb')
     {
         $dirname = dirname($file_name);
         $file_name = basename($file_name);
@@ -594,27 +568,24 @@ class Image
      * @param int $crop_size 裁切的参数，高度,宽度,四点坐标
      * @return true/false
      */
-    static function cropImage($image, $params, $original_size, $crop_size)
+    public static function cropImage($image, $params, $original_size, $crop_size)
     {
         $qulitity = isset($params['qulitity']) ? $params['qulitity'] : 100;
         $dst_width = isset($params['width']) ? $params['width'] : 90;
         $dst_height = isset($params['height']) ? $params['height'] : 105;
 
         $image = WEBPATH . $image;
-        if (!file_exists($image))
-        {
+        if (!file_exists($image)) {
             return '错误，图片不存在！';
         }
 
         $image_info = getimagesize($image);
 
-        if ($image_info["mime"] == "image/jpeg" || $image_info["mime"] == "image/gif" || $image_info["mime"] == "image/png")
-        {
+        if ($image_info["mime"] == "image/jpeg" || $image_info["mime"] == "image/gif" || $image_info["mime"] == "image/png") {
             /**
              * 计算实际裁剪区域，图片是否被缩放，如果不是真实大小，需要计算
              */
-            if (isset($params['abs_width']))
-            {
+            if (isset($params['abs_width'])) {
                 $tmp_rate = $params['abs_width'] / $params['width'];
                 $crop_size['left'] = $crop_size['left'] * $tmp_rate;
                 $crop_size['top'] = $crop_size['top'] * $tmp_rate;
@@ -624,8 +595,7 @@ class Image
 
             //裁剪
             $image_new = imagecreatetruecolor($dst_width, $dst_height);
-            switch ($image_info["mime"])
-            {
+            switch ($image_info["mime"]) {
                 case "image/jpeg":
                     $bin_ori = imagecreatefromjpeg($image);
                     break;
@@ -637,11 +607,20 @@ class Image
                     break;
             }
 
-            imagecopyresampled($image_new, $bin_ori, 0, 0, $crop_size['left'], $crop_size['top'], $dst_width,
-                $dst_height, $crop_size['width'], $crop_size['height']);
+            imagecopyresampled(
+                $image_new,
+                $bin_ori,
+                0,
+                0,
+                $crop_size['left'],
+                $crop_size['top'],
+                $dst_width,
+                $dst_height,
+                $crop_size['width'],
+                $crop_size['height']
+            );
             $file_new = WEBPATH . $params['newfile'];
-            if (!file_exists(dirname($file_new)))
-            {
+            if (!file_exists(dirname($file_new))) {
                 mkdir(dirname($file_new), 0777, true);
             }
 

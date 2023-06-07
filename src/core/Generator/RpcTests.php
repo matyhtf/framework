@@ -23,63 +23,63 @@ class RpcTests
 
     /**
      * Symfony console output instance.
-     * 
+     *
      * @var OutputInterface
      */
     protected $output = null;
 
     /**
      * Symfony console style instance.
-     * 
+     *
      * @var SymfonyStyle
      */
     protected $io = null;
 
     /**
      * Test cases source path.
-     * 
+     *
      * @var string
      */
     protected $sourcePath = null;
 
     /**
      * Test cases output path.
-     * 
+     *
      * @var string
      */
     protected $outputPath = null;
 
     /**
      * Test case template.
-     * 
+     *
      * @var string
      */
     protected static $template = null;
 
     /**
      * Process class`s count.
-     * 
+     *
      * @var integer
      */
     protected $handleClassCount = 0;
 
     /**
      * Process test case`s count.
-     * 
+     *
      * @var integer
      */
     protected $handleTestCaseCount = 0;
 
     /**
      * Repeat test case file process mode.
-     * 
+     *
      * @var string
      */
     protected $repeatFileMode = null;
 
     /**
      * The user last select choice.
-     * 
+     *
      * @var string
      */
     protected $repeatFileLastMode = null;
@@ -98,7 +98,7 @@ class RpcTests
 
     /**
      * Handle.
-     * 
+     *
      * @param string $src
      * @param string $output
      * @param string $mode
@@ -133,7 +133,7 @@ class RpcTests
 
     /**
      * Recursive handle generate opration.
-     * 
+     *
      * @param string $dirSrc
      */
     protected function recursiveHandle($dirSrc)
@@ -189,10 +189,10 @@ class RpcTests
 
     /**
      * Get class full name by namespace and class simple name
-     * 
+     *
      * @param string $class
      * @param string $namesapce
-     * 
+     *
      * @return string
      */
     protected function getClassFullName($class, $namespace = null)
@@ -206,7 +206,7 @@ class RpcTests
 
     /**
      * Using reflection parse class
-     * 
+     *
      * @param string $className
      * @param string $namespace
      */
@@ -253,9 +253,9 @@ class RpcTests
 
     /**
      * Parse the method parameter.
-     * 
+     *
      * @param ReflectionParameter $refParam
-     * 
+     *
      * @return array
      */
     protected function parseMethodParam(ReflectionParameter $refParam)
@@ -283,9 +283,9 @@ class RpcTests
 
     /**
      * Parse parameter type
-     * 
+     *
      * @param ReflectionType $refType
-     * 
+     *
      * @return null|array
      */
     protected function parseParamType(ReflectionType $refType = null)
@@ -366,7 +366,7 @@ class RpcTests
 
     /**
      * @param array $data
-     * 
+     *
      * @return string
      */
     protected function generateCallFunction($data)
@@ -378,7 +378,7 @@ class RpcTests
 
     /**
      * @param array $data
-     * 
+     *
      * @return string
      */
     protected function generateTestCaseTest($data)
@@ -390,7 +390,7 @@ class RpcTests
 
     /**
      * @param array $params
-     * 
+     *
      * @return array ['call_defined' => string, 'call_params' => string]
      */
     protected function generateTestCaseCallParam($params)
@@ -415,9 +415,9 @@ class RpcTests
 
     /**
      * Transfer mixed value to string expression.
-     * 
+     *
      * @param mixed $value
-     * 
+     *
      * @return string
      */
     protected function transferValueToExpr($value)
@@ -447,9 +447,9 @@ class RpcTests
 
     /**
      * Transfer array value to string expression using var_export and replacing the format.
-     * 
+     *
      * @param array $arr
-     * 
+     *
      * @return string
      */
     protected function transferExprArray($arr)
@@ -465,10 +465,10 @@ class RpcTests
 
     /**
      * Generate params.
-     * 
+     *
      * @param array $params
      * @param boolean $usingDefault
-     * 
+     *
      * @return array
      */
     protected function generateParamsMock($params, $usingDefault = false)
@@ -483,10 +483,10 @@ class RpcTests
 
     /**
      * Generate param.
-     * 
+     *
      * @param array $param
      * @param boolean $usingDefault
-     * 
+     *
      * @return array
      */
     protected function generateParamMock($param, $usingDefault = false)
@@ -508,9 +508,9 @@ class RpcTests
 
     /**
      * Generate param by it`s type.
-     * 
+     *
      * @param array $type
-     * 
+     *
      * @return mixed
      */
     protected function generateParamByType($type)
@@ -531,7 +531,8 @@ class RpcTests
                 case 'boolean':
                     return MockPhp::boolean();
                 case 'callable':
-                    return function () { };
+                    return function () {
+                    };
                 default:
                     return MockPhp::string();
             }
@@ -547,7 +548,7 @@ class RpcTests
     /**
      * @param array $data
      * @param array $params
-     * 
+     *
      * @return mixed the result will be print by var_export
      */
     protected function generateMethodReturn($data, $params)
@@ -571,7 +572,7 @@ class RpcTests
 
     /**
      * @param string $mode
-     * 
+     *
      * @return string
      */
     protected function transferChoiceMode($mode)
@@ -614,7 +615,7 @@ class RpcTests
 
     /**
      * Get the test case phpt template.
-     * 
+     *
      * @return string
      */
     public static function getTemplate()
@@ -624,7 +625,7 @@ class RpcTests
 
     /**
      * Set the test case phpt templete.
-     * 
+     *
      * @param string $template
      */
     public static function setTemplate($template)
@@ -634,10 +635,10 @@ class RpcTests
 
     /**
      * Parset template.
-     * 
+     *
      * @param string $template
      * @param array $params
-     * 
+     *
      * @return string
      */
     protected function parseTemplate($template, $params = [])
@@ -649,11 +650,11 @@ class RpcTests
 
     /**
      * Get the new code save path.
-     * 
+     *
      * @param string $cwd code path
      * @param string $source code source directory
      * @param string $output code save directory
-     * 
+     *
      * @return string code new path
      */
     protected function getSavePath($data)
@@ -683,7 +684,7 @@ class RpcTests
 
     /**
      * Get the PHP-Parser instance.
-     * 
+     *
      * @return Parser
      */
     public function getParser()
@@ -693,7 +694,7 @@ class RpcTests
 
     /**
      * Get the symfony console instance.
-     * 
+     *
      * @return OutputInterface
      */
     public function getOutput()
@@ -703,7 +704,7 @@ class RpcTests
 
     /**
      * Get the symfony console style instance.
-     * 
+     *
      * @return SymfonyStyle
      */
     public function getIo()
@@ -713,7 +714,7 @@ class RpcTests
 
     /**
      * Output log and line feed.
-     * 
+     *
      * @param string $msg
      */
     public function writeln($msg)
@@ -724,7 +725,7 @@ class RpcTests
     /**
      * Output log.
      * if there doesn`s have symfony output instance, then console log by echo.
-     * 
+     *
      * @param string $msg
      * @return string $method
      */

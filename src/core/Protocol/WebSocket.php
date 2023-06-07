@@ -78,7 +78,7 @@ abstract class WebSocket extends HttpServer
         return true;
     }
 
-    function onConnect($serv, $fd, $from_id)
+    public function onConnect($serv, $fd, $from_id)
     {
         $this->cleanBuffer($fd);
     }
@@ -86,7 +86,7 @@ abstract class WebSocket extends HttpServer
     /**
      * clean all connection
      */
-    function cleanConnection()
+    public function cleanConnection()
     {
         $now = time();
         foreach ($this->connections as $client_id => $conn) {
@@ -105,19 +105,18 @@ abstract class WebSocket extends HttpServer
      *
      * @return mixed
      */
-    abstract function onMessage($client_id, $message);
+    abstract public function onMessage($client_id, $message);
 
     /**
      * 客户端退出
      * @param $client_id
      * @return mixed
      */
-    function onExit($client_id)
+    public function onExit($client_id)
     {
-
     }
 
-    function onClose($serv, $client_id, $from_id)
+    public function onClose($serv, $client_id, $from_id)
     {
         $this->onExit($client_id);
     }
@@ -126,9 +125,8 @@ abstract class WebSocket extends HttpServer
      *
      * @param $client_id
      */
-    function onEnter($client_id)
+    public function onEnter($client_id)
     {
-
     }
 
     /**
@@ -137,7 +135,7 @@ abstract class WebSocket extends HttpServer
      * @param $client_id
      * @param $request
      */
-    function onWsConnect($client_id, $request)
+    public function onWsConnect($client_id, $request)
     {
         $this->log("WebSocket connection #$client_id is connected");
         $this->onEnter($client_id);
@@ -149,7 +147,7 @@ abstract class WebSocket extends HttpServer
      * @param $request
      * @return SPF\Response
      */
-    function onHttpRequest(SPF\Request $request)
+    public function onHttpRequest(SPF\Request $request)
     {
         return parent::onRequest($request);
     }
@@ -160,7 +158,7 @@ abstract class WebSocket extends HttpServer
      * @return SPF\Response
      * @throws \Exception
      */
-    function onWebSocketRequest(SPF\Request $request)
+    public function onWebSocketRequest(SPF\Request $request)
     {
         $response = $this->currentResponse = new SPF\Response();
         $this->doHandshake($request, $response);
@@ -173,7 +171,7 @@ abstract class WebSocket extends HttpServer
      * @return SPF\Response
      * @throws \Exception
      */
-    function onRequest(SPF\Request $request)
+    public function onRequest(SPF\Request $request)
     {
         return $request->isWebSocket() ? $this->onWebSocketRequest($request) : $this->onHttpRequest($request);
     }
@@ -183,7 +181,7 @@ abstract class WebSocket extends HttpServer
      * @param SPF\Request $request
      * @param SPF\Response $response
      */
-    function afterResponse(SPF\Request $request, SPF\Response $response)
+    public function afterResponse(SPF\Request $request, SPF\Response $response)
     {
         if ($request->isWebSocket()) {
             $conn = array('header' => $request->header, 'time' => time());
@@ -261,7 +259,7 @@ abstract class WebSocket extends HttpServer
      * @param $buffer
      * @return array|bool
      */
-    function parseFrame(&$buffer)
+    public function parseFrame(&$buffer)
     {
         $this->log("PaserFrame. BufferLen=".strlen($buffer));
         //websocket
@@ -291,8 +289,7 @@ abstract class WebSocket extends HttpServer
             $handle = unpack('nl', substr($buffer, $data_offset, 2));
             $data_offset += 2;
             $length = $handle['l'];
-        }
-        elseif ($length > 0x7e) {
+        } elseif ($length > 0x7e) {
             $handle = unpack('Nl1/Nl2', substr($buffer, $data_offset, 8));
             $data_offset += 8;
             $length = ($handle['l1'] << 32) + $handle['l2'];
@@ -390,10 +387,15 @@ abstract class WebSocket extends HttpServer
      */
     public function send($client_id, $message, $opcode = self::OPCODE_TEXT_FRAME, $end = true)
     {
-        if ((self::OPCODE_TEXT_FRAME === $opcode or self::OPCODE_CONTINUATION_FRAME === $opcode) and false === (bool)preg_match('//u',
-                $message)) {
-            $this->log('Message [%s] is not in UTF-8, cannot send it.', 2,
-                32 > strlen($message) ? substr($message, 0, 32) . ' ' : $message);
+        if ((self::OPCODE_TEXT_FRAME === $opcode or self::OPCODE_CONTINUATION_FRAME === $opcode) and false === (bool)preg_match(
+            '//u',
+            $message
+        )) {
+            $this->log(
+                'Message [%s] is not in UTF-8, cannot send it.',
+                2,
+                32 > strlen($message) ? substr($message, 0, 32) . ' ' : $message
+            );
             return false;
         } else {
             $out = $this->newFrame($message, $opcode, $end);
@@ -406,7 +408,7 @@ abstract class WebSocket extends HttpServer
      * @param $client_id
      * @param $frame
      */
-    function opcodeSwitch($client_id, &$frame)
+    public function opcodeSwitch($client_id, &$frame)
     {
         $this->log("[$client_id] opcode={$frame['opcode']}, fin={$frame['fin']}, length={$frame['length']}\n".str_repeat('-', 80));
 
@@ -517,7 +519,7 @@ abstract class WebSocket extends HttpServer
      * 清理连接缓存区
      * @param $fd
      */
-    function cleanBuffer($fd)
+    public function cleanBuffer($fd)
     {
         unset($this->frame_list[$fd], $this->connections[$fd]);
         parent::cleanBuffer($fd);

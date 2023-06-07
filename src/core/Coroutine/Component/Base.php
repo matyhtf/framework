@@ -15,14 +15,13 @@ abstract class Base
     protected $type;
 
     protected $current_entity = 0;
-    static $threshold_percent = 1.3;
-    static $threshold_num = 10;
-    static $threshold_idle_sec = 120;
+    public static $threshold_percent = 1.3;
+    public static $threshold_num = 10;
+    public static $threshold_idle_sec = 120;
 
-    function __construct($config)
+    public function __construct($config)
     {
-        if (empty($config['object_id']))
-        {
+        if (empty($config['object_id'])) {
             throw new SPF\Exception\InvalidParam("require object_id");
         }
         $this->config = $config;
@@ -30,30 +29,24 @@ abstract class Base
         $this->type .= '_'.$config['object_id'];
     }
 
-    function _createObject()
+    public function _createObject()
     {
-        while (true)
-        {
-            if ($this->pool->count() > 0)
-            {
+        while (true) {
+            if ($this->pool->count() > 0) {
                 $heap_object = $this->pool->extract();
                 $object = $heap_object['obj'];
                 $time = $heap_object['priority'];
                 //判断空闲时间是否大于配置时间
-                if (time() - $time >= self::$threshold_idle_sec)
-                {
+                if (time() - $time >= self::$threshold_idle_sec) {
                     unset($object);
                     continue;
                 }
                 //必须要 Swoole 2.1.1 以上版本
-                if (property_exists($object, "connected") and $object->connected === false)
-                {
+                if (property_exists($object, "connected") and $object->connected === false) {
                     unset($object);
                     continue;
                 }
-            }
-            else
-            {
+            } else {
                 $object = $this->create();
             }
             break;
@@ -63,16 +56,14 @@ abstract class Base
         return $object;
     }
 
-    function _freeObject()
+    public function _freeObject()
     {
         $cid = SPF\Coroutine::getuid();
-        if ($cid < 0)
-        {
+        if ($cid < 0) {
             return;
         }
         $object = BaseContext::get($this->type);
-        if ($object)
-        {
+        if ($object) {
             if ($this->isReuse()) {
                 $this->pool->insert(['priority' => time(), 'obj' => $object]);
             }
@@ -100,7 +91,7 @@ abstract class Base
         return true;
     }
 
-    abstract function create();
+    abstract public function create();
 }
 
 
@@ -114,7 +105,9 @@ class MinHeap extends \SplHeap
     {
         $p1 = $array1['priority'];
         $p2 = $array2['priority'];
-        if ($p1 === $p2) return 0;
+        if ($p1 === $p2) {
+            return 0;
+        }
         return $p1 > $p2 ? -1 : 1;
     }
 }

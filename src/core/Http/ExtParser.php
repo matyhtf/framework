@@ -8,31 +8,31 @@ namespace SPF\Http;
  */
 class ExtParser implements \SPF\IFace\HttpParser
 {
-    function parseHeader($header)
+    public function parseHeader($header)
     {
         $head =  http_parse_headers($header);
-        if($head === false)
-        {
+        if ($head === false) {
             return false;
-        }
-        else
-        {
+        } else {
             $head[0]['protocol'] = "HTTP/1.1";
             $head[0]['uri'] = $head["Request Url"];
             $head[0]['method'] = $head["Request Method"];
         }
         return $head;
     }
-    function parseBody($request)
+    public function parseBody($request)
     {
         $params = array();
         parse_str($request->body, $params);
         return $params;
     }
-    function parseCookie($request)
+    public function parseCookie($request)
     {
         $cookie =  http_parse_cookie($request->head['Cookie']);
-        if(isset($cookie->cookies)) return $cookie->cookies;
-        else return array();
+        if (isset($cookie->cookies)) {
+            return $cookie->cookies;
+        } else {
+            return array();
+        }
     }
 }

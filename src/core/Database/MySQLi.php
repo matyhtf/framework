@@ -22,7 +22,7 @@ class MySQLi implements SPF\IDatabase
      */
     protected $mysqli;
 
-    function __construct($db_config)
+    public function __construct($db_config)
     {
         if (empty($db_config['port'])) {
             $db_config['port'] = self::DEFAULT_PORT;
@@ -30,12 +30,12 @@ class MySQLi implements SPF\IDatabase
         $this->config = $db_config;
     }
 
-    function lastInsertId()
+    public function lastInsertId()
     {
         return $this->mysqli->insert_id;
     }
 
-    function close()
+    public function close()
     {
         return $this->mysqli->close();
     }
@@ -50,7 +50,7 @@ class MySQLi implements SPF\IDatabase
      * @param null $socket
      * @return bool
      */
-    function connect($_host = null, $user = null, $password = null, $database = null, $port = null, $socket = null)
+    public function connect($_host = null, $user = null, $password = null, $database = null, $port = null, $socket = null)
     {
         $db_config = &$this->config;
         $host = $db_config['host'];
@@ -67,7 +67,7 @@ class MySQLi implements SPF\IDatabase
         }
         if (!isset($db_config['socket'])) {
             $db_config['socket'] = null;
-		}
+        }
         $this->mysqli = mysqli_connect(
             $host,
             $db_config['user'],
@@ -91,7 +91,7 @@ class MySQLi implements SPF\IDatabase
      * @param $value
      * @return string
      */
-    function quote($value)
+    public function quote($value)
     {
         return $this->tryReconnect(array($this, 'escape_string'), array($value));
     }
@@ -156,7 +156,7 @@ class MySQLi implements SPF\IDatabase
      * @param int $resultmode
      * @return MySQLiRecord | false
      */
-    function query($sql, $resultmode = null)
+    public function query($sql, $resultmode = null)
     {
         $result = $this->tryReconnect(array($this->mysqli, 'query'), array($sql, $resultmode));
         if (!$result) {
@@ -175,7 +175,7 @@ class MySQLi implements SPF\IDatabase
      * @param string $sql 执行的SQL语句
      * @return MySQLiRecord | false
      */
-    function multi_query($sql)
+    public function multi_query($sql)
     {
         $result = $this->tryReconnect(array($this->mysqli, 'multi_query'), array($sql));
         if (!$result) {
@@ -208,7 +208,7 @@ class MySQLi implements SPF\IDatabase
      * @param $sql
      * @return bool|\mysqli_result
      */
-    function queryAsync($sql)
+    public function queryAsync($sql)
     {
         $result = $this->tryReconnect(array($this->mysqli, 'query'), array($sql, MYSQLI_ASYNC));
         if (!$result) {
@@ -233,7 +233,7 @@ class MySQLi implements SPF\IDatabase
     /**
      * @return \mysqli
      */
-    function getConnection()
+    public function getConnection()
     {
         return $this->mysqli;
     }
@@ -242,7 +242,7 @@ class MySQLi implements SPF\IDatabase
      * 获取错误码
      * @return int
      */
-    function errno()
+    public function errno()
     {
         return $this->mysqli->errno;
     }
@@ -251,7 +251,7 @@ class MySQLi implements SPF\IDatabase
      * 获取受影响的行数
      * @return int
      */
-    function getAffectedRows()
+    public function getAffectedRows()
     {
         return $this->mysqli->affected_rows;
     }
@@ -260,12 +260,12 @@ class MySQLi implements SPF\IDatabase
      * 返回上一个Insert语句的自增主键ID
      * @return int
      */
-    function Insert_ID()
+    public function Insert_ID()
     {
         return $this->mysqli->insert_id;
     }
 
-    function __call($func, $params)
+    public function __call($func, $params)
     {
         return call_user_func_array(array($this->mysqli, $func), $params);
     }
@@ -278,17 +278,17 @@ class MySQLiRecord implements SPF\IDbRecord
      */
     public $result;
 
-    function __construct($result)
+    public function __construct($result)
     {
         $this->result = $result;
     }
 
-    function fetch()
+    public function fetch()
     {
         return $this->result->fetch_assoc();
     }
 
-    function fetchall()
+    public function fetchall()
     {
         $data = array();
         while ($record = $this->result->fetch_assoc()) {
@@ -297,17 +297,17 @@ class MySQLiRecord implements SPF\IDbRecord
         return $data;
     }
 
-    function free()
+    public function free()
     {
         $this->result->free_result();
     }
 
-    function __get($key)
+    public function __get($key)
     {
         return $this->result->$key;
     }
 
-    function __call($func, $params)
+    public function __call($func, $params)
     {
         return call_user_func_array(array($this->result, $func), $params);
     }

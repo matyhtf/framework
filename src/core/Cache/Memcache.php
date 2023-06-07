@@ -23,7 +23,7 @@ class Memcache implements SPF\IFace\Cache
     const DEFAULT_PORT = 11211;
     const DEFAULT_HOST = '127.0.0.1';
 
-    function __construct($config)
+    public function __construct($config)
     {
         /**
          * 没有memcache扩展，PHP7
@@ -97,7 +97,7 @@ class Memcache implements SPF\IFace\Cache
      * @param $key
      * @return mixed
      */
-    function get($key)
+    public function get($key)
     {
         return $this->cache->get($key);
     }
@@ -109,7 +109,7 @@ class Memcache implements SPF\IFace\Cache
      * @param int $expire
      * @return bool
      */
-    function set($key, $value, $expire = 0)
+    public function set($key, $value, $expire = 0)
     {
         if ($this->memcached) {
             return $this->cache->set($key, $value, $expire);
@@ -123,12 +123,12 @@ class Memcache implements SPF\IFace\Cache
      * @param $key
      * @return bool
      */
-    function delete($key)
+    public function delete($key)
     {
         return $this->cache->delete($key);
     }
 
-    function __call($method, $params)
+    public function __call($method, $params)
     {
         return call_user_func_array(array($this->cache, $method), $params);
     }

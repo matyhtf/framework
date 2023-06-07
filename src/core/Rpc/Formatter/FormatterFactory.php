@@ -24,11 +24,11 @@ class FormatterFactory
 
     /**
      * 对响应的数据进行encode，然后交由通讯协议进行传输
-     * 
+     *
      * @param int $formatId
      * @param mixed $data
      * @param string $funcName
-     * 
+     *
      * @return string
      */
     public static function encode($formatId, $data, $funcName = '')
@@ -40,10 +40,10 @@ class FormatterFactory
 
     /**
      * 对通讯协议获取的请求数据进行decode
-     * 
+     *
      * @param int $formatId
      * @param string $buffer
-     * 
+     *
      * @return mixed
      */
     public static function decode($formatId, $buffer)
@@ -69,7 +69,7 @@ class FormatterFactory
 
     /**
      * @param int $formatId
-     * 
+     *
      * @return string
      */
     protected static function getFormatter($formatId)

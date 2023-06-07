@@ -3,5 +3,5 @@ namespace SPF\IFace;
 
 interface EventHandler
 {
-    function trigger($type, $data);
+    public function trigger($type, $data);
 }

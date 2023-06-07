@@ -5,5 +5,4 @@ use SPF;
 
 class ResponseException extends \Exception
 {
-
 }

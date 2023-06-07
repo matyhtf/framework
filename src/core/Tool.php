@@ -1,5 +1,6 @@
 <?php
 namespace SPF;
+
 /**
  * 附加工具集合
  * @author Tianfeng.Han
@@ -8,10 +9,10 @@ namespace SPF;
  */
 class Tool
 {
-    static public $url_key_join = '=';
-    static public $url_param_join = '&';
-    static public $url_prefix = '';
-    static public $url_add_end = '';
+    public static $url_key_join = '=';
+    public static $url_param_join = '&';
+    public static $url_prefix = '';
+    public static $url_add_end = '';
 
     const DATE_FORMAT_HTTP   = 'D, d-M-Y H:i:s T';
     const WEEK_TWO = '周';
@@ -19,7 +20,7 @@ class Tool
 
     const DATE_FORMAT_HUMEN = 'Y-m-d H:i:s';
 
-    static $number = array('〇','一','二','三','四','五','六','七','八','九');
+    public static $number = array('〇','一','二','三','四','五','六','七','八','九');
 
     /**
      * 数字转星期
@@ -27,22 +28,16 @@ class Tool
      * @param bool $two
      * @return string
      */
-    static function num2week($num, $two = true)
+    public static function num2week($num, $two = true)
     {
-        if ($num == '6')
-        {
+        if ($num == '6') {
             $num = '日';
-        }
-        else
-        {
+        } else {
             $num = Tool::num2han($num + 1);
         }
-        if ($two)
-        {
+        if ($two) {
             return self::WEEK_TWO . $num;
-        }
-        else
-        {
+        } else {
             return self::WEEK_THREE . $num;
         }
     }
@@ -52,32 +47,25 @@ class Tool
      * @param $num_str
      * @return mixed
      */
-    static function num2han($num_str)
+    public static function num2han($num_str)
     {
-        return str_replace(range(0,9),self::$number,$num_str);
+        return str_replace(range(0, 9), self::$number, $num_str);
     }
 
-    static function scandir($dir)
+    public static function scandir($dir)
     {
-        if (function_exists('scandir'))
-        {
+        if (function_exists('scandir')) {
             $files = scandir($dir);
-            foreach ($files as $key => $value)
-            {
-                if ($value == '.' or $value == '..')
-                {
+            foreach ($files as $key => $value) {
+                if ($value == '.' or $value == '..') {
                     unset($files[$key]);
                 }
             }
             return array_values($files);
-        }
-        else
-        {
+        } else {
             $dh  = opendir($dir);
-            while (false !== ($filename = readdir($dh)))
-            {
-                if ($filename == '.' or $filename == '..')
-                {
+            while (false !== ($filename = readdir($dh))) {
+                if ($filename == '.' or $filename == '..') {
                     continue;
                 }
                 $files[] = $filename;
@@ -92,7 +80,7 @@ class Tool
      * @param mixed $var
      * @return string
      */
-    static function export($var)
+    public static function export($var)
     {
         return "<?php\nreturn ".var_export($var, true).";";
     }
@@ -103,21 +91,18 @@ class Tool
      * @param bool $exclusive
      * @return bool|string
      */
-    static function readFile($file, $exclusive = false)
+    public static function readFile($file, $exclusive = false)
     {
         $fp = fopen($file, 'r');
-        if (!$fp)
-        {
+        if (!$fp) {
             return false;
         }
         $lockType = $exclusive ? LOCK_EX : LOCK_SH;
-        if (flock($fp, $lockType) === false)
-        {
+        if (flock($fp, $lockType) === false) {
             fclose($fp);
         }
         $content = '';
-        while(!feof($fp))
-        {
+        while (!feof($fp)) {
             $content .= fread($fp, 8192);
         }
         flock($fp, LOCK_UN);
@@ -129,7 +114,7 @@ class Tool
      * @param $string
      * @return mixed
      */
-    static function endchar($string)
+    public static function endchar($string)
     {
         return $string[strlen($string) - 1];
     }
@@ -139,7 +124,7 @@ class Tool
      * @param string $url
      * @return array $return
      */
-    static public function uri($url)
+    public static function uri($url)
     {
         $res = parse_url($url);
         $return['protocol'] = $res['scheme'];
@@ -153,18 +138,16 @@ class Tool
         return $return;
     }
 
-    static function httpExpire($lastModifyTime, $expire = 1800)
+    public static function httpExpire($lastModifyTime, $expire = 1800)
     {
         $expire = intval($expire);
         $responseTime = $requestTime = $_SERVER['REQUEST_TIME'];
         $result = true;
 
-        if (isset($_SERVER['HTTP_IF_MODIFIED_SINCE']))
-        {
+        if (isset($_SERVER['HTTP_IF_MODIFIED_SINCE'])) {
             $lastModifiedSince = strtotime($_SERVER['HTTP_IF_MODIFIED_SINCE']);
             //命中本地缓存
-            if ($lastModifiedSince > $lastModifyTime)
-            {
+            if ($lastModifiedSince > $lastModifyTime) {
                 App::getInstance()->http->status(304);
                 $result = false;
             }
@@ -177,8 +160,7 @@ class Tool
             'Expires' => date(self::DATE_FORMAT_HTTP, $responseTime + $expire),
         );
 
-        foreach ($headers as $key => $value)
-        {
+        foreach ($headers as $key => $value) {
             App::getInstance()->http->header($key, $value);
         }
         return $result;
@@ -189,62 +171,46 @@ class Tool
      * @param $datetime
      * @return string
      */
-    static function howLongAgo($datetime)
+    public static function howLongAgo($datetime)
     {
         $timestamp = strtotime($datetime);
         $seconds = time();
 
         $time = date('Y', $seconds) - date('Y', $timestamp);
-        if ($time > 0)
-        {
-            if ($time == 1)
-            {
+        if ($time > 0) {
+            if ($time == 1) {
                 return '去年';
-            }
-            else
-            {
+            } else {
                 return $time . '年前';
             }
         }
 
         $time = date('m', $seconds) - date('m', $timestamp);
-        if ($time > 0)
-        {
-            if ($time == 1)
-            {
+        if ($time > 0) {
+            if ($time == 1) {
                 return '上月';
-            }
-            else
-            {
+            } else {
                 return $time . '个月前';
             }
         }
         $time = date('d', $seconds) - date('d', $timestamp);
-        if ($time > 0)
-        {
-            if ($time == 1)
-            {
+        if ($time > 0) {
+            if ($time == 1) {
                 return '昨天';
-            }
-            elseif ($time == 2)
-            {
+            } elseif ($time == 2) {
                 return '前天';
-            }
-            else
-            {
+            } else {
                 return $time . '天前';
             }
         }
 
         $time = date('H', $seconds) - date('H', $timestamp);
-        if ($time >= 1)
-        {
+        if ($time >= 1) {
             return $time . '小时前';
         }
 
         $time = date('i', $seconds) - date('i', $timestamp);
-        if ($time >= 1)
-        {
+        if ($time >= 1) {
             return $time . '分钟前';
         }
 
@@ -257,27 +223,22 @@ class Tool
      * @param $urls
      * @return string
      */
-    static function combine_query($urls)
+    public static function combine_query($urls)
     {
         $url = array();
-        foreach ($urls as $k => $v)
-        {
-            if (!empty($k))
-            {
+        foreach ($urls as $k => $v) {
+            if (!empty($k)) {
                 $url[] = $k . self::$url_key_join . urlencode($v);
             }
         }
         return implode(self::$url_param_join, $url);
     }
 
-    static function urlAppend($url, $array)
+    public static function urlAppend($url, $array)
     {
-        if (strpos($url, '?') === false)
-        {
+        if (strpos($url, '?') === false) {
             return $url . '?' . Http::buildQuery($array);
-        }
-        else
-        {
+        } else {
             return $url . '&' . Http::buildQuery($array);
         }
     }
@@ -290,7 +251,7 @@ class Tool
      * @param null $urls
      * @return string
      */
-    static function url_merge($key, $value, $ignore = null, $urls = null)
+    public static function url_merge($key, $value, $ignore = null, $urls = null)
     {
         if ($urls === null) {
             $urls = App::getInstance()->request->get;
@@ -322,23 +283,18 @@ class Tool
      * @param $request
      * @return unknown_type
      */
-    static function url_parse_into($url, &$request)
+    public static function url_parse_into($url, &$request)
     {
         $url = str_replace(self::$url_add_end, '', $url);
-        if (self::$url_key_join == self::$url_param_join)
-        {
+        if (self::$url_key_join == self::$url_param_join) {
             $urls = explode(self::$url_param_join, $url);
             $c = intval(count($urls) / 2);
-            for ($i = 0; $i < $c; $i++)
-            {
+            for ($i = 0; $i < $c; $i++) {
                 $request[$urls[$i * 2]] = $urls[$i * 2 + 1];
             }
-        }
-        else
-        {
+        } else {
             $urls = explode(self::$url_param_join, $url);
-            foreach ($urls as $u)
-            {
+            foreach ($urls as $u) {
                 $us = explode(self::$url_key_join, $u);
                 $request[$us[0]] = $us[1];
             }
@@ -352,12 +308,15 @@ class Tool
      * @param $data
      * @return $data
      */
-    static function array_iconv($in_charset, $out_charset, $data)
+    public static function array_iconv($in_charset, $out_charset, $data)
     {
         if (is_array($data)) {
             foreach ($data as $key => $value) {
-                if (is_array($value)) $value = self::array_iconv($in_charset, $out_charset, $value);
-                else $value = iconv($in_charset, $out_charset, $value);
+                if (is_array($value)) {
+                    $value = self::array_iconv($in_charset, $out_charset, $value);
+                } else {
+                    $value = iconv($in_charset, $out_charset, $value);
+                }
                 $data[$key] = $value;
             }
         }
@@ -369,10 +328,14 @@ class Tool
      * @param $array
      * @return unknown_type
      */
-    static function array_fullness($array)
+    public static function array_fullness($array)
     {
         $nulls = 0;
-        foreach ($array as $v) if (empty($v) or intval($v) < 0) $nulls++;
+        foreach ($array as $v) {
+            if (empty($v) or intval($v) < 0) {
+                $nulls++;
+            }
+        }
         return 100 - intval($nulls / count($array) * 100);
     }
 
@@ -382,24 +345,18 @@ class Tool
      * @param int $birth_date
      * @return string
      */
-    static function get_constellation($birth_month, $birth_date)
+    public static function get_constellation($birth_month, $birth_date)
     {
         //判断的时候，为避免出现1和true的疑惑，或是判断语句始终为真的问题，这里统一处理成字符串形式
         $birth_month = strval($birth_month);
         $constellation_name = array('水瓶座', '双鱼座', '白羊座', '金牛座', '双子座', '巨蟹座', '狮子座', '处女座', '天秤座', '天蝎座', '射手座', '摩羯座');
-        if ($birth_date <= 22)
-        {
-            if ('1' !== $birth_month)
-            {
+        if ($birth_date <= 22) {
+            if ('1' !== $birth_month) {
                 $constellation = $constellation_name[$birth_month - 2];
-            }
-            else
-            {
+            } else {
                 $constellation = $constellation_name[11];
             }
-        }
-        else
-        {
+        } else {
             $constellation = $constellation_name[$birth_month - 1];
         }
         return $constellation;
@@ -411,15 +368,12 @@ class Tool
      * @param int $birth_year
      * @return string
      */
-    static function get_animal($birth_year, $format = '1')
+    public static function get_animal($birth_year, $format = '1')
     {
         //1900年是子鼠年
-        if ($format == '2')
-        {
+        if ($format == '2') {
             $animal = array('子鼠', '丑牛', '寅虎', '卯兔', '辰龙', '巳蛇', '午马', '未羊', '申猴', '酉鸡', '戌狗', '亥猪');
-        }
-        elseif ($format == '1')
-        {
+        } elseif ($format == '1') {
             $animal = array('鼠', '牛', '虎', '兔', '龙', '蛇', '马', '羊', '猴', '鸡', '狗', '猪');
         }
         $my_animal = ($birth_year - 1900) % 12;
@@ -437,7 +391,7 @@ class Tool
      * @param int $birth_date
      * @return int
      */
-    static function get_age($birth_year, $birth_month, $birth_date)
+    public static function get_age($birth_year, $birth_month, $birth_date)
     {
         $now_age = 1; //实际年龄，以出生时为1岁计
         $full_age = 0; //周岁，该变量放着，根据具体情况可以随时修改
@@ -446,12 +400,9 @@ class Tool
         $birth_date_num = date('z', mktime(0, 0, 0, $birth_month, $birth_date, $birth_year));
         $difference = $now_date_num - $birth_date_num;
 
-        if ($difference > 0)
-        {
+        if ($difference > 0) {
             $full_age = $now_year - $birth_year;
-        }
-        else
-        {
+        } else {
             $full_age = $now_year - $birth_year - 1;
         }
         $now_age = $full_age + 1;
@@ -462,15 +413,12 @@ class Tool
      * 发送一个UDP包
      * @return unknown_type
      */
-    static function sendUDP($server_ip, $server_port, $data, $timeout = 30)
+    public static function sendUDP($server_ip, $server_port, $data, $timeout = 30)
     {
         $client = stream_socket_client("udp://$server_ip:$server_port", $errno, $errstr, $timeout);
-        if (!$client)
-        {
+        if (!$client) {
             echo "ERROR: $errno - $errstr<br />\n";
-        }
-        else
-        {
+        } else {
             fwrite($client, $data);
             fclose($client);
         }
@@ -482,7 +430,7 @@ class Tool
      * @param $tdir目标目录名(不带/)
      * @return
      */
-    static function dir_copy($fdir, $tdir)
+    public static function dir_copy($fdir, $tdir)
     {
         if (is_dir($fdir)) {
             if (!is_dir($tdir)) {
@@ -490,7 +438,9 @@ class Tool
             }
             $handle = opendir($fdir);
             while (false !== ($filename = readdir($handle))) {
-                if ($filename != "." && $filename != "..") self::dir_copy($fdir . "/" . $filename, $tdir . "/" . $filename);
+                if ($filename != "." && $filename != "..") {
+                    self::dir_copy($fdir . "/" . $filename, $tdir . "/" . $filename);
+                }
             }
             closedir($handle);
             return true;
@@ -500,18 +450,15 @@ class Tool
         }
     }
 
-    static function fileAppend($log, $file = '')
+    public static function fileAppend($log, $file = '')
     {
-        if (empty($file))
-        {
+        if (empty($file)) {
             $file = '/tmp/swoole.log';
         }
-        if (!is_string($log))
-        {
+        if (!is_string($log)) {
             $log = var_export($log, true);
         }
-        if (self::endchar($log) !== "\n")
-        {
+        if (self::endchar($log) !== "\n") {
             $log .= "\n";
         }
         file_put_contents($file, $log, FILE_APPEND);
@@ -522,22 +469,15 @@ class Tool
      * @param int $round
      * @return string
      */
-    static function getHumanSize($n, $round = 3)
+    public static function getHumanSize($n, $round = 3)
     {
-        if ($n > 1024 * 1024 * 1024)
-        {
+        if ($n > 1024 * 1024 * 1024) {
             return round($n / (1024 * 1024 * 1024), $round) . "G";
-        }
-        elseif ($n > 1024 * 1024)
-        {
+        } elseif ($n > 1024 * 1024) {
             return round($n / (1024 * 1024), $round) . "M";
-        }
-        elseif ($n > 1024)
-        {
+        } elseif ($n > 1024) {
             return round($n / (1024), $round) . "K";
-        }
-        else
-        {
+        } else {
             return $n;
         }
     }
@@ -548,30 +488,19 @@ class Tool
      * @param int $round
      * @return string
      */
-    static function getHumanTime($n, $round = 3)
+    public static function getHumanTime($n, $round = 3)
     {
-        if ($n > 86400 * 365)
-        {
-            return round($n / ( 86400 * 365), $round) . "年";
-        }
-        elseif ($n > 86400 * 30)
-        {
+        if ($n > 86400 * 365) {
+            return round($n / (86400 * 365), $round) . "年";
+        } elseif ($n > 86400 * 30) {
             return round($n / (86400 * 30), $round) . "月";
-        }
-        elseif ($n > 86400)
-        {
+        } elseif ($n > 86400) {
             return round($n / (86400), $round) . "天";
-        }
-        elseif ($n > 3600)
-        {
+        } elseif ($n > 3600) {
             return round($n / (3600), $round) . "小时";
-        }
-        elseif ($n > 60)
-        {
+        } elseif ($n > 60) {
             return round($n / (60), $round) . "分钟";
-        }
-        else
-        {
+        } else {
             return $n."秒";
         }
     }
@@ -579,7 +508,7 @@ class Tool
     /**
      * @param $func
      */
-    static function showCost($func)
+    public static function showCost($func)
     {
         $_t = microtime(true);
         $_m = memory_get_usage(true);
@@ -594,28 +523,24 @@ class Tool
      * @param array $servers
      * @return mixed
      */
-    static function getServer(array $servers)
+    public static function getServer(array $servers)
     {
         $weight = 0;
         //返回全部有效的节点
-        foreach ($servers as $k => $svr)
-        {
+        foreach ($servers as $k => $svr) {
             $weight += $svr['weight'];
         }
         //计算权重并随机选择一台机器
         $use = rand(0, $weight - 1);
         $weight = 0;
-        foreach ($servers as $k => $svr)
-        {
+        foreach ($servers as $k => $svr) {
             //默认100权重
-            if (empty($svr['weight']))
-            {
+            if (empty($svr['weight'])) {
                 $svr['weight'] = 100;
             }
             $weight += $svr['weight'];
             //在权重范围内
-            if ($use < $weight)
-            {
+            if ($use < $weight) {
                 return $svr;
             }
         }
@@ -629,7 +554,7 @@ class Tool
      * @param $var
      * @return mixed
      */
-    static function dump($var)
+    public static function dump($var)
     {
         return highlight_string("<?php\n\$array = ".var_export($var, true).";", true);
     }
@@ -637,29 +562,20 @@ class Tool
     /**
      * @param array $arr
      */
-    static function arrayUnique(array &$arr)
+    public static function arrayUnique(array &$arr)
     {
         $map = array();
-        foreach ($arr as $k => $v)
-        {
-            if (is_object($v))
-            {
+        foreach ($arr as $k => $v) {
+            if (is_object($v)) {
                 $hash = spl_object_hash($v);
-            }
-            elseif (is_resource($v))
-            {
+            } elseif (is_resource($v)) {
                 $hash = intval($v);
-            }
-            else
-            {
+            } else {
                 $hash = $v;
             }
-            if (isset($map[$hash]))
-            {
+            if (isset($map[$hash])) {
                 unset($arr[$k]);
-            }
-            else
-            {
+            } else {
                 $map[$hash] = true;
             }
         }
@@ -669,11 +585,10 @@ class Tool
      * @param $array
      * @return \stdClass
      */
-    static function array2object($array)
+    public static function array2object($array)
     {
         $object = new \stdClass();
-        foreach ($array as $key => $value)
-        {
+        foreach ($array as $key => $value) {
             $object->$key = $value;
         }
         return $object;
@@ -683,11 +598,10 @@ class Tool
      * @param $object
      * @return array
      */
-    static function object2array($object)
+    public static function object2array($object)
     {
         $array = [];
-        foreach ($object as $key => $value)
-        {
+        foreach ($object as $key => $value) {
             $array[$key] = $value;
         }
         return $array;
@@ -698,7 +612,7 @@ class Tool
      * @param null $tm
      * @return bool|string
      */
-    static function now($tm = null)
+    public static function now($tm = null)
     {
         return date(self::DATE_FORMAT_HUMEN, $tm);
     }
@@ -708,17 +622,14 @@ class Tool
      * @param string $ip
      * @return bool
      */
-    static function isPrivateIP(string $ip)
+    public static function isPrivateIP(string $ip)
     {
-        if (strncmp($ip, "10.", 3) == 0 or strncmp($ip, "192.168.", 8) == 0)
-        {
+        if (strncmp($ip, "10.", 3) == 0 or strncmp($ip, "192.168.", 8) == 0) {
             return true;
         }
-        if (strncmp($ip, "172.", 4) == 0)
-        {
+        if (strncmp($ip, "172.", 4) == 0) {
             $arr = explode('.', $ip);
-            if ($arr[1] >= 16 and $arr[1] <= 31)
-            {
+            if ($arr[1] >= 16 and $arr[1] <= 31) {
                 return true;
             }
         }
@@ -729,7 +640,7 @@ class Tool
      * @param $data
      * @return string
      */
-    static function packJson($data)
+    public static function packJson($data)
     {
         $json = json_encode($data);
         return pack('N', _string($json)->len()) . $json;
@@ -739,7 +650,7 @@ class Tool
      * @param $str
      * @return mixed
      */
-    static function unpackJson($str)
+    public static function unpackJson($str)
     {
         return json_decode(substr($str, 4), true);
     }

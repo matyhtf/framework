@@ -240,9 +240,9 @@ class Utils
 
     /**
      * 使用两个空格缩进
-     * 
+     *
      * @param int $num
-     * 
+     *
      * @return string
      */
     public static function indent($num = 1)
@@ -252,9 +252,9 @@ class Utils
 
     /**
      * 使用\n换行
-     * 
+     *
      * @param int $num
-     * 
+     *
      * @return string
      */
     public static function lineFeed($num = 1)
@@ -269,13 +269,13 @@ class Utils
 
     /**
      * 输出终端日志
-     * 
+     *
      * @param string $log
      * @param string $level info|warning|raw|error
      */
     public static function log($log, $level = 'info')
     {
-        switch($level) {
+        switch ($level) {
             case 'warning':
                 $log = "<comment>$log</comment>";
                 break;

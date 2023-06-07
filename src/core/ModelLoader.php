@@ -1,6 +1,7 @@
 <?php
 
 namespace SPF;
+
 /**
  * 模型加载器
  * 产生一个模型的接口对象
@@ -12,7 +13,7 @@ class ModelLoader
     protected $_models = array();
     protected $_tables = array();
 
-    function __construct($swoole)
+    public function __construct($swoole)
     {
         $this->swoole = $swoole;
     }
@@ -23,7 +24,7 @@ class ModelLoader
      * @return mixed
      * @throws Error
      */
-    function __get($model_name)
+    public function __get($model_name)
     {
         return $this->loadModel($model_name, 'master');
     }
@@ -35,7 +36,7 @@ class ModelLoader
      * @return mixed
      * @throws Error
      */
-    function __call($model_name, $params)
+    public function __call($model_name, $params)
     {
         $db_key = count($params) < 1 ? 'master' : $params[0];
         return $this->loadModel($model_name, $db_key);

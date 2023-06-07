@@ -8,10 +8,9 @@ namespace SPF\Exception;
  */
 class Syscall extends \Exception
 {
-    static function __callStatic($func, $args)
+    public static function __callStatic($func, $args)
     {
-        if (call_user_func_array($func, $args) === false)
-        {
+        if (call_user_func_array($func, $args) === false) {
             throw new self("$func(".implode(',', $args).") failed.");
         }
     }

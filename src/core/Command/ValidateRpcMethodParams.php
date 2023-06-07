@@ -49,11 +49,11 @@ class ValidateRpcMethodParams extends Command
 
     /**
      * Get option value from input.
-     * 
+     *
      * @param InputInterface $input
      * @param string $name option`s name
      * @param string $default default value if the option null
-     * 
+     *
      * @return string
      */
     protected function getOption(InputInterface $input, $name, $default = null)
@@ -68,9 +68,9 @@ class ValidateRpcMethodParams extends Command
 
     /**
      * Resolve path to full path.
-     * 
+     *
      * @param string $path
-     * 
+     *
      * @return string
      */
     protected function resolvePath($path)
@@ -82,7 +82,7 @@ class ValidateRpcMethodParams extends Command
 
     /**
      * Validate the path`s value
-     * 
+     *
      * @param string $src
      */
     protected function validPath($path)

@@ -120,7 +120,8 @@ class ServantParser
 
                 if ($tmpChar === false) {
                     Utils::abnormalExit('error', $this->interfaceName . '注释换行错误,请检查');
-                } elseif (Utils::isReturn($tmpChar)) { } elseif (($tmpChar) === '*') {
+                } elseif (Utils::isReturn($tmpChar)) {
+                } elseif (($tmpChar) === '*') {
                     $nextnextChar = fgetc($this->fp);
                     if ($nextnextChar == '/') {
                         return;

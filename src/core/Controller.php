@@ -22,7 +22,7 @@ class Controller extends BaseObject
     protected $model;
     protected $config;
 
-    function __construct(App $app)
+    public function __construct(App $app)
     {
         $this->app = $app;
         $this->model = $app->modelLoader;
@@ -44,17 +44,14 @@ class Controller extends BaseObject
      */
     protected function trace($title, $value = '')
     {
-        if (is_array($title))
-        {
+        if (is_array($title)) {
             $this->traceInfo = array_merge($this->traceInfo, $title);
-        }
-        else
-        {
+        } else {
             $this->traceInfo[$title] = $value;
         }
     }
 
-    function fetch($tpl_file ='')
+    public function fetch($tpl_file ='')
     {
         ob_start();
         $this->display($tpl_file);
@@ -63,14 +60,11 @@ class Controller extends BaseObject
         return $content;
     }
 
-    function value($array, $key, $default = '', $intval = false)
+    public function value($array, $key, $default = '', $intval = false)
     {
-        if (isset($array[$key]))
-        {
+        if (isset($array[$key])) {
             return $intval ? intval($array[$key]) : $array[$key];
-        }
-        else
-        {
+        } else {
             return $default;
         }
     }
@@ -83,22 +77,19 @@ class Controller extends BaseObject
      *
      * @return string
      */
-    function json($data = '', $code = 0, $message = '')
+    public function json($data = '', $code = 0, $message = '')
     {
         $json = array('code' => $code, 'message' => $message, 'data' => $data);
-        if (!empty($_REQUEST['jsonp']))
-        {
+        if (!empty($_REQUEST['jsonp'])) {
             $this->http->header('Content-type', 'application/x-javascript');
             return $_REQUEST['jsonp'] . "(" . json_encode($json) . ");";
-        }
-        else
-        {
+        } else {
             $this->http->header('Content-type', 'application/json');
             return json_encode($json);
         }
     }
 
-    function message($code = 0, $msg = 'success')
+    public function message($code = 0, $msg = 'success')
     {
         $ret = array('code' => $code, 'message' => $msg);
         return $this->is_ajax ? $ret : json_encode($ret);
@@ -109,7 +100,7 @@ class Controller extends BaseObject
      * @param $value
      * @throws InvalidParam
      */
-    function assign($key, $value)
+    public function assign($key, $value)
     {
         // Verify $key is reliable.
         if (strpos($key, '_swoole') === 0) {
@@ -123,14 +114,12 @@ class Controller extends BaseObject
      * render template file, then display it.
      * @param string $tpl_file
      */
-    function display($tpl_file = '')
+    public function display($tpl_file = '')
     {
-        if (empty($tpl_file))
-        {
+        if (empty($tpl_file)) {
             $tpl_file = strtolower($this->app->env['mvc']['controller']) . '/' . strtolower($this->app->env['mvc']['view']) . '.php';
         }
-        if (!is_file($this->template_dir . $tpl_file))
-        {
+        if (!is_file($this->template_dir . $tpl_file)) {
             Error::info('template error', "template file[" . $this->template_dir . $tpl_file . "] not found");
         }
         extract($this->tpl_var);
@@ -163,8 +152,7 @@ class Controller extends BaseObject
         $included_files = get_included_files();
 
         // 系统默认显示信息
-        if (!empty($this->request->server['SCRIPT_NAME']))
-        {
+        if (!empty($this->request->server['SCRIPT_NAME'])) {
             $_trace['请求脚本'] = $this->request->server['SCRIPT_NAME'];
         }
 
@@ -173,12 +161,10 @@ class Controller extends BaseObject
         $_trace['HTTP版本'] = $this->request->server['SERVER_PROTOCOL'];
         $_trace['请求时间'] = date('Y-m-d H:i:s', $this->request->server['REQUEST_TIME']);
 
-        if (isset($_SESSION))
-        {
+        if (isset($_SESSION)) {
             $_trace['SESSION_ID'] = session_id();
         }
-        if ($this->app->db instanceof Database)
-        {
+        if ($this->app->db instanceof Database) {
             $_trace['读取数据库'] = $this->app->db->read_times . '次';
             $_trace['写入数据库'] = $this->app->db->write_times . '次';
         }
@@ -207,16 +193,13 @@ HTMLS;
         <a href='".Tool::url_merge('_show_session', '1')."'>显示会话信息</a> |
         <a href='".Tool::url_merge('_show_files', '1')."'>显示加载的PHP文件</a>
         <hr/>";
-        foreach ($_trace as $key => $info)
-        {
+        foreach ($_trace as $key => $info) {
             $html .= $key . ' : ' . $info . BL;
         }
-        if (!empty($this->request->get['_show_files']))
-        {
+        if (!empty($this->request->get['_show_files'])) {
             //输出包含的文件
             $html .= '加载的文件：' . BL."<pre style='color: #666'>";
-            foreach ($included_files as $file)
-            {
+            foreach ($included_files as $file) {
                 $html .= $file . "\n";
             }
             $html .= "</pre>";
@@ -224,34 +207,28 @@ HTMLS;
         $html .= "</div></fieldset>";
         $html .= "</div>";
 
-        if (!empty($this->request->get['_show_request']))
-        {
+        if (!empty($this->request->get['_show_request'])) {
             $output = '<fieldset style="margin:5px;"><div style="overflow:auto;text-align:left;">';
             $request = $this->app->request;
             $output .= "<h2>HEADER:</h2>".Tool::dump($request->header);
             $output .= "<h2>SERVER:</h2>".Tool::dump($request->server);
-            if (!empty($request->files))
-            {
+            if (!empty($request->files)) {
                 $output .= "<h2>FILE:</h2>".Tool::dump($request->files);
             }
-            if (!empty($request->cookie))
-            {
+            if (!empty($request->cookie)) {
                 $output .= "<h2>COOKIES:</h2>".Tool::dump($request->cookie);
             }
-            if (!empty($request->get))
-            {
+            if (!empty($request->get)) {
                 $output .= "<h2>GET:</h2>".Tool::dump($this->app->request->get);
             }
-            if (!empty($request->post))
-            {
+            if (!empty($request->post)) {
                 $output .= "<h2>POST:</h2>".Tool::dump($request->post);
             }
 
             $html .= $output."</div></fieldset>";
         }
 
-        if (!empty($this->request->get['_show_session']))
-        {
+        if (!empty($this->request->get['_show_session'])) {
             $output = '<fieldset style="margin:5px;"><div style="overflow:auto;text-align:left;">';
             $this->session->start();
             $output .= "<h2>SESSION:</h2>" . Tool::dump($this->request->session);
@@ -266,21 +243,16 @@ HTMLS;
      * @param $params
      * @throws InvalidParam
      */
-    function validate(&$data, $params)
+    public function validate(&$data, $params)
     {
-        foreach ($params as $k => $v)
-        {
-            if ($v instanceof \Closure)
-            {
+        foreach ($params as $k => $v) {
+            if ($v instanceof \Closure) {
                 $ret = call_user_func($v, $data[$k]);
-                if ($ret === false)
-                {
+                if ($ret === false) {
                     $e = new Exception\InvalidParam("verification failed.", InvalidParam::ERROR_USER_DEFINED);
                     $e->key = $k;
                     throw $e;
-                }
-                else
-                {
+                } else {
                     continue;
                 }
             }
@@ -288,84 +260,68 @@ HTMLS;
             $s = swoole_string($v);
             $conds = $s->split('|');
 
-            if ($conds->contains('required'))
-            {
-                if (!isset($data[$k]))
-                {
+            if ($conds->contains('required')) {
+                if (!isset($data[$k])) {
                     $e = new Exception\InvalidParam("Parameter [$k] is required.", InvalidParam::ERROR_REQUIRED);
                     $e->key = $k;
                     throw $e;
                 }
-            }
-            else
-            {
-                if (!isset($data[$k]))
-                {
+            } else {
+                if (!isset($data[$k])) {
                     continue;
                 }
             }
 
-            if ($conds->contains('numeric') and !is_numeric($data[$k]))
-            {
+            if ($conds->contains('numeric') and !is_numeric($data[$k])) {
                 type_incorrectly:
                 $e = new Exception\InvalidParam("Parameter [$k] type is incorrectly.", InvalidParam::ERROR_TYPE_INCORRECTLY);
                 $e->key = $k;
                 throw $e;
             }
             //日期
-            if ($conds->contains('date') and Validate::check('date', $data[$k]) === false)
-            {
+            if ($conds->contains('date') and Validate::check('date', $data[$k]) === false) {
                 goto type_incorrectly;
             }
             //时间
-            if ($conds->contains('time') and Validate::check('time', $data[$k]) === false)
-            {
+            if ($conds->contains('time') and Validate::check('time', $data[$k]) === false) {
                 goto type_incorrectly;
             }
             //日期时间
-            if ($conds->contains('datetime') and Validate::check('datetime', $data[$k]) === false)
-            {
+            if ($conds->contains('datetime') and Validate::check('datetime', $data[$k]) === false) {
                 goto type_incorrectly;
             }
             //EMAIL
-            if ($conds->contains('email') and Validate::check('email', $data[$k]) === false)
-            {
+            if ($conds->contains('email') and Validate::check('email', $data[$k]) === false) {
                 goto type_incorrectly;
             }
             //mobile
-            if ($conds->contains('mobile') and Validate::check('mobile', $data[$k]) === false)
-            {
+            if ($conds->contains('mobile') and Validate::check('mobile', $data[$k]) === false) {
                 goto type_incorrectly;
             }
             //tel
-            if ($conds->contains('tel') and Validate::check('tel', $data[$k]) === false)
-            {
+            if ($conds->contains('tel') and Validate::check('tel', $data[$k]) === false) {
                 goto type_incorrectly;
             }
             //url
-            if ($conds->contains('url') and Validate::check('url', $data[$k]) === false)
-            {
+            if ($conds->contains('url') and Validate::check('url', $data[$k]) === false) {
                 goto type_incorrectly;
             }
             //version
-            if ($conds->contains('version') and Validate::check('version', $data[$k]) === false)
-            {
+            if ($conds->contains('version') and Validate::check('version', $data[$k]) === false) {
                 goto type_incorrectly;
             }
             //整型
-            if ($conds->contains('int'))
-            {
+            if ($conds->contains('int')) {
                 $data[$k] = intval($data[$k]);
             }
             //浮点型
-            if ($conds->contains('float'))
-            {
+            if ($conds->contains('float')) {
                 $data[$k] = floatval($data[$k]);
             }
         }
     }
 
-    function __destruct()
+    public function __destruct()
     {
         $this->app->__clean();
     }

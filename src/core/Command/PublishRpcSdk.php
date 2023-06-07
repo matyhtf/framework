@@ -41,7 +41,7 @@ class PublishRpcSdk extends Command
             $publisher->handle($path);
         } catch (Throwable $e) {
             $output->writeln('<error>'.$e->getMessage().'</error>');
-            foreach(explode("\n", $e->getTraceAsString()) as $line) {
+            foreach (explode("\n", $e->getTraceAsString()) as $line) {
                 $output->writeln("<comment>  {$line}</comment>");
             }
         }
@@ -49,11 +49,11 @@ class PublishRpcSdk extends Command
 
     /**
      * Get option value from input.
-     * 
+     *
      * @param InputInterface $input
      * @param string $name option`s name
      * @param string $default default value if the option null
-     * 
+     *
      * @return string
      */
     protected function getOption(InputInterface $input, $name, $default = null)
@@ -68,9 +68,9 @@ class PublishRpcSdk extends Command
 
     /**
      * Resolve path to full path.
-     * 
+     *
      * @param string $path
-     * 
+     *
      * @return string
      */
     protected function resolvePath($path)
@@ -82,7 +82,7 @@ class PublishRpcSdk extends Command
 
     /**
      * Validate the path`s value
-     * 
+     *
      * @param string $path
      */
     protected function validPath($path)

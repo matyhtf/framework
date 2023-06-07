@@ -9,16 +9,16 @@ class Builder
 {
     /**
      * Build struct object.
-     * 
+     *
      * @param string $className
      * @param array $param
-     * 
+     *
      * @return object
      */
     public static function builder(string $className, array $param)
     {
         $class = new $className;
-        foreach($param as $name => $value) {
+        foreach ($param as $name => $value) {
             if (property_exists($class, $name) || ($class instanceof Map)) {
                 $class->{$name} = $value;
             }
@@ -29,11 +29,11 @@ class Builder
 
     /**
      * Try transfer array to struct object if the param type is struct object.
-     * 
+     *
      * @param string $class
      * @param string $method
      * @param array $params
-     * 
+     *
      * @return array
      */
     public static function tryTransferArrayToStructObject($class, $method, $params)
@@ -52,7 +52,7 @@ class Builder
 
     /**
      * Recursive transfer.
-     * 
+     *
      * @param array $fields
      * @param array|object $params
      */

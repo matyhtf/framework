@@ -18,30 +18,24 @@ class TCP extends Socket
      * @param string $data
      * @return bool | int
      */
-    function send($data)
+    public function send($data)
     {
         $length = strlen($data);
         $written = 0;
         $t1 = microtime(true);
         //总超时，for循环中计时
-        while ($written < $length)
-        {
+        while ($written < $length) {
             $n = socket_send($this->sock, substr($data, $written), $length - $written, null);
             //超过总时间
-            if (microtime(true) > $this->timeout_send + $t1)
-            {
+            if (microtime(true) > $this->timeout_send + $t1) {
                 return false;
             }
-            if ($n === false)
-            {
+            if ($n === false) {
                 $errno = socket_last_error($this->sock);
                 //判断错误信息，EAGAIN EINTR，重写一次
-                if ($errno == 11 or $errno == 4)
-                {
+                if ($errno == 11 or $errno == 4) {
                     continue;
-                }
-                else
-                {
+                } else {
                     return false;
                 }
             }
@@ -56,25 +50,20 @@ class TCP extends Socket
      * @param bool $waitall 等待接收到全部数据后再返回，注意这里超过包长度会阻塞住
      * @return string | bool
      */
-    function recv($length = 65535, $waitall = false)
+    public function recv($length = 65535, $waitall = false)
     {
         $flags = 0;
-        if ($waitall)
-        {
+        if ($waitall) {
             $flags = MSG_WAITALL;
         }
 
         $ret = socket_recv($this->sock, $data, $length, $flags);
-        if ($ret === false)
-        {
+        if ($ret === false) {
             $this->set_error();
             //重试一次，这里为防止意外，不使用递归循环
-            if ($this->errCode == 4)
-            {
+            if ($this->errCode == 4) {
                 socket_recv($this->sock, $data, $length, $waitall);
-            }
-            else
-            {
+            } else {
                 return false;
             }
         }
@@ -90,11 +79,10 @@ class TCP extends Socket
      * @param float $timeout 超时默认值，连接，发送，接收都使用此设置
      * @return bool
      */
-    function connect($host, $port, $timeout = 0.1, $nonblock = false)
+    public function connect($host, $port, $timeout = 0.1, $nonblock = false)
     {
         //判断超时为0或负数
-        if (empty($host) or empty($port) or $timeout <= 0)
-        {
+        if (empty($host) or empty($port) or $timeout <= 0) {
             $this->errCode = -10001;
             $this->errMsg = "param error";
             return false;
@@ -103,8 +91,7 @@ class TCP extends Socket
         $this->port = $port;
         //创建socket
         $this->sock = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
-        if ($this->sock === false)
-        {
+        if ($this->sock === false) {
             $this->set_error();
             return false;
         }
@@ -112,24 +99,17 @@ class TCP extends Socket
         $this->set_timeout($timeout, $timeout);
         $this->setopt(SO_REUSEADDR, 1);
         //非阻塞模式下connect将立即返回
-        if ($nonblock)
-        {
+        if ($nonblock) {
             socket_set_nonblock($this->sock);
             @socket_connect($this->sock, $this->host, $this->port);
             return true;
-        }
-        else
-        {
+        } else {
             //这里的错误信息没有任何意义，所以屏蔽掉
-            if (@socket_connect($this->sock, $this->host, $this->port))
-            {
+            if (@socket_connect($this->sock, $this->host, $this->port)) {
                 $this->connected = true;
                 return true;
-            }
-            elseif ($this->try_reconnect)
-            {
-                if (@socket_connect($this->sock, $this->host, $this->port))
-                {
+            } elseif ($this->try_reconnect) {
+                if (@socket_connect($this->sock, $this->host, $this->port)) {
                     $this->connected = true;
                     return true;
                 }
@@ -143,10 +123,9 @@ class TCP extends Socket
     /**
      * 关闭socket连接
      */
-    function close()
+    public function close()
     {
-        if ($this->sock)
-        {
+        if ($this->sock) {
             socket_close($this->sock);
         }
         $this->sock = null;
@@ -156,7 +135,7 @@ class TCP extends Socket
      * 是否连接到服务器
      * @return bool
      */
-    function isConnected()
+    public function isConnected()
     {
         return $this->connected;
     }

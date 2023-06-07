@@ -8,10 +8,10 @@ abstract class Struct extends BaseStruct
 {
     /**
      * Set property`s value
-     * 
+     *
      * @param string $key property name
      * @param mixed $value propety value
-     * 
+     *
      * @return self
      */
     public function set(string $key, $value)
@@ -23,9 +23,9 @@ abstract class Struct extends BaseStruct
 
     /**
      * Batch set property`s values
-     * 
+     *
      * @param array $values key-value map
-     * 
+     *
      * @return self
      */
     public function sets(array $values)
@@ -40,10 +40,10 @@ abstract class Struct extends BaseStruct
 
     /**
      * Get property value
-     * 
+     *
      * @param string $key property name
      * @param mixed $default default value
-     * 
+     *
      * @return mixed
      */
     public function get(string $key, $default = null)
@@ -59,9 +59,9 @@ abstract class Struct extends BaseStruct
 
     /**
      * Batch get property values
-     * 
+     *
      * @param array $keys property names
-     * 
+     *
      * @return array
      */
     public function gets(array $keys)

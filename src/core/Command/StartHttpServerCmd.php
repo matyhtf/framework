@@ -21,16 +21,36 @@ class StartHttpServerCmd extends Command
                 new InputDefinition(array(
                     new InputOption('host', 'host', InputOption::VALUE_OPTIONAL, '指定监听地址'),
                     new InputOption('port', 'p', InputOption::VALUE_OPTIONAL, '指定监听端口'),
-                    new InputOption('daemon', 'd', InputOption::VALUE_OPTIONAL,
-                        '启用守护进程模式'),
-                    new InputOption('base', 'b', InputOption::VALUE_OPTIONAL,
-                        '使用BASE模式启动'),
-                    new InputOption('worker', 'w', InputOption::VALUE_OPTIONAL,
-                        '设置Worker进程的数量'),
-                    new InputOption('thread', 'r', InputOption::VALUE_OPTIONAL,
-                        '设置Reactor线程的数量'),
-                    new InputOption('task', 't', InputOption::VALUE_OPTIONAL,
-                        '设置Task进程的数量'),
+                    new InputOption(
+                        'daemon',
+                        'd',
+                        InputOption::VALUE_OPTIONAL,
+                        '启用守护进程模式'
+                    ),
+                    new InputOption(
+                        'base',
+                        'b',
+                        InputOption::VALUE_OPTIONAL,
+                        '使用BASE模式启动'
+                    ),
+                    new InputOption(
+                        'worker',
+                        'w',
+                        InputOption::VALUE_OPTIONAL,
+                        '设置Worker进程的数量'
+                    ),
+                    new InputOption(
+                        'thread',
+                        'r',
+                        InputOption::VALUE_OPTIONAL,
+                        '设置Reactor线程的数量'
+                    ),
+                    new InputOption(
+                        'task',
+                        't',
+                        InputOption::VALUE_OPTIONAL,
+                        '设置Task进程的数量'
+                    ),
                 ))
             );
     }
@@ -52,7 +72,7 @@ class StartHttpServerCmd extends Command
         }
     }
 
-    static function addServerOption($key, $options)
+    public static function addServerOption($key, $options)
     {
         if (!empty($options[$key])) {
             SPF\Network\Server::setOption($key, $options[$key]);

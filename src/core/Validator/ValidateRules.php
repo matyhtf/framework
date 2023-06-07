@@ -7,7 +7,7 @@ class ValidateRules
     /**
      * @param array $attribute
      * @param mixed $value
-     * 
+     *
      * @return boolean
      */
     public static function validateIn($attribute, $value, $params = [])
@@ -306,10 +306,10 @@ class ValidateRules
 
     /**
      * Get the value`s size
-     * 
+     *
      * @param array $attribute
      * @param mixed $value
-     * 
+     *
      * @return int
      */
     protected static function getSize($attribute, $value)
@@ -325,9 +325,9 @@ class ValidateRules
 
     /**
      * Has numeric rule in setting rules
-     * 
+     *
      * @param array $attribute
-     * 
+     *
      * @return boolean
      */
     protected static function hasNumeric($attribute)

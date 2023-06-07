@@ -8,10 +8,10 @@ use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 
 class Helper
-{   
+{
     /**
      * @param string $bufferFuncName
-     * 
+     *
      * @return array
      */
     public static function parserFuncName($bufferFuncName)
@@ -42,7 +42,7 @@ class Helper
 
     /**
      * 设置进程名称
-     * 
+     *
      * @param stirng $name
      */
     public static function setProcessName($name)
@@ -56,9 +56,9 @@ class Helper
 
     /**
      * 递归读取文件夹
-     * 
+     *
      * @param string $folder
-     * 
+     *
      * @return \RecursiveIteratorIterator
      */
     public static function recurseReadFolder($folder)

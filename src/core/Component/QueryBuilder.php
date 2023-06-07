@@ -9,7 +9,7 @@ class QueryBuilder
     protected $db;
     protected $selector;
 
-    function __construct(Database $db, $table, $fields)
+    public function __construct(Database $db, $table, $fields)
     {
         $this->db = $db;
         $this->selector = new SelectDB($db);
@@ -23,30 +23,20 @@ class QueryBuilder
      * $params $value
      * @return $this
      */
-    function where()
+    public function where()
     {
         $args = func_get_args();
         $argc = count($args);
-        if ($argc == 3)
-        {
+        if ($argc == 3) {
             $this->selector->where($args[0], $args[1], $args[2]);
-
-        }
-        elseif ($argc == 2)
-        {
+        } elseif ($argc == 2) {
             $this->selector->equal($args[0], $args[1]);
-        }
-        else
-        {
-            if (is_array($args[0]))
-            {
-                foreach($args[0] as $k => $v)
-                {
+        } else {
+            if (is_array($args[0])) {
+                foreach ($args[0] as $k => $v) {
                     $this->selector->equal($k, $v);
                 }
-            }
-            else
-            {
+            } else {
                 $this->selector->where($args[0]);
             }
         }
@@ -58,7 +48,7 @@ class QueryBuilder
      * @param $order
      * @return $this
      */
-    function order($order)
+    public function order($order)
     {
         $this->selector->order($order);
 
@@ -70,7 +60,7 @@ class QueryBuilder
      * @param $like
      * @return $this
      */
-    function like($field, $like)
+    public function like($field, $like)
     {
         $this->selector->like($field, $like);
 
@@ -82,7 +72,7 @@ class QueryBuilder
      * @param $value
      * @return $this
      */
-    function in($field, $value)
+    public function in($field, $value)
     {
         $this->selector->in($field, $value);
 
@@ -94,14 +84,11 @@ class QueryBuilder
      * @param int $offset
      * @return $this
      */
-    function limit($limit, $offset = -1)
+    public function limit($limit, $offset = -1)
     {
-        if ($offset > 0)
-        {
+        if ($offset > 0) {
             $this->selector->limit($offset . ', ', $limit);
-        }
-        else
-        {
+        } else {
             $this->selector->limit($limit);
         }
 
@@ -113,7 +100,7 @@ class QueryBuilder
      * @param $value
      * @return $this
      */
-    function notIn($field, $value)
+    public function notIn($field, $value)
     {
         $this->selector->notin($field, $value);
 
@@ -126,21 +113,15 @@ class QueryBuilder
      * $params $value
      * @return $this
      */
-    function orWhere()
+    public function orWhere()
     {
         $args = func_get_args();
         $argc = count($args);
-        if ($argc == 3)
-        {
+        if ($argc == 3) {
             $this->selector->orwhere($args[0], $args[1], $args[2]);
-
-        }
-        elseif ($argc == 2)
-        {
+        } elseif ($argc == 2) {
             $this->selector->orwhere($args[0], '=', $args[1]);
-        }
-        else
-        {
+        } else {
             $this->selector->orwhere($args[0]);
         }
 
@@ -150,7 +131,7 @@ class QueryBuilder
     /**
      * @return array
      */
-    function fetch()
+    public function fetch()
     {
         return $this->selector->getone();
     }
@@ -158,7 +139,7 @@ class QueryBuilder
     /**
      * @return array|bool
      */
-    function fetchAll()
+    public function fetchAll()
     {
         return $this->selector->getall();
     }
@@ -166,7 +147,7 @@ class QueryBuilder
     /**
      * @return null|string
      */
-    function getSql()
+    public function getSql()
     {
         return $this->selector->getsql();
     }
@@ -176,47 +157,47 @@ class QueryBuilder
      * @param $value
      * @return $this
      */
-    function equal($field, $value)
+    public function equal($field, $value)
     {
         $this->selector->equal($field, $value);
         return $this;
     }
 
-    function groupBy($field)
+    public function groupBy($field)
     {
         $this->selector->group($field);
         return $this;
     }
 
-    function join($table_name, $on)
+    public function join($table_name, $on)
     {
         $this->selector->join($table_name, $on);
 
         return $this;
     }
 
-    function leftJoin($table_name, $on)
+    public function leftJoin($table_name, $on)
     {
         $this->selector->leftJoin($table_name, $on);
 
         return $this;
     }
 
-    function rightJoin($table_name, $on)
+    public function rightJoin($table_name, $on)
     {
         $this->selector->rightJoin($table_name, $on);
 
         return $this;
     }
 
-    function find($field, $find)
+    public function find($field, $find)
     {
         $this->selector->find($field, $find);
 
         return $this;
     }
 
-    function having($expr)
+    public function having($expr)
     {
         $this->selector->having($expr);
 
@@ -226,12 +207,12 @@ class QueryBuilder
     /**
      * @return \SPF\Pager
      */
-    function getPager()
+    public function getPager()
     {
         return $this->selector->pager;
     }
 
-    function paginate($page, $pagesize = 10)
+    public function paginate($page, $pagesize = 10)
     {
         $this->selector->page($page);
         $this->selector->pagesize($pagesize);

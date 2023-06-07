@@ -11,7 +11,7 @@ class ImageLocal
     public $beforeUrlGet;
     public $afterUrlGet;
 
-    function __construct($basedir)
+    public function __construct($basedir)
     {
         $this->base_dir = $basedir;
     }
@@ -25,11 +25,10 @@ class ImageLocal
      * @param $min_file_size
      * @return int
      */
-    function execute(&$content, $from_url, $min_file_size = 0)
+    public function execute(&$content, $from_url, $min_file_size = 0)
     {
         preg_match_all('~<img[^>]*(?<!_mce_)\s+src\s?=\s?([\'"])((?:(?!\1).)*?)\1[^>]*>~i', $content, $match);
-        if (empty($match[2]))
-        {
+        if (empty($match[2])) {
             return 0;
         }
 
@@ -37,70 +36,56 @@ class ImageLocal
         $replaced = array();
         $this->referrer_url = $from_url;
 
-        foreach ($match[2] as $uri)
-        {
+        foreach ($match[2] as $uri) {
             //已经替换过的
-            if (isset($replaced[$uri]))
-            {
+            if (isset($replaced[$uri])) {
                 continue;
             }
-            if(!(strpos($uri,"data:image") === false))
-            {
+            if (!(strpos($uri, "data:image") === false)) {
                 return false;
             }
-            if ($this->beforeUrlGet)
-            {
+            if ($this->beforeUrlGet) {
                 $replaced_uri = call_user_func($this->beforeUrlGet, $this, $uri);
-            }
-            else
-            {
+            } else {
                 $replaced_uri = $uri;
             }
-            $_abs_uri = str_replace("%","",HTML::parseRelativePath($from_url, $replaced_uri));
+            $_abs_uri = str_replace("%", "", HTML::parseRelativePath($from_url, $replaced_uri));
             $info = parse_url($_abs_uri);
             $path = $info['host'].'/'.ltrim($info['path'], '/');
             $file =  $this->base_dir.'/'.$path;
 
             $update = true;
-            if (!is_file($file))
-            {
+            if (!is_file($file)) {
                 $dir = dirname($file);
-                if (!is_dir($dir))
-                {
+                if (!is_dir($dir)) {
                     mkdir($dir, 0777, true);
                 }
                 $update = $this->downloadFile($_abs_uri, $file, $min_file_size);
-                if ($this->afterUrlGet)
-                {
+                if ($this->afterUrlGet) {
                     call_user_func($this->afterUrlGet, $this, $_abs_uri);
                 }
             }
-            if ($update)
-            {
+            if ($update) {
                 $new_uri = $this->base_url .'/'. ltrim($path, '/');
                 $content = str_replace($uri, $new_uri, $content);
                 $replaced[$uri] = true;
                 $image_n ++;
-            }
-            else
-            {
+            } else {
                 return false;
             }
         }
         return $image_n;
     }
 
-    function downloadFile($url, $file, $min_file_size = 0)
+    public function downloadFile($url, $file, $min_file_size = 0)
     {
         $url = trim(html_entity_decode($url));
         $curl = new Client\CURL;
-        if (!empty($this->referrer_url))
-        {
+        if (!empty($this->referrer_url)) {
             $curl->setReferrer($this->referrer_url);
         }
         $fp = fopen($file, 'w');
-        if (!$fp)
-        {
+        if (!$fp) {
             return false;
         }
         return $curl->download($url, $fp, null, $this->http_timeout);

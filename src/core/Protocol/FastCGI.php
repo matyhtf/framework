@@ -37,13 +37,11 @@ class FastCGI extends WebServer
     const STATE_BODY = 1;
     const STATE_PADDING = 2;
 
-    function parseRecord($data)
+    public function parseRecord($data)
     {
         $records = array();
-        while (strlen($data))
-        {
-            if (strlen($data) < 8 )
-            {
+        while (strlen($data)) {
+            if (strlen($data) < 8) {
                 /**
                  * We don't have a full header
                  */
@@ -52,13 +50,12 @@ class FastCGI extends WebServer
             $header = substr($data, 0, 8);
             $record = unpack('Cversion/Ctype/nrequestId/ncontentLength/CpaddingLength/Creserved', $header);
             //$record['requestId'] = $record['requestIdB1'] * 256 + $record['requestIdB0'];
-           // $record['contentLength'] = $record['contentLengthB1'] * 256 + $record['contentLengthB0'];
+            // $record['contentLength'] = $record['contentLengthB1'] * 256 + $record['contentLengthB0'];
             $recordlength = 8 + $record['contentLength'] + $record['paddingLength'];
             $record['contentData'] = substr($data, 8, $record['contentLength']);
             $record['paddingData'] = substr($data, 8 + $record['contentLength'], $record['paddingLength']);
 
-            if (strlen($data) < $recordlength )
-            {
+            if (strlen($data) < $recordlength) {
                 /**
                  * We don't have a full record.
                  */
@@ -70,32 +67,28 @@ class FastCGI extends WebServer
         return array('records' => $records, 'remainder' => $data);
     }
 
-    function xSendFile($req)
+    public function xSendFile($req)
     {
         if ($this->config['sendfile'] and (!$this->config['sendfileonlybycommand'] or isset($req->server['USE_SENDFILE']))
-            and !isset($req->server['DONT_USE_SENDFILE']))
-        {
+            and !isset($req->server['DONT_USE_SENDFILE'])) {
             $fn = tempnam($this->config['sendfiledir'], $this->config['sendfileprefix']);
             $req->sendfp = fopen($fn, 'wb');
             $req->header['X-Sendfile'] = $fn;
         }
     }
 
-    function onReceive($serv, $fd, $tid, $data)
+    public function onReceive($serv, $fd, $tid, $data)
     {
         $result = $this->parseRecord($data);
-        if (count($result['records']) == 0)
-        {
+        if (count($result['records']) == 0) {
             $this->log("Bad Request. data=".var_export($data, true)."\nresult: ".var_export($result, true));
             $this->server->close($fd);
             return;
         }
-        foreach($result['records'] as $record)
-        {
+        foreach ($result['records'] as $record) {
             $rid = $record['requestId'];
             $type = $record['type'];
-            if ($type == self::FCGI_BEGIN_REQUEST)
-            {
+            if ($type == self::FCGI_BEGIN_REQUEST) {
                 $u = unpack('nrole/Cflags', $record['contentData']);
                 $req = new SPF\Request();
                 $req->fd = $fd;
@@ -108,42 +101,30 @@ class FastCGI extends WebServer
                 $req->attrs->chunked = false;
                 $req->attrs->noHttpVer = true;
                 $this->requests[$rid] = $req;
-            }
-            elseif (isset($this->requests[$rid]))
-            {
+            } elseif (isset($this->requests[$rid])) {
                 $req = $this->requests[$rid];
-            }
-            else {
+            } else {
                 $this->log('Unexpected FastCGI-record #. Request ID: ' . $rid . '.');
                 return;
             }
 
-            if ($type === self::FCGI_ABORT_REQUEST)
-            {
+            if ($type === self::FCGI_ABORT_REQUEST) {
                 $req->abort();
-            }
-            elseif ($type === self::FCGI_PARAMS)
-            {
-                if ($record['contentData'] === '')
-                {
-                    if (!isset($req->server['REQUEST_TIME']))
-                    {
+            } elseif ($type === self::FCGI_PARAMS) {
+                if ($record['contentData'] === '') {
+                    if (!isset($req->server['REQUEST_TIME'])) {
                         $req->server['REQUEST_TIME'] = time();
                     }
-                    if (!isset($req->server['REQUEST_TIME_FLOAT']))
-                    {
+                    if (!isset($req->server['REQUEST_TIME_FLOAT'])) {
                         $req->server['REQUEST_TIME_FLOAT'] = microtime(true);
                     }
                     $req->attrs->paramsDone = true;
-                }
-                else
-                {
+                } else {
                     $p = 0;
                     while ($p < $record['contentLength']) {
                         if (($namelen = ord($record['contentData']{$p})) < 128) {
                             ++$p;
-                        }
-                        else {
+                        } else {
                             $u       = unpack('Nlen', chr(ord($record['contentData']{$p}) & 0x7f) . substr($record['contentData'], $p + 1, 3));
                             $namelen = $u['len'];
                             $p += 4;
@@ -151,8 +132,7 @@ class FastCGI extends WebServer
 
                         if (($vlen = ord($record['contentData']{$p})) < 128) {
                             ++$p;
-                        }
-                        else {
+                        } else {
                             $u    = unpack('Nlen', chr(ord($record['contentData']{$p}) & 0x7f) . substr($record['contentData'], $p + 1, 3));
                             $vlen = $u['len'];
                             $p += 4;
@@ -162,14 +142,11 @@ class FastCGI extends WebServer
                         $p += $namelen + $vlen;
                     }
                 }
-            }
-            elseif ($type === self::FCGI_STDIN)
-            {
+            } elseif ($type === self::FCGI_STDIN) {
                 $this->log("FCGI_STDIN:".var_export($record, true));
             }
         }
-        if ($req)
-        {
+        if ($req) {
             $response = $this->onRequest($req);
             $out = $response->getHeader(true);
             $out .= $response->body;
@@ -188,21 +165,16 @@ class FastCGI extends WebServer
     public function response($req, $out)
     {
         $cs = $chunksize = 8192;
-        if (strlen($out) > $cs)
-        {
-            while (($ol = strlen($out)) > 0)
-            {
+        if (strlen($out) > $cs) {
+            while (($ol = strlen($out)) > 0) {
                 $l = min($cs, $ol);
-                if ($this->sendChunk($req, substr($out, 0, $l)) === false)
-                {
+                if ($this->sendChunk($req, substr($out, 0, $l)) === false) {
                     $this->log("send response failed.");
                     return false;
                 }
                 $out = substr($out, $l);
             }
-        }
-        elseif ($this->sendChunk($req, $out) === false)
-        {
+        } elseif ($this->sendChunk($req, $out) === false) {
             $this->log("send response failed.");
             return false;
         }
@@ -217,7 +189,8 @@ class FastCGI extends WebServer
      */
     public function sendChunk($req, $chunk)
     {
-        return $this->server->send($req->fd,
+        return $this->server->send(
+            $req->fd,
             "\x01" // protocol version
             . "\x06" // record type (STDOUT)
             . pack('nn', $req->id, strlen($chunk)) // id, content length
@@ -238,7 +211,8 @@ class FastCGI extends WebServer
         $c = pack('NC', $appStatus, $protoStatus) // app status, protocol status
             . "\x00\x00\x00";
 
-        $this->server->send($req->fd,
+        $this->server->send(
+            $req->fd,
             "\x01" // protocol version
             . "\x03" // record type (END_REQUEST)
             . pack('nn', $req->id, strlen($c)) // id, content length

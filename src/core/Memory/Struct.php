@@ -37,7 +37,7 @@ abstract class Struct
      * @param bool $assoc 是否使用关联数组
      * @throws InvalidParam
      */
-    function __construct($convertBigEndian = true, $assoc = false)
+    public function __construct($convertBigEndian = true, $assoc = false)
     {
         $this->is32bit = (PHP_INT_SIZE === 4);
         $this->convertBigEndian = $convertBigEndian;
@@ -45,18 +45,13 @@ abstract class Struct
         $this->assoc = $assoc;
         $rClass = new \ReflectionClass($this->class);
         $props = $rClass->getProperties(\ReflectionProperty::IS_PUBLIC);
-        foreach ($props as $p)
-        {
-            if (preg_match(self::REGX_FIELDTYPE, $p->getDocComment(), $match))
-            {
+        foreach ($props as $p) {
+            if (preg_match(self::REGX_FIELDTYPE, $p->getDocComment(), $match)) {
                 $field = $this->parseFieldType($match[1]);
                 $field->name = $p->getName();
-                if ($this->assoc)
-                {
+                if ($this->assoc) {
                     $this->fileds[$field->name] = $field;
-                }
-                else
-                {
+                } else {
                     $this->fileds[] = $field;
                 }
                 $this->size += $field->size;
@@ -67,7 +62,7 @@ abstract class Struct
     /**
      * @return int
      */
-    function size()
+    public function size()
     {
         return $this->size;
     }
@@ -83,20 +78,16 @@ abstract class Struct
         $struct = null;
 
         start_switch:
-        switch (strtolower($fieldType[0]))
-        {
+        switch (strtolower($fieldType[0])) {
             case 'u':
                 $signed = true;
                 $fieldType = substr($fieldType, 1);
                 goto start_switch;
 
             case 'i':
-                if ($fieldType == 'int')
-                {
+                if ($fieldType == 'int') {
                     $size = 4;
-                }
-                else
-                {
+                } else {
                     $size = substr($fieldType, 3) / 8;
                 }
                 $type = Field::INT;
@@ -126,8 +117,7 @@ abstract class Struct
              * 嵌套结构体
              */
             case 's':
-                if (preg_match(self::REGX_FILEINFO, $fieldType, $match))
-                {
+                if (preg_match(self::REGX_FILEINFO, $fieldType, $match)) {
                     $class = '\\'.$match[1];
                     /**
                      * @var $struct Struct
@@ -135,9 +125,7 @@ abstract class Struct
                     $struct = new $class($this->convertBigEndian, $this->assoc);
                     $type = Field::STRUCT;
                     $size = $struct->size();
-                }
-                else
-                {
+                } else {
                     throw new InvalidParam("require struct class name.");
                 }
                 break;
@@ -160,62 +148,48 @@ abstract class Struct
      * @return string
      * @throws InvalidParam
      */
-    function pack(array $data)
+    public function pack(array $data)
     {
-        if (count($data) != count($this->fileds))
-        {
+        if (count($data) != count($this->fileds)) {
             throw new InvalidParam("{$this->class}: invalid data.");
         }
 
         $_binStr = '';
-        foreach ($this->fileds as $k => $field)
-        {
-            if (!isset($data[$k]))
-            {
+        foreach ($this->fileds as $k => $field) {
+            if (!isset($data[$k])) {
                 throw new InvalidParam("{$this->class}: item[key=$k] is not exists.");
             }
             /**
              * @var $field Field
              */
-            switch ($field->type)
-            {
+            switch ($field->type) {
                 case Field::INT:
                     $value = intval($data[$k]);
-                    switch ($field->size)
-                    {
+                    switch ($field->size) {
                         case 1:
                             $_binStr .= pack($field->signed ? 'c' : 'C', $value);
                             break;
                         case 2:
-                            if ($this->convertBigEndian)
-                            {
+                            if ($this->convertBigEndian) {
                                 //网络字节序只有无符号的编码方式
                                 $_binStr .= pack('n', $value);
-                            }
-                            else
-                            {
+                            } else {
                                 $_binStr .= pack($field->signed ? 's' : 'S', $value);
                             }
                             break;
                         case 4:
-                            if ($this->convertBigEndian)
-                            {
+                            if ($this->convertBigEndian) {
                                 //网络字节序只有无符号的编码方式
                                 $_binStr .= pack('N', $value);
-                            }
-                            else
-                            {
+                            } else {
                                 $_binStr .= pack($field->signed ? 'l' : 'L', $value);
                             }
                             break;
                         case 8:
-                            if ($this->convertBigEndian)
-                            {
+                            if ($this->convertBigEndian) {
                                 //网络字节序只有无符号的编码方式
                                 $_binStr .= pack('J', $value);
-                            }
-                            else
-                            {
+                            } else {
                                 $_binStr .= pack($field->signed ? 'q' : 'Q', $value);
                             }
                             break;
@@ -230,8 +204,7 @@ abstract class Struct
                 case Field::CHAR:
                     $value = strval($data[$k]);
                     //C字符串末尾必须为\0，最大只能保存(size-1)个字节
-                    if (strlen($value) > $field->size - 1)
-                    {
+                    if (strlen($value) > $field->size - 1) {
                         throw new InvalidParam("string is too long.");
                     }
                     $_binStr .=  pack('a' . ($field->size - 1) . 'x', $value);
@@ -241,8 +214,7 @@ abstract class Struct
                  */
                 case Field::STRUCT:
                     //参数必须为数组，个数必须与结构体的字段数量一致
-                    if (!is_array($data[$k]) or count($data[$k]) != count($field->struct->fileds))
-                    {
+                    if (!is_array($data[$k]) or count($data[$k]) != count($field->struct->fileds)) {
                         throw new InvalidParam("struct size invalid.");
                     }
                     $_binStr .= $field->struct->pack($data[$k]);
@@ -260,52 +232,40 @@ abstract class Struct
      * @param $str
      * @return array
      */
-    function unpack($str)
+    public function unpack($str)
     {
         $data = array();
-        foreach ($this->fileds as $k => $field)
-        {
+        foreach ($this->fileds as $k => $field) {
             /**
              * @var $field Field
              */
-            switch ($field->type)
-            {
+            switch ($field->type) {
                 case Field::INT:
-                    switch ($field->size)
-                    {
+                    switch ($field->size) {
                         case 1:
                             list(, $data[$k]) = unpack($field->signed ? 'c' : 'C', $str);
                             break;
                         case 2:
-                            if ($this->convertBigEndian)
-                            {
+                            if ($this->convertBigEndian) {
                                 //网络字节序只有无符号的编码方式
                                 list(, $data[$k]) = unpack('n', $str);
-                            }
-                            else
-                            {
+                            } else {
                                 list(, $data[$k]) = unpack($field->signed ? 's' : 'S', $str);
                             }
                             break;
                         case 4:
-                            if ($this->convertBigEndian)
-                            {
+                            if ($this->convertBigEndian) {
                                 //网络字节序只有无符号的编码方式
                                 list(, $data[$k]) = unpack('N', $str);
-                            }
-                            else
-                            {
+                            } else {
                                 list(, $data[$k]) = unpack($field->signed ? 'l' : 'L', $str);
                             }
                             break;
                         case 8:
-                            if ($this->convertBigEndian)
-                            {
+                            if ($this->convertBigEndian) {
                                 //网络字节序只有无符号的编码方式
                                 list(, $data[$k]) = unpack('J', $str);
-                            }
-                            else
-                            {
+                            } else {
                                 list(, $data[$k]) = unpack($field->signed ? 'q' : 'Q', $str);
                             }
                             break;

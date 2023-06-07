@@ -37,17 +37,16 @@ abstract class Base implements Driver
 
     protected $processName;
 
-    function __construct($host, $port, $timeout = 30)
+    public function __construct($host, $port, $timeout = 30)
     {
         $this->host = $host;
         $this->port = $port;
         $this->timeout = $timeout;
     }
 
-    function addListener($host, $port, $type)
+    public function addListener($host, $port, $type)
     {
-        if (!($this->protocol instanceof SPF\Network\Server))
-        {
+        if (!($this->protocol instanceof SPF\Network\Server)) {
             throw new \Exception("addListener must use swoole extension.");
         }
     }
@@ -56,7 +55,7 @@ abstract class Base implements Driver
      * 设置进程名称
      * @param $name
      */
-    function setProcessName($name)
+    public function setProcessName($name)
     {
         $this->processName = $name;
     }
@@ -65,15 +64,12 @@ abstract class Base implements Driver
      * 获取进程名称
      * @return string
      */
-    function getProcessName()
+    public function getProcessName()
     {
-        if (empty($this->processName))
-        {
+        if (empty($this->processName)) {
             global $argv;
             return "php {$argv[0]}";
-        }
-        else
-        {
+        } else {
             return $this->processName;
         }
     }
@@ -83,10 +79,9 @@ abstract class Base implements Driver
      * @param $protocol
      * @throws \Exception
      */
-    function setProtocol($protocol)
+    public function setProtocol($protocol)
     {
-        if (!($protocol instanceof SPF\IFace\Protocol))
-        {
+        if (!($protocol instanceof SPF\IFace\Protocol)) {
             throw new \Exception("The protocol is not instanceof \\SPF\\IFace\\Protocol");
         }
         $this->protocol = $protocol;
@@ -98,12 +93,12 @@ abstract class Base implements Driver
      * @param $key
      * @param $value
      */
-    static function setOption($key, $value)
+    public static function setOption($key, $value)
     {
         self::$options[$key] = $value;
     }
 
-    function connection_info($fd)
+    public function connection_info($fd)
     {
         $peername = stream_socket_get_name($this->fds[$fd], true);
         list($ip, $port) = explode(':', $peername);
@@ -114,68 +109,56 @@ abstract class Base implements Driver
      * 接受连接
      * @return bool|int
      */
-    function accept()
+    public function accept()
     {
         $client_socket = stream_socket_accept($this->server_sock, 0);
         //惊群
-        if ($client_socket === false)
-        {
+        if ($client_socket === false) {
             return false;
         }
         $client_socket_id = (int)$client_socket;
         stream_set_blocking($client_socket, $this->client_block);
         $this->client_sock[$client_socket_id] = $client_socket;
         $this->client_num++;
-        if ($this->client_num > $this->max_connect)
-        {
+        if ($this->client_num > $this->max_connect) {
             SPF\Network\Stream::close($client_socket);
             return false;
-        }
-        else
-        {
+        } else {
             //设置写缓冲区
             stream_set_write_buffer($client_socket, $this->write_buffer_size);
             return $client_socket_id;
         }
     }
 
-    function spawn($setting)
+    public function spawn($setting)
     {
         $num = 0;
-        if (isset($setting['worker_num']))
-        {
+        if (isset($setting['worker_num'])) {
             $num = (int)$setting['worker_num'];
         }
-        if ($num < 2)
-        {
+        if ($num < 2) {
             return;
         }
-        if (!extension_loaded('pcntl'))
-        {
+        if (!extension_loaded('pcntl')) {
             die(__METHOD__ . " require pcntl extension!");
         }
         $pids = array();
-        for ($i = 0; $i < $num; $i++)
-        {
+        for ($i = 0; $i < $num; $i++) {
             $pid = pcntl_fork();
-            if ($pid > 0)
-            {
+            if ($pid > 0) {
                 $pids[] = $pid;
-            }
-            else
-            {
+            } else {
                 break;
             }
         }
         return $pids;
     }
 
-    function startWorker()
+    public function startWorker()
     {
-
     }
 
-    abstract function run($setting);
+    abstract public function run($setting);
 
     /**
      * 发送数据到客户端
@@ -183,30 +166,26 @@ abstract class Base implements Driver
      * @param $data
      * @return bool
      */
-    abstract function send($client_id, $data);
+    abstract public function send($client_id, $data);
 
     /**
      * 关闭连接
      * @param $client_id
      * @return mixed
      */
-    abstract function close($client_id);
+    abstract public function close($client_id);
 
-    abstract function shutdown();
+    abstract public function shutdown();
 
-    function daemonize()
+    public function daemonize()
     {
-        if (!function_exists('pcntl_fork'))
-        {
+        if (!function_exists('pcntl_fork')) {
             throw new \Exception(__METHOD__ . ": require pcntl_fork.");
         }
         $pid = pcntl_fork();
-        if ($pid == -1)
-        {
+        if ($pid == -1) {
             die("fork(1) failed!\n");
-        }
-        elseif ($pid > 0)
-        {
+        } elseif ($pid > 0) {
             //让由用户启动的进程退出
             exit(0);
         }
@@ -215,18 +194,15 @@ abstract class Base implements Driver
         posix_setsid();
 
         $pid = pcntl_fork();
-        if ($pid == -1)
-        {
+        if ($pid == -1) {
             die("fork(2) failed!\n");
-        }
-        elseif ($pid > 0)
-        {
+        } elseif ($pid > 0) {
             //父进程退出, 剩下子进程成为最终的独立进程
             exit(0);
         }
     }
 
-    function onError($errno, $errstr)
+    public function onError($errno, $errstr)
     {
         exit("$errstr ($errno)");
     }
@@ -237,7 +213,7 @@ abstract class Base implements Driver
      * @param int $block
      * @return resource
      */
-    function create($uri, $block = 0)
+    public function create($uri, $block = 0)
     {
         if (swoole_string($uri)->startsWith('udp')) {
             $socket = stream_socket_server($uri, $errno, $errstr, STREAM_SERVER_BIND);
@@ -253,7 +229,7 @@ abstract class Base implements Driver
         return $socket;
     }
 
-    function create_socket($uri, $block = false)
+    public function create_socket($uri, $block = false)
     {
         $set = parse_url($uri);
         if (swoole_string($uri)->startsWith('udp')) {
@@ -272,12 +248,12 @@ abstract class Base implements Driver
         return $sock;
     }
 
-    function sendData($sock, $data)
+    public function sendData($sock, $data)
     {
         return SPF\Network\Stream::write($sock, $data);
     }
 
-    function log($log)
+    public function log($log)
     {
         echo $log, NL;
     }
@@ -285,12 +261,9 @@ abstract class Base implements Driver
 
 function sw_run($cmd)
 {
-    if (PHP_OS == 'WINNT')
-    {
+    if (PHP_OS == 'WINNT') {
         pclose(popen("start /B " . $cmd, "r"));
-    }
-    else
-    {
+    } else {
         exec($cmd . " > /dev/null &");
     }
 }
@@ -298,8 +271,7 @@ function sw_run($cmd)
 function sw_gc_array($array)
 {
     $new = array();
-    foreach ($array as $k => $v)
-    {
+    foreach ($array as $k => $v) {
         $new[$k] = $v;
         unset($array[$k]);
     }
@@ -309,44 +281,44 @@ function sw_gc_array($array)
 
 interface TCP_Server_Driver
 {
-    function run($num = 1);
+    public function run($num = 1);
 
-    function send($client_id, $data);
+    public function send($client_id, $data);
 
-    function close($client_id);
+    public function close($client_id);
 
-    function shutdown();
+    public function shutdown();
 
-    function setProtocol($protocol);
+    public function setProtocol($protocol);
 }
 
 interface UDP_Server_Driver
 {
-    function run($num = 1);
+    public function run($num = 1);
 
-    function shutdown();
+    public function shutdown();
 
-    function setProtocol($protocol);
+    public function setProtocol($protocol);
 }
 
 interface TCP_Server_Protocol
 {
-    function onStart();
+    public function onStart();
 
-    function onConnect($client_id);
+    public function onConnect($client_id);
 
-    function onReceive($client_id, $data);
+    public function onReceive($client_id, $data);
 
-    function onClose($client_id);
+    public function onClose($client_id);
 
-    function onShutdown($server);
+    public function onShutdown($server);
 }
 
 interface UDP_Server_Protocol
 {
-    function onStart();
+    public function onStart();
 
-    function onData($peer, $data);
+    public function onData($peer, $data);
 
-    function onShutdown();
+    public function onShutdown();
 }

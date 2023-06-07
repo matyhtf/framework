@@ -1,5 +1,6 @@
 <?php
 namespace SPF;
+
 /**
  * JS生成工具，可以生成常用的Javascript代码
  *
@@ -10,20 +11,17 @@ namespace SPF;
  */
 class JS
 {
-    static $head = "<script language=\"javascript\">\n";
-    static $foot = "</script>\n";
-    static $charset = 'utf-8';
-    static $return = true;
+    public static $head = "<script language=\"javascript\">\n";
+    public static $foot = "</script>\n";
+    public static $charset = 'utf-8';
+    public static $return = true;
 
-    static function charset($return = false)
+    public static function charset($return = false)
     {
         $out = '<meta http-equiv="Content-Type" content="text/html; charset=' . self::$charset . '">';
-        if ($return)
-        {
+        if ($return) {
             return $out;
-        }
-        else
-        {
+        } else {
             echo $out;
         }
     }
@@ -33,18 +31,15 @@ class JS
      * @param $js
      * @return string
      */
-    static function echojs($js, $return = false)
+    public static function echojs($js, $return = false)
     {
         $out = self::charset($return);
         $out .= self::$head;
         $out .= $js;
         $out .= self::$foot;
-        if (!Error::$stop or $return)
-        {
+        if (!Error::$stop or $return) {
             return $out;
-        }
-        else
-        {
+        } else {
             echo $out;
         }
     }
@@ -54,7 +49,7 @@ class JS
      * @param $str
      * @return string
      */
-    static function alert($str)
+    public static function alert($str)
     {
         return self::echojs("alert(\"$str\");");
     }
@@ -64,7 +59,7 @@ class JS
      * @param $url
      * @return string
      */
-    static function location($url)
+    public static function location($url)
     {
         return self::echojs("location.href='$url';");
     }
@@ -75,10 +70,9 @@ class JS
      * @param $go
      * @return string
      */
-    static function js_back($msg, $go = -1)
+    public static function js_back($msg, $go = -1)
     {
-        if (!is_numeric($go))
-        {
+        if (!is_numeric($go)) {
             $go = -1;
         }
         return self::echojs("alert('$msg');\nhistory.go($go);\n");
@@ -90,10 +84,9 @@ class JS
      * @param $go
      * @return string
      */
-    static function parent_js_back($msg, $go = -1)
+    public static function parent_js_back($msg, $go = -1)
     {
-        if (!is_numeric($go))
-        {
+        if (!is_numeric($go)) {
             $go = -1;
         }
         return self::echojs("alert('$msg');\nparent.history.go($go);\n");
@@ -105,7 +98,7 @@ class JS
      * @param $url
      * @return string
      */
-    static function parent_js_goto($msg, $url)
+    public static function parent_js_goto($msg, $url)
     {
         return self::echojs("alert(\"$msg\");\nwindow.parent.location.href=\"$url\";");
     }
@@ -115,7 +108,7 @@ class JS
      * @param $str
      * @return string
      */
-    static function js_alert($msg)
+    public static function js_alert($msg)
     {
         return self::echojs("alert('$msg');");
     }
@@ -126,7 +119,7 @@ class JS
      * @param $url
      * @return string
      */
-    static function js_goto($msg, $url)
+    public static function js_goto($msg, $url)
     {
         return self::echojs("alert('$msg');\nwindow.location.href=\"$url\";\n");
     }
@@ -136,7 +129,7 @@ class JS
      * @param $msg
      * @return string
      */
-    static function js_parent_reload($msg)
+    public static function js_parent_reload($msg)
     {
         return self::echojs("alert('$msg');\nwindow.parent.location.reload();");
     }
@@ -146,7 +139,7 @@ class JS
      * @param $msg
      * @return string
      */
-    static function js_alert_close($msg)
+    public static function js_alert_close($msg)
     {
         return self::echojs("alert('$msg');\nwindow.self.close();\n");
     }
@@ -158,7 +151,7 @@ class JS
      * @param $false
      * @return string
      */
-    static function js_confirm($msg, $true, $false)
+    public static function js_confirm($msg, $true, $false)
     {
         $js = "if(confirm('$msg')) location.href=\"{$true}\";\n";
         $js .= "else location.href=\"$false\";\n";
@@ -171,7 +164,7 @@ class JS
      * @param $true
      * @return string
      */
-    static function js_confirmback($msg, $true)
+    public static function js_confirmback($msg, $true)
     {
         $js = "if(confirm('$msg')) location.href=\"{$true}\";\n";
         $js .= "else history.go(-1);\n";

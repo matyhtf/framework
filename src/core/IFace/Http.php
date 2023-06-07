@@ -3,16 +3,23 @@ namespace SPF\IFace;
 
 interface Http
 {
-    function header($k, $v);
+    public function header($k, $v);
 
-    function status($code);
+    public function status($code);
 
-    function response($content);
+    public function response($content);
 
-    function redirect($url, $mode = 302);
+    public function redirect($url, $mode = 302);
 
-    function finish($content = null);
+    public function finish($content = null);
 
-    function setcookie($name, $value = null, $expire = null, $path = '/', $domain = null, $secure = null,
-        $httponly = null);
+    public function setcookie(
+        $name,
+        $value = null,
+        $expire = null,
+        $path = '/',
+        $domain = null,
+        $secure = null,
+        $httponly = null
+    );
 }

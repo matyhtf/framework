@@ -87,7 +87,8 @@ class ClientParser
 
                 if ($tmpChar === false) {
                     Utils::abnormalExit('error', '注释换行错误,请检查' . $tmpChar);
-                } elseif ($tmpChar === "\n") { } elseif (($tmpChar) === '*') {
+                } elseif ($tmpChar === "\n") {
+                } elseif (($tmpChar) === '*') {
                     $nextnextChar = fgetc($this->fp);
                     if ($nextnextChar == '/') {
                         return;

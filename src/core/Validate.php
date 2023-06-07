@@ -10,7 +10,7 @@ namespace SPF;
  */
 class Validate
 {
-    static $regx = array(
+    public static $regx = array(
         //邮箱
         'email' => '/^([a-z0-9\+_\-]+)(\.[a-z0-9\+_\-]+)*@([a-z0-9\-]+\.)+[a-z]{2,6}$/ix',
         //手机号码
@@ -51,32 +51,26 @@ class Validate
      * @param $input
      * @return bool|string
      */
-    static function regx($regx, $input)
+    public static function regx($regx, $input)
     {
         $n = preg_match($regx, $input, $match);
-        if ($n === 0)
-        {
+        if ($n === 0) {
             return false;
-        }
-        else
-        {
+        } else {
             return $match[0];
         }
     }
 
-    static function isVersion($ver)
+    public static function isVersion($ver)
     {
         return self::check('version', $ver);
     }
 
-    static function check($ctype, $input)
+    public static function check($ctype, $input)
     {
-        if (isset(self::$regx[$ctype]))
-        {
+        if (isset(self::$regx[$ctype])) {
             return self::regx(self::$regx[$ctype], $input);
-        }
-        else
-        {
+        } else {
             return self::$ctype($input);
         }
     }
@@ -88,12 +82,10 @@ class Validate
      *
      * @return bool
      */
-    static function checkLacks(array $array, array $keys)
+    public static function checkLacks(array $array, array $keys)
     {
-        foreach($keys as $k)
-        {
-            if (empty($array[$k]))
-            {
+        foreach ($keys as $k) {
+            if (empty($array[$k])) {
                 return false;
             }
         }
@@ -105,7 +97,7 @@ class Validate
      * @param $str
      * @return false or $str
      */
-    static function string($str)
+    public static function string($str)
     {
         return filter_var($str, FILTER_DEFAULT);
     }
@@ -114,7 +106,7 @@ class Validate
      * @param $str
      * @return false or $str
      */
-    static function url($str)
+    public static function url($str)
     {
         return filter_var($str, FILTER_VALIDATE_URL);
     }
@@ -123,7 +115,7 @@ class Validate
      * @param $str
      * @return false or $str
      */
-    static function text($str)
+    public static function text($str)
     {
         return filter_var($str, FILTER_SANITIZE_STRING);
     }
@@ -132,34 +124,46 @@ class Validate
      * @param $str
      * @return false or $str
      */
-    static function chinese_gb($str)
+    public static function chinese_gb($str)
     {
-        $n =  preg_match("/^[".chr(0xa1)."-".chr(0xff)."]+$/",$str,$match);
-        if($n===0) return false;
-        else return $match[0];
+        $n =  preg_match("/^[".chr(0xa1)."-".chr(0xff)."]+$/", $str, $match);
+        if ($n===0) {
+            return false;
+        } else {
+            return $match[0];
+        }
     }
     /**
      * 检测是否为自然字符串（可是中文，字符串，下划线，数字），不包含特殊字符串，只支持utf-8或者gb2312
      * @param $str
      * @return false or $str
      */
-    static function realstring($str,$encode='utf8')
+    public static function realstring($str, $encode='utf8')
     {
-        if($encode=='utf8') $n = preg_match('/^[\x{4e00}-\x{9fa5}|a-z|0-9|A-Z]+$/u',$str,$match);
-        else $n = preg_match("/^[".chr(0xa1)."-".chr(0xff)."|a-z|0-9|A-Z]+$/",$str,$match);
-        if($n===0) return false;
-        else return $match[0];
+        if ($encode=='utf8') {
+            $n = preg_match('/^[\x{4e00}-\x{9fa5}|a-z|0-9|A-Z]+$/u', $str, $match);
+        } else {
+            $n = preg_match("/^[".chr(0xa1)."-".chr(0xff)."|a-z|0-9|A-Z]+$/", $str, $match);
+        }
+        if ($n===0) {
+            return false;
+        } else {
+            return $match[0];
+        }
     }
     /**
      * 检测是否一个英文单词，不含空格和其他特殊字符
      * @param $str
      * @return false or $str
      */
-    static function word($str, $other='')
+    public static function word($str, $other='')
     {
-        $n = preg_match("/^([a-zA-Z_{$other}]*)$/",$str,$match);
-        if($n===0) return false;
-        else return $match[0];
+        $n = preg_match("/^([a-zA-Z_{$other}]*)$/", $str, $match);
+        if ($n===0) {
+            return false;
+        } else {
+            return $match[0];
+        }
     }
 
     /**
@@ -167,13 +171,14 @@ class Validate
      * @param $value
      * @return true or false
      */
-    static function assic($value)
+    public static function assic($value)
     {
         $len = strlen($value);
-        for ($i = 0; $i < $len; $i++)
-        {
+        for ($i = 0; $i < $len; $i++) {
             $ord = ord(substr($value, $i, 1));
-            if ($ord > 127) return false;
+            if ($ord > 127) {
+                return false;
+            }
         }
         return $value;
     }
@@ -183,9 +188,9 @@ class Validate
      * @param $value
      * @return bool
      */
-    static function ip($value)
+    public static function ip($value)
     {
-        return filter_var($value,FILTER_VALIDATE_IP) !== false;
+        return filter_var($value, FILTER_VALIDATE_IP) !== false;
     }
 
     /**
@@ -194,10 +199,12 @@ class Validate
      * @param $default
      * @return unknown_type
      */
-    static function value_default($value,$default)
+    public static function value_default($value, $default)
     {
-        if(empty($value)) return $default;
-        else return $value;
+        if (empty($value)) {
+            return $default;
+        } else {
+            return $value;
+        }
     }
-
 }

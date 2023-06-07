@@ -11,7 +11,7 @@ namespace SPF;
  */
 interface IDbRecord
 {
-    function fetch();
+    public function fetch();
 
-    function fetchall();
+    public function fetchall();
 }

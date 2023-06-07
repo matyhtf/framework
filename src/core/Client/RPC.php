@@ -1,5 +1,6 @@
 <?php
 namespace SPF\Client;
+
 use SPF\Core;
 use SPF\Exception\InvalidParam;
 use SPF\Network\Server;
@@ -62,7 +63,7 @@ class RPC
     private $keepSocket = false;    //让整个对象保持同一个socket，不再重新分配
     private $keepSocketServer = array();    //对象保持同一个socket的服务器信息
 
-    function __construct($id = null)
+    public function __construct($id = null)
     {
         $key = empty($id) ? 'default' : $id;
         self::$_instances[$key] = $this;
@@ -84,28 +85,22 @@ class RPC
      * @param $gzip
      * @throws \Exception
      */
-    function setEncodeType($type, $gzip)
+    public function setEncodeType($type, $gzip)
     {
         //兼容老版本，老版本true代表用json false代表serialize
-        if ($type === true)
-        {
+        if ($type === true) {
             $type = RPCServer::DECODE_JSON;
         }
-        if ($type === false)
-        {
+        if ($type === false) {
             $type = RPCServer::DECODE_PHP;
         }
         
-        if ($type === RPCServer::DECODE_SWOOLE and (substr(PHP_VERSION, 0, 1) != '7'))
-        {
+        if ($type === RPCServer::DECODE_SWOOLE and (substr(PHP_VERSION, 0, 1) != '7')) {
             throw new \Exception("swoole_serialize only use in phpng");
-        }
-        else
-        {
+        } else {
             $this->encode_type = $type;
         }
-        if ($gzip)
-        {
+        if ($gzip) {
             $this->encode_gzip = true;
         }
     }
@@ -115,19 +110,15 @@ class RPC
      * @param $id
      * @return Server
      */
-    static function getInstance($id = null)
+    public static function getInstance($id = null)
     {
         $key = empty($id) ? 'default' : $id;
-        if (Core::$enableCoroutine)
-        {
+        if (Core::$enableCoroutine) {
             return new static($id);
         }
-        if (empty(self::$_instances[$key]))
-        {
+        if (empty(self::$_instances[$key])) {
             $object = new static($id);
-        }
-        else
-        {
+        } else {
             $object = self::$_instances[$key];
         }
         return $object;
@@ -135,19 +126,17 @@ class RPC
 
     protected function beforeRequest($retObj)
     {
-
     }
 
     protected function afterRequest($retObj)
     {
-
     }
 
     /**
      * 生成请求串号
      * @return int
      */
-    static function getRequestId()
+    public static function getRequestId()
     {
         $us = strstr(microtime(), ' ', true);
         return intval(strval($us * 1000 * 1000) . rand(100, 999));
@@ -156,8 +145,7 @@ class RPC
     protected function closeConnection($host, $port)
     {
         $conn_key = $host . ':' . $port;
-        if (!isset($this->connections[$conn_key]))
-        {
+        if (!isset($this->connections[$conn_key])) {
             return false;
         }
         $socket = $this->connections[$conn_key];
@@ -170,13 +158,11 @@ class RPC
     {
         $ret = false;
         $conn_key = $host.':'.$port;
-        if (isset($this->connections[$conn_key]))
-        {
+        if (isset($this->connections[$conn_key])) {
             return $this->connections[$conn_key];
         }
         //基于Swoole扩展
-        if ($this->haveSwoole)
-        {
+        if ($this->haveSwoole) {
             $socket = new \swoole_client(SWOOLE_SOCK_TCP | SWOOLE_KEEP, SWOOLE_SOCK_SYNC);
             $socket->set(array(
                 'open_length_check' => true,
@@ -188,41 +174,32 @@ class RPC
             /**
              * 尝试重连一次
              */
-            for ($i = 0; $i < 2; $i++)
-            {
+            for ($i = 0; $i < 2; $i++) {
                 $ret = $socket->connect($host, $port, $this->timeout);
-                if ($ret === false and ($socket->errCode == 114 or $socket->errCode == 115))
-                {
+                if ($ret === false and ($socket->errCode == 114 or $socket->errCode == 115)) {
                     //强制关闭，重连
                     $socket->close(true);
                     continue;
-                }
-                else
-                {
+                } else {
                     break;
                 }
             }
         }
         //基于sockets扩展
-        elseif ($this->haveSockets)
-        {
+        elseif ($this->haveSockets) {
             $socket = new TCP;
             $socket->try_reconnect = false;
             $ret = $socket->connect($host, $port, $this->timeout);
         }
         //基于stream
-        else
-        {
+        else {
             $socket = new Stream();
             $ret = $socket->connect($host, $port, $this->timeout);
         }
-        if ($ret)
-        {
+        if ($ret) {
             $this->connections[$conn_key] = $socket;
             return $socket;
-        }
-        else
-        {
+        } else {
             return false;
         }
     }
@@ -233,19 +210,15 @@ class RPC
     protected function validConnection($servers)
     {
         $offline = [];
-        foreach ($servers as $k => $svr)
-        {
-            if (!empty($svr['status']) and $svr['status'] == 'offline')
-            {
+        foreach ($servers as $k => $svr) {
+            if (!empty($svr['status']) and $svr['status'] == 'offline') {
                 $offline[] = $svr;
             }
         }
         if (!empty($offline)) {
-            foreach ($offline as $svr)
-            {
+            foreach ($offline as $svr) {
                 $conn_key = $svr['host'].':'.$svr['port'];
-                if (isset($this->connections[$conn_key]))
-                {
+                if (isset($this->connections[$conn_key])) {
                     $socket = $this->connections[$conn_key];
                     $socket->close(true);
                     unset($this->connections[$conn_key]);
@@ -264,35 +237,27 @@ class RPC
     {
         $servers = $this->servers;
         //循环连接
-        while (count($servers) > 0)
-        {
+        while (count($servers) > 0) {
             $svr = $this->getServer($servers);
-            if (empty($svr))
-            {
+            if (empty($svr)) {
                 return false;
             }
             $this->validConnection($servers);
             $socket = $this->getConnection($svr['host'], $svr['port']);
             //连接失败，服务器节点不可用
             //TODO 如果连接失败，需要上报机器存活状态
-            if ($socket === false)
-            {
-                foreach($servers as $k => $v)
-                {
-                    if ($v['host'] == $svr['host'] and $v['port'] == $svr['port'])
-                    {
+            if ($socket === false) {
+                foreach ($servers as $k => $v) {
+                    if ($v['host'] == $svr['host'] and $v['port'] == $svr['port']) {
                         //从Server列表中移除
                         unset($servers[$k]);
                     }
                 }
-                if ($this->keepSocket)
-                {
+                if ($this->keepSocket) {
                     //若连接失败，则清除掉该server
                     $this->keepSocketServer = array();
                 }
-            }
-            else
-            {
+            } else {
                 $retObj->socket = $socket;
                 $retObj->server_host = $svr['host'];
                 $retObj->server_port = $svr['port'];
@@ -316,8 +281,7 @@ class RPC
 
         $retObj->index = $this->requestIndex++;
         connect_to_server:
-        if ($this->connectToServer($retObj) === false)
-        {
+        if ($this->connectToServer($retObj) === false) {
             $retObj->code = RPC_Result::ERR_CONNECT;
             return false;
         }
@@ -325,17 +289,14 @@ class RPC
         $retObj->requestId = self::getRequestId();
         //打包格式
         $encodeType = $this->encode_type;
-        if ($this->encode_gzip)
-        {
+        if ($this->encode_gzip) {
             $encodeType |= RPCServer::DECODE_GZIP;
         }
         //发送失败了
-        if ($retObj->socket->send(RPCServer::encode($retObj->send, $encodeType, 0, $retObj->requestId)) === false)
-        {
+        if ($retObj->socket->send(RPCServer::encode($retObj->send, $encodeType, 0, $retObj->requestId)) === false) {
             $this->closeConnection($retObj->server_host, $retObj->server_port);
             //连接被重置了，重现连接到服务器
-            if ($this->haveSwoole and $retObj->socket->errCode == 104)
-            {
+            if ($this->haveSwoole and $retObj->socket->errCode == 104) {
                 goto connect_to_server;
             }
             $retObj->code = RPC_Result::ERR_SEND;
@@ -381,7 +342,7 @@ class RPC
      * 设置超时时间，包括连接超时和接收超时
      * @param $timeout
      */
-    function setTimeout($timeout)
+    public function setTimeout($timeout)
     {
         $this->timeout = $timeout;
     }
@@ -391,7 +352,7 @@ class RPC
      * @param $user
      * @param $password
      */
-    function auth($user, $password)
+    public function auth($user, $password)
     {
         $this->putEnv('user', $user);
         $this->putEnv('password', sha1($user . '|' . $password));
@@ -406,19 +367,16 @@ class RPC
     protected function finish($retData, $retObj, $header)
     {
         //解包失败了
-        if ($retData === false)
-        {
+        if ($retData === false) {
             $retObj->code = RPC_Result::ERR_UNPACK;
         }
         //调用成功
-        elseif (isset($header['errno']) && $header['errno'] === self::OK)
-        {
+        elseif (isset($header['errno']) && $header['errno'] === self::OK) {
             $retObj->code = self::OK;
             $retObj->data = $retData;
         }
         //服务器返回失败
-        else
-        {
+        else {
             $retObj->code = $header['errno'] ?? RPC_Result::ERR_SERVER;
             if ($retData instanceof Response) {
                 $retData = $retData->toArray();
@@ -426,14 +384,12 @@ class RPC
                 $retData = $retData ? (array) $retData : [];
             }
             $retObj->data = new Response($retObj->code, RPCServer::getErrorMsg($header['errno'] ?? RPC_Result::ERR_SERVER), $retData);
-            
         }
         unset($this->waitList[$retObj->requestId]);
         //执行after钩子函数
         $this->afterRequest($retObj);
         //执行回调函数
-        if ($retObj->callback)
-        {
+        if ($retObj->callback) {
             call_user_func($retObj->callback, $retObj);
         }
     }
@@ -442,25 +398,18 @@ class RPC
      * 添加服务器
      * @param array $servers
      */
-    function addServers(array $servers)
+    public function addServers(array $servers)
     {
-        if (isset($servers['host']))
-        {
+        if (isset($servers['host'])) {
             self::formatServerConfig($servers);
             $this->servers[] = $servers;
-        }
-        else
-        {
+        } else {
             //兼容老的写法
-            foreach ($servers as $svr)
-            {
+            foreach ($servers as $svr) {
                 // 127.0.0.1:8001 的写法
-                if (is_string($svr))
-                {
+                if (is_string($svr)) {
                     list($config['host'], $config['port']) = explode(':', $svr);
-                }
-                else
-                {
+                } else {
                     $config = $svr;
                 }
                 self::formatServerConfig($config);
@@ -473,22 +422,18 @@ class RPC
      * @param $config
      * @throws InvalidParam
      */
-    static protected function formatServerConfig(&$config)
+    protected static function formatServerConfig(&$config)
     {
-        if (empty($config['host']))
-        {
+        if (empty($config['host'])) {
             throw new InvalidParam("require 'host' option.");
         }
-        if (empty($config['port']))
-        {
+        if (empty($config['port'])) {
             throw new InvalidParam("require 'port' option.");
         }
-        if (empty($config['status']))
-        {
+        if (empty($config['status'])) {
             $config['status'] = 'online';
         }
-        if (empty($config['weight']))
-        {
+        if (empty($config['weight'])) {
             $config['weight'] = 100;
         }
     }
@@ -497,10 +442,9 @@ class RPC
      * 设置服务器
      * @param array $servers
      */
-    function setServers(array $servers)
+    public function setServers(array $servers)
     {
-        foreach($servers as &$svr)
-        {
+        foreach ($servers as &$svr) {
             self::formatServerConfig($svr);
         }
         $this->servers = $servers;
@@ -512,21 +456,16 @@ class RPC
      * @return array
      * @throws \Exception
      */
-    function getServer($servers)
+    public function getServer($servers)
     {
-        if (empty($servers))
-        {
+        if (empty($servers)) {
             throw new \Exception("servers config empty.");
         }
 
-        if ($this->keepSocket)
-        {
-            if (is_array($this->keepSocketServer) && count($this->keepSocketServer))
-            {
+        if ($this->keepSocket) {
+            if (is_array($this->keepSocketServer) && count($this->keepSocketServer)) {
                 return $this->keepSocketServer;
-            }
-            else
-            {
+            } else {
                 $this->keepSocketServer = Tool::getServer($servers);
 
                 return $this->keepSocketServer;
@@ -546,12 +485,11 @@ class RPC
      * @param $callback
      * @return RPC_Result
      */
-    function task($function, $params = array(), $callback = null)
+    public function task($function, $params = array(), $callback = null)
     {
         $retObj = new RPC_Result($this);
         $send = array('call' => $function, 'params' => $params);
-        if (count($this->env) > 0)
-        {
+        if (count($this->env) > 0) {
             //调用端环境变量
             $send['env'] = $this->env;
         }
@@ -563,7 +501,7 @@ class RPC
     /**
      * 侦测服务器是否存活
      */
-    function ping()
+    public function ping()
     {
         return $this->task('PING')->getResult() === 'PONG';
     }
@@ -574,8 +512,7 @@ class RPC
      */
     protected function recvPacket($connection, $timeout=0.5)
     {
-        if ($this->haveSwoole)
-        {
+        if ($this->haveSwoole) {
             return $connection->recv();
         }
 
@@ -583,21 +520,18 @@ class RPC
          * Stream or Socket
          */
         $_header_data = $connection->recv(RPCServer::HEADER_SIZE, true);
-        if (empty($_header_data))
-        {
+        if (empty($_header_data)) {
             return "";
         }
         //这里仅使用了length和type，uid,serid未使用
         $header = unpack(RPCServer::HEADER_STRUCT, $_header_data);
         //错误的包头，返回空字符串，结束连接
-        if ($header === false or $header['length'] <= 0 or $header['length'] > $this->packet_maxlen)
-        {
+        if ($header === false or $header['length'] <= 0 or $header['length'] > $this->packet_maxlen) {
             return "";
         }
 
         $_body_data = $connection->recv($header['length'], true);
-        if (empty($_body_data))
-        {
+        if (empty($_body_data)) {
             return "";
         }
         return $_header_data . $_body_data;
@@ -613,40 +547,32 @@ class RPC
      */
     protected function select($read, $write, $error, $timeout)
     {
-        if ($this->haveSwoole)
-        {
+        if ($this->haveSwoole) {
             return swoole_client_select($read, $write, $error, $timeout);
         }
 
         $t_sec = (int)$timeout;
         $t_usec = (int)(($timeout - $t_sec) * 1000 * 1000);
 
-        foreach ($read as $o)
-        {
+        foreach ($read as $o) {
             $_read[] = $o->getSocket();
         }
-        foreach ($write as $o)
-        {
+        foreach ($write as $o) {
             $_write[] = $o->getSocket();
         }
-        foreach ($error as $o)
-        {
+        foreach ($error as $o) {
             $_error[] = $o->getSocket();
         }
 
-        if ($this->haveSockets)
-        {
+        if ($this->haveSockets) {
             return socket_select($_read, $_write, $_error, $t_sec, $t_usec);
-        }
-        else
-        {
+        } else {
             return stream_select($_read, $_write, $_error, $t_sec, $t_usec);
         }
     }
 
     protected function freeConnection($socket)
     {
-
     }
 
     /**
@@ -654,45 +580,36 @@ class RPC
      * @param $timeout
      * @return int
      */
-    function wait($timeout = 0.5)
+    public function wait($timeout = 0.5)
     {
         $st = microtime(true);
         $success_num = 0;
 
-        while (count($this->waitList) > 0)
-        {
+        while (count($this->waitList) > 0) {
             $write = $error = $read = array();
-            foreach ($this->waitList as $obj)
-            {
+            foreach ($this->waitList as $obj) {
                 /**
                  * @var $obj RPC_Result
                  */
-                if ($obj->socket !== null)
-                {
+                if ($obj->socket !== null) {
                     $read[] = $obj->socket;
                 }
             }
-            if (empty($read))
-            {
+            if (empty($read)) {
                 break;
             }
             //去掉重复的socket
             Tool::arrayUnique($read);
             //等待可读事件
             $n = $this->select($read, $write, $error, $timeout);
-            if ($n > 0)
-            {
+            if ($n > 0) {
                 //可读
-                foreach($read as $connection)
-                {
-                    $data = $this->recvPacket($connection,$timeout);
+                foreach ($read as $connection) {
+                    $data = $this->recvPacket($connection, $timeout);
                     //socket被关闭了
-                    if ($data === "")
-                    {
-                        foreach($this->waitList as $retObj)
-                        {
-                            if ($retObj->socket == $connection)
-                            {
+                    if ($data === "") {
+                        foreach ($this->waitList as $retObj) {
+                            if ($retObj->socket == $connection) {
                                 $retObj->code = RPC_Result::ERR_CLOSED;
                                 unset($this->waitList[$retObj->requestId]);
                                 $this->closeConnection($retObj->server_host, $retObj->server_port);
@@ -701,15 +618,12 @@ class RPC
                             }
                         }
                         continue;
-                    }
-                    elseif ($data === false)
-                    {
+                    } elseif ($data === false) {
                         continue;
                     }
                     $header = unpack(RPCServer::HEADER_STRUCT, substr($data, 0, RPCServer::HEADER_SIZE));
                     //不在请求列表中，错误的请求串号
-                    if (!isset($this->waitList[$header['serid']]))
-                    {
+                    if (!isset($this->waitList[$header['serid']])) {
                         trigger_error(__CLASS__ . " invalid responseId[{$header['serid']}].", E_USER_WARNING);
                         continue;
                     }
@@ -720,10 +634,8 @@ class RPC
                 }
             }
             //发生超时
-            if ((microtime(true) - $st) > $timeout)
-            {
-                foreach ($this->waitList as $obj)
-                {
+            if ((microtime(true) - $st) > $timeout) {
+                foreach ($this->waitList as $obj) {
                     $obj->code = ($obj->socket->isConnected()) ? RPC_Result::ERR_TIMEOUT : RPC_Result::ERR_CONNECT;
                     $this->closeConnection($obj->server_host, $obj->server_port);
                     //执行after钩子函数
@@ -731,16 +643,14 @@ class RPC
                 }
                 //清空当前列表
                 $this->waitList = array();
-                foreach($read as $r)
-                {
+                foreach ($read as $r) {
                     $this->freeConnection($r);
                 }
                 return $success_num;
             }
         }
 
-        foreach($read as $r)
-        {
+        foreach ($read as $r) {
             $this->freeConnection($r);
         }
 
@@ -753,10 +663,9 @@ class RPC
     /**
      * 关闭所有连接
      */
-    function close()
+    public function close()
     {
-        foreach ($this->connections as $key => $socket)
-        {
+        foreach ($this->connections as $key => $socket) {
             /**
              * @var $socket \swoole_client
              */
@@ -826,15 +735,14 @@ class RPC_Result
 
     const ERR_RECV       = 8010; //等待接收数据
 
-    function __construct($soa_client)
+    public function __construct($soa_client)
     {
         $this->soa_client = $soa_client;
     }
 
-    function getResult($timeout = 0.5)
+    public function getResult($timeout = 0.5)
     {
-        if ($this->code == self::ERR_RECV)
-        {
+        if ($this->code == self::ERR_RECV) {
             $this->soa_client->wait($timeout);
         }
         return $this->data;
@@ -843,5 +751,4 @@ class RPC_Result
 
 class SOA_Result extends RPC_Result
 {
-
 }

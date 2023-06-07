@@ -1,6 +1,7 @@
 <?php
 
 namespace SPF;
+
 /**
  * 内容处理工具类
  * 提供远程图片获取、内容分页、汉字转拼音等功能
@@ -20,7 +21,7 @@ class Content
      * @param string $sptag 分隔符
      * @return bool   是否成功
      */
-    function paging(&$content, $spsize, $sptag)
+    public function paging(&$content, $spsize, $sptag)
     {
         if (strlen($content) < $spsize) {
             return false;
@@ -37,12 +38,17 @@ class Content
             $bds[$i] = "<" . $bds[$i];
             if (strlen($bds[$i]) > 6) {
                 $tname = substr($bds[$i], 1, 5);
-                if (strtolower($tname) == 'table') $istable++;
-                else if (strtolower($tname) == '/tabl') $istable--;
+                if (strtolower($tname) == 'table') {
+                    $istable++;
+                } elseif (strtolower($tname) == '/tabl') {
+                    $istable--;
+                }
                 if ($istable > 0) {
                     $npageBody .= $bds[$i];
                     continue;
-                } else $npageBody .= $bds[$i];
+                } else {
+                    $npageBody .= $bds[$i];
+                }
             } else {
                 $npageBody .= $bds[$i];
             }
@@ -63,7 +69,7 @@ class Content
      * @param string $dir
      * @return void
      */
-    function image_local(&$content, $dir = '')
+    public function image_local(&$content, $dir = '')
     {
         if (empty($dir)) {
             $dir = App::getInstance()->config['upload']['base_dir'] . '/extend/' . date('Ym') . "/" . date("d");
@@ -73,7 +79,7 @@ class Content
         $regs = array();
         $source = array();
         $i = 0;
-        while (list ($id, $chunk) = each($chunklist)) {
+        while (list($id, $chunk) = each($chunklist)) {
             if (strstr(strtolower($chunk), "img") && strstr(strtolower($chunk), "src")) {
                 while (eregi("(img[^>]*src[[:blank:]]*)=[[:blank:]]*[\'\"]?(([[a-z]{3,5}://(([.a-zA-Z0-9-])+(:[0-9]+)*))*([+:%/?=&;\\\(\),._a-zA-Z0-9-]*))(#[.a-zA-Z0-9-]*)?[\'\" ]?", $chunk, $regs)) {
                     if ($regs[2]) {
@@ -100,7 +106,7 @@ class Content
      * @param string $charset
      * @return string $res 拼音
      */
-    function pinyin($str, $charset = 'gb2312')
+    public function pinyin($str, $charset = 'gb2312')
     {
         return Pinyin($str, $charset);
     }
@@ -114,7 +120,9 @@ class Content
             return "";
         } else {
             for ($i = count($pinyin) - 1; $i >= 0; $i--) {
-                if ($pinyin[$i][1] <= $num) break;
+                if ($pinyin[$i][1] <= $num) {
+                    break;
+                }
             }
             return $pinyin[$i][0];
         }
@@ -124,7 +132,7 @@ class Content
      * 数字转汉字表示
      *
      */
-    function num2han($num)
+    public function num2han($num)
     {
         $array = array('〇', '一', '二', '三', '四', '五', '六', '七', '八', '九');
         $num = (string)$num;
@@ -190,7 +198,9 @@ function Pinyin($_String, $_Code = 'gb2312')
     arsort($_Data);
     reset($_Data);
 
-    if ($_Code != 'gb2312') $_String = _U2_Utf8_Gb($_String);
+    if ($_Code != 'gb2312') {
+        $_String = _U2_Utf8_Gb($_String);
+    }
     $_Res = '';
     for ($i = 0; $i < strlen($_String); $i++) {
         $_P = ord(substr($_String, $i, 1));
@@ -205,11 +215,15 @@ function Pinyin($_String, $_Code = 'gb2312')
 
 function _Pinyin($_Num, $_Data)
 {
-    if ($_Num > 0 && $_Num < 160) return chr($_Num);
-    elseif ($_Num < -20319 || $_Num > -10247) return '';
-    else {
+    if ($_Num > 0 && $_Num < 160) {
+        return chr($_Num);
+    } elseif ($_Num < -20319 || $_Num > -10247) {
+        return '';
+    } else {
         foreach ($_Data as $k => $v) {
-            if ($v <= $_Num) break;
+            if ($v <= $_Num) {
+                break;
+            }
         }
         return $k;
     }
@@ -218,8 +232,9 @@ function _Pinyin($_Num, $_Data)
 function _U2_Utf8_Gb($_C)
 {
     $_String = '';
-    if ($_C < 0x80) $_String .= $_C;
-    elseif ($_C < 0x800) {
+    if ($_C < 0x80) {
+        $_String .= $_C;
+    } elseif ($_C < 0x800) {
         $_String .= chr(0xC0 | $_C >> 6);
         $_String .= chr(0x80 | $_C & 0x3F);
     } elseif ($_C < 0x10000) {

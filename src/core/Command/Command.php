@@ -47,7 +47,7 @@ class Command extends BaseCommand
 
     /**
      * 输出Raw信息到终端（不换行）
-     * 
+     *
      * @param string $msg
      */
     protected function write($msg)
@@ -57,7 +57,7 @@ class Command extends BaseCommand
 
     /**
      * 输出Raw信息到终端
-     * 
+     *
      * @param string $msg
      */
     protected function writeln($msg)
@@ -67,7 +67,7 @@ class Command extends BaseCommand
 
     /**
      * 输出INFO信息到终端
-     * 
+     *
      * @param string $msg
      */
     protected function info($msg)
@@ -77,7 +77,7 @@ class Command extends BaseCommand
 
     /**
      * 输出错误信息到终端
-     * 
+     *
      * @param string $msg
      */
     protected function error($msg)
@@ -87,7 +87,7 @@ class Command extends BaseCommand
 
     /**
      * 输出备注信息到终端
-     * 
+     *
      * @param string $msg
      */
     protected function comment($msg)
@@ -97,7 +97,7 @@ class Command extends BaseCommand
 
     /**
      * 输出表格到终端
-     * 
+     *
      * @param array $header [A, B]
      * @param array $body [[R11, R12], [R21, R22], ...]
      */
@@ -105,7 +105,7 @@ class Command extends BaseCommand
     {
         $table = new Table($this->output());
         $table->setHeaders($header);
-        foreach($body as $row) {
+        foreach ($body as $row) {
             $table->addRow($row);
         }
         $table->render();
@@ -116,7 +116,7 @@ class Command extends BaseCommand
         $code = $e->getCode();
         $msg = $e->getMessage();
         $this->error(">Exception({$code}): {$msg}");
-        foreach(explode("\n", $e->getTraceAsString()) as $line) {
+        foreach (explode("\n", $e->getTraceAsString()) as $line) {
             $this->info("  >{$line}");
         }
     }

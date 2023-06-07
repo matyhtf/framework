@@ -44,7 +44,7 @@ class GenerateRpcSdk extends Command
             $generator->handle($src, $target, $libdir);
         } catch (Throwable $e) {
             $output->writeln('<error>'.$e->getMessage().'</error>');
-            foreach(explode("\n", $e->getTraceAsString()) as $line) {
+            foreach (explode("\n", $e->getTraceAsString()) as $line) {
                 $output->writeln("<comment>  {$line}</comment>");
             }
         }
@@ -52,11 +52,11 @@ class GenerateRpcSdk extends Command
 
     /**
      * Get option value from input.
-     * 
+     *
      * @param InputInterface $input
      * @param string $name option`s name
      * @param string $default default value if the option null
-     * 
+     *
      * @return string
      */
     protected function getOption(InputInterface $input, $name, $default = null)
@@ -71,9 +71,9 @@ class GenerateRpcSdk extends Command
 
     /**
      * Resolve path to full path.
-     * 
+     *
      * @param string $path
-     * 
+     *
      * @return string
      */
     protected function resolvePath($path)
@@ -85,7 +85,7 @@ class GenerateRpcSdk extends Command
 
     /**
      * Validate the source`s value
-     * 
+     *
      * @param string $src
      */
     protected function validSource($src)

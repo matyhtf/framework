@@ -83,7 +83,10 @@ class Encrypter
         // value can be verified later as not having been changed by the users.
         $value = \openssl_encrypt(
             $serialize ? serialize($value) : $value,
-            $this->cipher, $this->key, 0, $iv
+            $this->cipher,
+            $this->key,
+            0,
+            $iv
         );
 
         if ($value === false) {
@@ -134,7 +137,11 @@ class Encrypter
         // we will then unserialize it and return it out to the caller. If we are
         // unable to decrypt this value we will throw out an exception message.
         $decrypted = \openssl_decrypt(
-            $payload['value'], $this->cipher, $this->key, 0, $iv
+            $payload['value'],
+            $this->cipher,
+            $this->key,
+            0,
+            $iv
         );
 
         if ($decrypted === false) {
@@ -217,7 +224,8 @@ class Encrypter
         $calculated = $this->calculateMac($payload, $bytes = self::randomBytes(16));
 
         return hash_equals(
-            hash_hmac('sha256', $payload['mac'], $bytes, true), $calculated
+            hash_hmac('sha256', $payload['mac'], $bytes, true),
+            $calculated
         );
     }
 
@@ -231,7 +239,10 @@ class Encrypter
     protected function calculateMac($payload, $bytes)
     {
         return hash_hmac(
-            'sha256', $this->hash($payload['iv'], $payload['value']), $bytes, true
+            'sha256',
+            $this->hash($payload['iv'], $payload['value']),
+            $bytes,
+            true
         );
     }
 
@@ -256,6 +267,5 @@ class Encrypter
         if (function_exists('openssl_random_pseudo_bytes')) {
             return \openssl_random_pseudo_bytes($length);
         }
-
     }
 }

@@ -1,5 +1,6 @@
 <?php
 namespace SPF;
+
 use RuntimeException;
 
 /**
@@ -13,9 +14,9 @@ class Session
     protected $config;
 
     // 类成员属性定义
-    static $cache_prefix = "phpsess_";
-    static $cookie_key = 'PHPSESSID';
-    static $sess_size = 32;
+    public static $cache_prefix = "phpsess_";
+    public static $cookie_key = 'PHPSESSID';
+    public static $sess_size = 32;
 
     public $isStarted = false;
     protected $sessID;
@@ -84,8 +85,13 @@ class Session
                 $sessid = Cookie::get(self::$cookie_key);
                 if (empty($sessid)) {
                     $sessid = RandomKey::randmd5(40);
-                    App::getInstance()->http->setCookie(self::$cookie_key, $sessid, time() + $this->cookie_lifetime,
-                        $this->cookie_path, $this->cookie_domain);
+                    App::getInstance()->http->setCookie(
+                        self::$cookie_key,
+                        $sessid,
+                        time() + $this->cookie_lifetime,
+                        $this->cookie_path,
+                        $this->cookie_domain
+                    );
                 }
             }
             $_SESSION = $this->load($sessid);
@@ -97,7 +103,7 @@ class Session
      * 设置SessionID
      * @param $session_id
      */
-    function setId($session_id)
+    public function setId($session_id)
     {
         $this->sessID = $session_id;
         if ($this->use_php_session) {
@@ -109,7 +115,7 @@ class Session
      * 获取SessionID
      * @return string
      */
-    function getId()
+    public function getId()
     {
         if ($this->use_php_session) {
             return session_id();
@@ -143,8 +149,7 @@ class Session
         /**
          * 使用PHP Sesion，Readonl，未启动 这3种情况下不需要保存
          */
-        if ($this->use_php_session or !$this->isStarted or $this->readonly)
-        {
+        if ($this->use_php_session or !$this->isStarted or $this->readonly) {
             return true;
         }
         //设置为Session关闭状态

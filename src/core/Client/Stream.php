@@ -19,7 +19,7 @@ class Stream
     protected $fp;
     protected $tcp;
 
-    function __construct($tcp = true)
+    public function __construct($tcp = true)
     {
         $this->tcp = $tcp;
     }
@@ -30,12 +30,11 @@ class Stream
      * @param float $timeout
      * @return bool
      */
-    function connect($host, $port, $timeout = 0.1)
+    public function connect($host, $port, $timeout = 0.1)
     {
         $uri = ($this->tcp ? 'tcp' : 'udp') . "://{$host}:{$port}";
         $this->fp = stream_socket_client($uri, $this->errCode, $this->errMsg, $timeout);
-        if (!$this->fp)
-        {
+        if (!$this->fp) {
             return false;
         }
         $this->connected = true;
@@ -47,7 +46,7 @@ class Stream
      * @param float $timeout
      * @return bool
      */
-    function setTimeout($timeout)
+    public function setTimeout($timeout)
     {
         $t_sec = (int)$timeout;
         $t_usec = (int)(($timeout - $t_sec) * 1000 * 1000);
@@ -60,23 +59,18 @@ class Stream
      * @param $length
      * @return string
      */
-    function recv($length)
+    public function recv($length)
     {
         $content = '';
         $readn = $length;
 
-        while ($readn > 0)
-        {
-            if ($readn > 8192)
-            {
+        while ($readn > 0) {
+            if ($readn > 8192) {
                 $tmp = fread($this->fp, 8192);
-            }
-            else
-            {
+            } else {
                 $tmp = fread($this->fp, $readn);
             }
-            if (empty($tmp))
-            {
+            if (empty($tmp)) {
                 break;
             }
             $content .= $tmp;
@@ -90,22 +84,17 @@ class Stream
      * @param $content
      * @return int
      */
-    function send($content)
+    public function send($content)
     {
         $length = strlen($content);
-        for ($written = 0; $written < $length; $written += $n)
-        {
-            if ($length - $written >= 8192)
-            {
+        for ($written = 0; $written < $length; $written += $n) {
+            if ($length - $written >= 8192) {
                 $n = fwrite($this->fp, substr($content, 8192));
-            }
-            else
-            {
+            } else {
                 $n = fwrite($this->fp, substr($content, $written));
             }
             //写文件失败了
-            if (empty($n))
-            {
+            if (empty($n)) {
                 break;
             }
         }
@@ -116,7 +105,7 @@ class Stream
     /**
      * @return mixed
      */
-    function getSocket()
+    public function getSocket()
     {
         return $this->fp;
     }
@@ -125,10 +114,9 @@ class Stream
      * 关闭socket连接
      * @return bool
      */
-    function close()
+    public function close()
     {
-        if ($this->fp)
-        {
+        if ($this->fp) {
             return fclose($this->fp);
         }
         return false;

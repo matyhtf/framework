@@ -8,7 +8,7 @@ class TUPAPIWrapper
 {
     /**
      * TUP协议的版本
-     * 
+     *
      * @var int
      */
     public static $version = 1;
@@ -155,7 +155,7 @@ class TUPAPIWrapper
 
     /**
      * 将数组转换成对象
-     * 
+     *
      * @param array $data
      * @param \TARS_Struct $structObj
      */
@@ -174,7 +174,7 @@ class TUPAPIWrapper
 
     /**
      * TUPAPI代理
-     * 
+     *
      * @return mixed
      */
     protected static function proxyTUPAPI()
@@ -211,9 +211,9 @@ class TUPAPIWrapper
 
     /**
      * 获取TARS_Exception异常对应的异常信息
-     * 
+     *
      * @param int $code
-     * 
+     *
      * @return int
      */
     protected static function getTarsException($code)

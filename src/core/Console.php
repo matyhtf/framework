@@ -4,7 +4,7 @@ namespace SPF;
 
 class Console
 {
-    static function getOpt($cmd)
+    public static function getOpt($cmd)
     {
         $cmd = trim($cmd);
         $args = explode(' ', $cmd);
@@ -27,7 +27,7 @@ class Console
      * @param $user
      * @return bool
      */
-    static function changeUser($user)
+    public static function changeUser($user)
     {
         if (!function_exists('posix_getpwnam')) {
             trigger_error(__METHOD__ . ": require posix extension.");
@@ -48,7 +48,7 @@ class Console
      * 设置进程的名称
      * @param $name
      */
-    static function setProcessName($name)
+    public static function setProcessName($name)
     {
         if (function_exists('cli_set_process_title')) {
             @cli_set_process_title($name);

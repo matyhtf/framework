@@ -1,5 +1,6 @@
 <?php
 namespace SPF;
+
 /**
  * 文件上传类
  * 限制尺寸，压缩，生成缩略图，限制格式
@@ -62,15 +63,13 @@ class Upload
      */
     public $error_code;
 
-    function __construct($config)
+    public function __construct($config)
     {
-        if (empty($config['base_dir']) or empty($config['base_url']))
-        {
+        if (empty($config['base_dir']) or empty($config['base_url'])) {
             throw new \Exception(__CLASS__.' require base_dir and base_url.');
         }
         $this->base_dir = $config['base_dir'];
-        if (Tool::endchar($this->base_dir) != '/')
-        {
+        if (Tool::endchar($this->base_dir) != '/') {
             $this->base_dir .= '/';
         }
         $this->base_url = $config['base_url'];
@@ -78,31 +77,27 @@ class Upload
         $this->mimes = $mimes;
     }
 
-    function error_msg()
+    public function error_msg()
     {
         return $this->error_msg;
     }
-    function save_all()
+    public function save_all()
     {
-        if(!empty($_FILES))
-		{
-			foreach($_FILES as $k=>$f)
-			{
-				if(!empty($_FILES[$k]['type'])) $_POST[$k] = $this->save($k);
-			}
-		}
+        if (!empty($_FILES)) {
+            foreach ($_FILES as $k=>$f) {
+                if (!empty($_FILES[$k]['type'])) {
+                    $_POST[$k] = $this->save($k);
+                }
+            }
+        }
     }
 
-    static function moveUploadFile($tmpfile, $newfile)
+    public static function moveUploadFile($tmpfile, $newfile)
     {
-        if (!defined('SWOOLE_SERVER'))
-        {
+        if (!defined('SWOOLE_SERVER')) {
             return move_uploaded_file($tmpfile, $newfile);
-        }
-        else
-        {
-            if (rename($tmpfile, $newfile) === false)
-            {
+        } else {
+            if (rename($tmpfile, $newfile) === false) {
                 return false;
             }
             return chmod($newfile, 0666);
@@ -116,11 +111,10 @@ class Upload
      * @param null $allow
      * @return bool
      */
-    function save($name, $filename = null, $allow = null)
+    public function save($name, $filename = null, $allow = null)
     {
         //检查请求中是否存在上传的文件
-        if (empty($_FILES[$name]['type']))
-        {
+        if (empty($_FILES[$name]['type'])) {
             $this->error_msg = "No upload file '$name'!";
             $this->error_code = 0;
             return false;
@@ -130,22 +124,15 @@ class Upload
         $base_dir = empty($this->sub_dir) ? $this->base_dir : $this->base_dir . $this->sub_dir . '/';
 
         //切分目录
-        if ($this->shard_type == 'randomkey')
-        {
-            if (empty($this->shard_argv))
-            {
+        if ($this->shard_type == 'randomkey') {
+            if (empty($this->shard_argv)) {
                 $this->shard_argv = 8;
             }
             $sub_dir = RandomKey::randmd5($this->shard_argv);
-        }
-        elseif ($this->shard_type == 'user')
-        {
+        } elseif ($this->shard_type == 'user') {
             $sub_dir = $this->shard_argv;
-        }
-        else
-        {
-            if (empty($this->shard_argv))
-            {
+        } else {
+            if (empty($this->shard_argv)) {
                 $this->shard_argv = 'Ym/d';
             }
             $sub_dir = date($this->shard_argv);
@@ -153,10 +140,8 @@ class Upload
 
         //上传的最终绝对路径，如果不存在则创建目录
         $path = rtrim($base_dir, '/') . '/' . ltrim($sub_dir, '/');
-        if (!is_dir($path))
-        {
-            if (mkdir($path, 0777, true) === false)
-            {
+        if (!is_dir($path)) {
+            if (mkdir($path, 0777, true) === false) {
                 $this->error_msg = "mkdir path=$path fail.";
                 return false;
             }
@@ -168,48 +153,38 @@ class Upload
         //MIME格式
         $mime = $_FILES[$name]['type'];
         $filetype = $this->getMimeType($mime);
-        if ($filetype === 'bin')
-        {
+        if ($filetype === 'bin') {
             $filetype = self::getFileExt($_FILES[$name]['name']);
         }
-        if ($filetype === false)
-        {
+        if ($filetype === false) {
             $this->error_msg = "File mime '$mime' unknown!";
             $this->error_code = 1;
             return false;
-        }
-        elseif (!in_array($filetype, $this->allow))
-        {
+        } elseif (!in_array($filetype, $this->allow)) {
             $this->error_msg = "File Type '$filetype' not allow upload!";
             $this->error_code = 2;
             return false;
         }
 
         //生成文件名
-        if ($filename === null)
-        {
+        if ($filename === null) {
             $filename = RandomKey::randtime();
             //如果已存在此文件，不断随机直到产生一个不存在的文件名
-            while ($this->exist_check and is_file($path . '/' . $filename . '.' . $filetype))
-            {
+            while ($this->exist_check and is_file($path . '/' . $filename . '.' . $filetype)) {
                 $filename = RandomKey::randtime();
             }
-        }
-        elseif ($this->overwrite === false and is_file($path . '/' . $filename . '.' . $filetype))
-        {
+        } elseif ($this->overwrite === false and is_file($path . '/' . $filename . '.' . $filetype)) {
             $this->error_msg = "File '$path/$filename.$filetype' existed!";
             $this->error_code = 3;
             return false;
         }
-        if ($this->shard_type != 'user')
-        {
+        if ($this->shard_type != 'user') {
             $filename .= '.' . $filetype;
         }
 
         //检查文件大小
         $filesize = filesize($_FILES[$name]['tmp_name']);
-        if ($this->max_size > 0 and $filesize > $this->max_size)
-        {
+        if ($this->max_size > 0 and $filesize > $this->max_size) {
             $this->error_msg = "File size go beyond the max_size!";
             $this->error_code = 4;
             return false;
@@ -217,49 +192,50 @@ class Upload
         $save_filename = rtrim($path) . '/' . ltrim($filename);
 
         $base_url = $this->base_url;
-        if (substr($base_url,-1) != "/"){
+        if (substr($base_url, -1) != "/") {
             $base_url.="/";
         }
         $_sub_dir = "";
-        if (!empty($this->sub_dir)){
+        if (!empty($this->sub_dir)) {
             $_sub_dir = $this->sub_dir;
-            if (substr($_sub_dir,-1) != "/"){
+            if (substr($_sub_dir, -1) != "/") {
                 $_sub_dir .= "/";
             }
         }
 
-    	//写入文件
-        if (self::moveUploadFile($_FILES[$name]['tmp_name'], $save_filename))
-        {
+        //写入文件
+        if (self::moveUploadFile($_FILES[$name]['tmp_name'], $save_filename)) {
             //产生缩略图
-            if ($this->thumb_width and in_array($filetype, array('gif', 'jpg', 'jpeg', 'bmp', 'png')))
-            {
-                $thumb_file = str_replace('.' . $filetype,
+            if ($this->thumb_width and in_array($filetype, array('gif', 'jpg', 'jpeg', 'bmp', 'png'))) {
+                $thumb_file = str_replace(
+                    '.' . $filetype,
                     '_' . $this->thumb_width . 'x' . $this->thumb_height . '.' . $filetype,
-                    $filename);
-                Image::thumbnail($save_filename,
+                    $filename
+                );
+                Image::thumbnail(
+                    $save_filename,
                     $path . '/' . $thumb_file,
                     $this->thumb_width,
                     $this->thumb_height,
-                    $this->thumb_qulitity);
+                    $this->thumb_qulitity
+                );
                 $return['thumb'] =   $base_url.$_sub_dir."{$sub_dir}/{$thumb_file}";
             }
             //压缩图片
-            if ($this->max_width and in_array($filetype, array('gif', 'jpg', 'jpeg', 'bmp', 'png')))
-            {
-                Image::thumbnail($save_filename,
+            if ($this->max_width and in_array($filetype, array('gif', 'jpg', 'jpeg', 'bmp', 'png'))) {
+                Image::thumbnail(
+                    $save_filename,
                     $save_filename,
                     $this->max_width,
                     $this->max_height,
-                    $this->max_qulitity);
+                    $this->max_qulitity
+                );
             }
             $return['url']  = $base_url.$_sub_dir."{$sub_dir}/{$filename}";
             $return['size'] = $filesize;
             $return['type'] = $filetype;
             return $return;
-        }
-        else
-        {
+        } else {
             $this->error_msg = "move upload file fail. tmp_name={$_FILES[$name]['tmp_name']}|dest_name={$save_filename}";
             $this->error_code = 2;
             return false;
@@ -272,12 +248,9 @@ class Upload
      */
     public function getMimeType($mime)
     {
-        if (isset($this->mimes[$mime]))
-        {
+        if (isset($this->mimes[$mime])) {
             return $this->mimes[$mime];
-        }
-        else
-        {
+        } else {
             return false;
         }
     }
@@ -287,11 +260,10 @@ class Upload
      * @param $file
      * @return string
      */
-    static public function getFileExt($file)
+    public static function getFileExt($file)
     {
         $s = strrchr($file, '.');
-        if ($s === false)
-        {
+        if ($s === false) {
             return false;
         }
         return strtolower(trim(substr($s, 1)));

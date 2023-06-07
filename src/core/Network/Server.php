@@ -20,12 +20,12 @@ class Server extends Base implements Driver
     protected static $beforeStopCallback;
     protected static $beforeReloadCallback;
 
-    static $swooleMode;
-    static $useSwooleHttpServer = false;
-    static $optionKit;
-    static $pidFile;
+    public static $swooleMode;
+    public static $useSwooleHttpServer = false;
+    public static $optionKit;
+    public static $pidFile;
 
-    static $defaultOptions = array(
+    public static $defaultOptions = array(
         'd|daemon' => '启用守护进程模式',
         'h|host?' => '指定监听地址',
         'p|port?' => '指定监听端口',
@@ -41,13 +41,13 @@ class Server extends Base implements Driver
      */
     protected $sw;
     protected $pid_file;
-    static public $swoole;
+    public static $swoole;
 
     /**
      * 设置PID文件
      * @param $pidFile
      */
-    static function setPidFile($pidFile)
+    public static function setPidFile($pidFile)
     {
         self::$pidFile = $pidFile;
     }
@@ -58,7 +58,7 @@ class Server extends Base implements Driver
      * @param int $signo
      * @return string
      */
-    static function killProcessByName($name, $signo = 9)
+    public static function killProcessByName($name, $signo = 9)
     {
         $cmd = 'ps -eaf |grep "' . $name . '" | grep -v "grep"| awk "{print $2}"|xargs kill -' . $signo;
         return exec($cmd);
@@ -78,7 +78,7 @@ class Server extends Base implements Driver
      * @param $description
      * @throws ServerOptionException
      */
-    static function addOption($specString, $description)
+    public static function addOption($specString, $description)
     {
         if (!self::$optionKit) {
             self::$optionKit = new OptionCollection;
@@ -96,7 +96,7 @@ class Server extends Base implements Driver
     }
 
 
-    static function setOption($key, $value)
+    public static function setOption($key, $value)
     {
         self::$options[$key] = $value;
     }
@@ -104,7 +104,7 @@ class Server extends Base implements Driver
     /**
      * @param $function
      */
-    static function setStartFunction(callable $function)
+    public static function setStartFunction(callable $function)
     {
         self::$startFunction = $function;
     }
@@ -112,7 +112,7 @@ class Server extends Base implements Driver
     /**
      * @param callable $function
      */
-    static function beforeStop(callable $function)
+    public static function beforeStop(callable $function)
     {
         self::$beforeStopCallback = $function;
     }
@@ -120,12 +120,12 @@ class Server extends Base implements Driver
     /**
      * @param callable $function
      */
-    static function beforeReload(callable $function)
+    public static function beforeReload(callable $function)
     {
         self::$beforeReloadCallback = $function;
     }
 
-    static function getServerPid()
+    public static function getServerPid()
     {
         if (empty(self::$pidFile)) {
             throw new \Exception("require pidFile.");
@@ -145,7 +145,7 @@ class Server extends Base implements Driver
      * @param null $usage
      * @throws \Exception
      */
-    static function start($startFunction, $usage = null)
+    public static function start($startFunction, $usage = null)
     {
         if (empty(self::$pidFile)) {
             throw new \Exception("require pidFile.");
@@ -213,7 +213,7 @@ class Server extends Base implements Driver
         $startFunction(self::$options);
     }
 
-    static function startServer($isHttp = false)
+    public static function startServer($isHttp = false)
     {
         if ($isHttp) {
             self::$useSwooleHttpServer = true;
@@ -230,7 +230,7 @@ class Server extends Base implements Driver
         return self::cmdStatus(0, "Server start success");
     }
 
-    static function stop()
+    public static function stop()
     {
         $pid = self::getServerPid();
         if (empty($pid)) {
@@ -248,7 +248,7 @@ class Server extends Base implements Driver
         return self::cmdStatus(0, "Server stop success");
     }
 
-    static function reload()
+    public static function reload()
     {
         $pid = self::getServerPid();
 
@@ -267,7 +267,7 @@ class Server extends Base implements Driver
         return self::cmdStatus(0, "Server reload success");
     }
 
-    static function cmdStatus($code, $msg)
+    public static function cmdStatus($code, $msg)
     {
         return [
             'code' => $code,
@@ -283,7 +283,7 @@ class Server extends Base implements Driver
      * @param bool $ssl
      * @return Server
      */
-    static function autoCreate($host, $port, $ssl = false)
+    public static function autoCreate($host, $port, $ssl = false)
     {
         if (class_exists('\\Swoole\\Server', false)) {
             return new self($host, $port, $ssl);
@@ -294,7 +294,7 @@ class Server extends Base implements Driver
         }
     }
 
-    function __construct($host, $port, $ssl = false)
+    public function __construct($host, $port, $ssl = false)
     {
         $flag = $ssl ? (SWOOLE_SOCK_TCP | SWOOLE_SSL) : SWOOLE_SOCK_TCP;
         if (!empty(self::$options['base'])) {
@@ -324,22 +324,22 @@ class Server extends Base implements Driver
         );
     }
 
-    function daemonize()
+    public function daemonize()
     {
         $this->runtimeSetting['daemonize'] = 1;
     }
 
-    function connections()
+    public function connections()
     {
         return $this->sw->connections;
     }
 
-    function connection_info($fd)
+    public function connection_info($fd)
     {
         return $this->sw->connection_info($fd);
     }
 
-    function onMasterStart($serv)
+    public function onMasterStart($serv)
     {
         SPF\Console::setProcessName($this->getProcessName() . ': master -host=' . $this->host . ' -port=' . $this->port);
         if (!empty($this->runtimeSetting['pid_file'])) {
@@ -350,7 +350,7 @@ class Server extends Base implements Driver
         }
     }
 
-    function onMasterStop($serv)
+    public function onMasterStop($serv)
     {
         if (!empty($this->runtimeSetting['pid_file'])) {
             unlink(self::$pidFile);
@@ -360,7 +360,7 @@ class Server extends Base implements Driver
         }
     }
 
-    function onManagerStart($server)
+    public function onManagerStart($server)
     {
         SPF\Console::setProcessName($this->getProcessName() . ': manager');
         if (method_exists($this->protocol, 'onManagerStart')) {
@@ -368,14 +368,14 @@ class Server extends Base implements Driver
         }
     }
 
-    function onManagerStop($server)
+    public function onManagerStop($server)
     {
         if (method_exists($this->protocol, 'onManagerStop')) {
             $this->protocol->onManagerStop($server);
         }
     }
 
-    function onWorkerStart($serv, $worker_id)
+    public function onWorkerStart($serv, $worker_id)
     {
         /**
          * 清理Opcache缓存
@@ -403,7 +403,7 @@ class Server extends Base implements Driver
         }
     }
 
-    function run($setting = array())
+    public function run($setting = array())
     {
         $this->runtimeSetting = array_merge($this->runtimeSetting, $setting);
         if (self::$pidFile) {
@@ -459,12 +459,12 @@ class Server extends Base implements Driver
         $this->sw->start();
     }
 
-    function shutdown()
+    public function shutdown()
     {
         return $this->sw->shutdown();
     }
 
-    function close($client_id)
+    public function close($client_id)
     {
         return $this->sw->close($client_id);
     }
@@ -473,7 +473,7 @@ class Server extends Base implements Driver
      * @param $protocol
      * @throws \Exception
      */
-    function setProtocol($protocol)
+    public function setProtocol($protocol)
     {
         if (self::$useSwooleHttpServer) {
             $this->protocol = $protocol;
@@ -482,12 +482,12 @@ class Server extends Base implements Driver
         }
     }
 
-    function send($client_id, $data)
+    public function send($client_id, $data)
     {
         return $this->sw->send($client_id, $data);
     }
 
-    static function task($data, $func)
+    public static function task($data, $func)
     {
         $params = array(
             'func' => $func,
@@ -496,7 +496,7 @@ class Server extends Base implements Driver
         self::$swoole->task($params);
     }
 
-    function __call($func, $params)
+    public function __call($func, $params)
     {
         return call_user_func_array(array($this->sw, $func), $params);
     }
@@ -504,5 +504,4 @@ class Server extends Base implements Driver
 
 class ServerOptionException extends \Exception
 {
-
 }

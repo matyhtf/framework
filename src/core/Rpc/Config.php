@@ -19,7 +19,7 @@ class Config
     /**
      * 根据路径载入
      * 自动将文件名作为顶层key
-     * 
+     *
      * @param string $path
      */
     public static function loadPath(string $path)
@@ -30,7 +30,7 @@ class Config
 
         $dirIterator = new RecursiveDirectoryIterator($path, RecursiveDirectoryIterator::SKIP_DOTS);
         $iterator = new RecursiveIteratorIterator($dirIterator);
-        foreach($iterator as $file) {
+        foreach ($iterator as $file) {
             if ($file->getExtension() !== 'php') {
                 continue;
             }
@@ -43,12 +43,12 @@ class Config
     /**
      * 根据配置文件列表载入
      * 可以将数组的key作为配置顶层key
-     * 
+     *
      * @param array $list ['config1.php', 'mykey' => 'config2.php']
      */
     public static function loadList(array $list)
     {
-        foreach($list as $key => $file) {
+        foreach ($list as $key => $file) {
             $filename = static::resolvePath($file);
             if (!is_file($filename)) {
                 throw new Exception("config file [$file] is not exists");
@@ -67,10 +67,10 @@ class Config
 
     /**
      * 获取配置
-     * 
+     *
      * @param string $key 配置键名，支持多层级，用.隔开，例如project.name
      * @param mixed $default 默认值
-     * 
+     *
      * @return mixed
      */
     public static function get($key, $default = null)
@@ -81,7 +81,7 @@ class Config
             return $config;
         }
 
-        foreach(explode('.', $key) as $subKey) {
+        foreach (explode('.', $key) as $subKey) {
             if (isset($config[$subKey])) {
                 $config = $config[$subKey];
                 continue;
@@ -95,9 +95,9 @@ class Config
 
     /**
      * 获取配置，配置不存在时抛出异常
-     * 
+     *
      * @param string $key 配置键名，支持多层级，用.隔开，例如project.name
-     * 
+     *
      * @return mixed
      */
     public static function getOrFailed($key)
@@ -122,7 +122,7 @@ class Config
 
     /**
      * 设置配置
-     * 
+     *
      * @param string $key 配置键名，支持多层级，最多支持4层级，用.隔开，例如project.name
      * @param mixed $value 配置的值
      */
@@ -150,7 +150,7 @@ class Config
 
     /**
      * 移除配置
-     * 
+     *
      * @param string $key 配置键名，支持多层级，最多支持4层级，用.隔开，例如project.name
      */
     public static function remove($key)
@@ -191,7 +191,7 @@ class Config
 
     /**
      * @param string $path
-     * 
+     *
      * @return string|bool
      */
     protected static function resolvePath($path)
@@ -218,7 +218,7 @@ class Config
 
     /**
      * 是否处于debug模式
-     * 
+     *
      * @return bool
      */
     public static function debug()

@@ -22,7 +22,7 @@ class RecordSet implements \Iterator
 
     public $_current_id = 0;
 
-    function __construct($db, $table, $primary, $select)
+    public function __construct($db, $table, $primary, $select)
     {
         $this->table = $table;
         $this->primary = $primary;
@@ -37,7 +37,7 @@ class RecordSet implements \Iterator
      * 获取得到的数据
      * @return array
      */
-    function get()
+    public function get()
     {
         return $this->_list;
     }
@@ -47,7 +47,7 @@ class RecordSet implements \Iterator
      * @param array $params
      * @return bool
      */
-    function params($params)
+    public function params($params)
     {
         return $this->db_select->put($params);
     }
@@ -56,7 +56,7 @@ class RecordSet implements \Iterator
      * @param array $params
      * @return null
      */
-    function filter($where)
+    public function filter($where)
     {
         $this->db_select->where($where);
     }
@@ -64,15 +64,15 @@ class RecordSet implements \Iterator
      * 增加过滤条件，$field = $value
      * @return unknown_type
      */
-    function eq($field, $value)
+    public function eq($field, $value)
     {
-        $this->db_select->equal($field,$value);
+        $this->db_select->equal($field, $value);
     }
     /**
      * 过滤器语法，参数为SQL SelectDB的orwhere语句
      * @param $params
      */
-    function orfilter($where)
+    public function orfilter($where)
     {
         $this->db_select->orwhere($where);
     }
@@ -81,7 +81,7 @@ class RecordSet implements \Iterator
      * 参数可以制定返回的字段
      * @param $field
      */
-    function fetch($field='')
+    public function fetch($field='')
     {
         return $this->db_select->getone($field);
     }
@@ -89,25 +89,24 @@ class RecordSet implements \Iterator
     /**
      * 获取全部数据
      */
-    function fetchall()
+    public function fetchall()
     {
         return $this->db_select->getall();
     }
 
-    function __set($key, $v)
+    public function __set($key, $v)
     {
         $this->db_select->$key = $v;
     }
 
-    function __call($method, $argv)
+    public function __call($method, $argv)
     {
         return call_user_func_array(array($this->db_select, $method), $argv);
     }
 
     public function rewind()
     {
-        if (empty($this->_list))
-        {
+        if (empty($this->_list)) {
             $this->_list = $this->db_select->getall();
         }
         $this->_current_id = 0;
@@ -133,12 +132,9 @@ class RecordSet implements \Iterator
 
     public function valid()
     {
-        if (isset($this->_list[$this->_current_id]))
-        {
+        if (isset($this->_list[$this->_current_id])) {
             return true;
-        }
-        else
-        {
+        } else {
             return false;
         }
     }

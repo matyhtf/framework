@@ -1,11 +1,12 @@
 <?php
 namespace SPF\Protocol;
+
 use SPF;
 
 class FtpServer extends Base
 {
     const EOF = "\r\n";
-    static $software = "swoole-ftp-server";
+    public static $software = "swoole-ftp-server";
 
     /**
      * @var \swoole_server
@@ -15,14 +16,14 @@ class FtpServer extends Base
 
     public $users = array();
 
-    function send($socket, $msg)
+    public function send($socket, $msg)
     {
         $msg = strtr($msg, array("\n" => "", "\0" => "", "\r" => ""));
         echo "[-->]\t" . $msg . "\n";
         return $this->serv->send($socket, $msg . self::EOF);
     }
 
-    function isIPAddress($ip)
+    public function isIPAddress($ip)
     {
         if (!is_numeric($ip[0]) || $ip[0] < 1 || $ip[0] > 254) {
             return false;
@@ -41,13 +42,13 @@ class FtpServer extends Base
         }
     }
 
-    function onStart($serv)
+    public function onStart($serv)
     {
         $this->serv = $serv;
         //SPF\Console::changeUser('www-data');
     }
 
-    function onConnect($serv, $fd, $from_id)
+    public function onConnect($serv, $fd, $from_id)
     {
         $this->connections[$fd] = array();
         $this->send($fd, "220---------- Welcome to " . self::$software . " ----------");
@@ -60,7 +61,7 @@ class FtpServer extends Base
      * @param $fd
      * @param $cmd
      */
-    function cmd_PWD($fd, $cmd)
+    public function cmd_PWD($fd, $cmd)
     {
         $user = $this->getUser($fd);
         $this->send($fd, "257 \"" . $this->getUserDir($user) . "\" is your current location");
@@ -71,15 +72,12 @@ class FtpServer extends Base
      * @param $fd
      * @param $cmd
      */
-    function cmd_CWD($fd, $cmd)
+    public function cmd_CWD($fd, $cmd)
     {
         $user = $this->getUser($fd);
-        if (($dir = $this->setUserDir($user, $cmd[1])) != false)
-        {
+        if (($dir = $this->setUserDir($user, $cmd[1])) != false) {
             $this->send($fd, "250 OK. Current directory is " . $dir);
-        }
-        else
-        {
+        } else {
             $this->send($fd, "550 Can't change directory to " . $cmd[1] . ": No such file or directory");
         }
     }
@@ -89,32 +87,29 @@ class FtpServer extends Base
      * @param $fd
      * @param $cmd
      */
-    function cmd_STOR($fd, $cmd)
+    public function cmd_STOR($fd, $cmd)
     {
         $user = $this->getUser($fd);
         $ftpsock = $this->getUserSock($user);
         $file = $this->fillDirName($user, $cmd[1]);
         $this->debug("PUT: $file");
         $fp = fopen($file, "w");
-        if (!$fp)
-        {
+        if (!$fp) {
             $this->send($fd, "553 Can't open that file: Permission denied");
-        }
-        else
-        {
+        } else {
             $this->send($fd, "150 Connecting to client");
-            while (!feof($ftpsock))
-            {
+            while (!feof($ftpsock)) {
                 $cont = fread($ftpsock, 8192);
-                if (!$cont) break;
-                if (!fwrite($fp, $cont)) break;
+                if (!$cont) {
+                    break;
+                }
+                if (!fwrite($fp, $cont)) {
+                    break;
+                }
             }
-            if (fclose($fp) and $this->closeUserSock($user))
-            {
+            if (fclose($fp) and $this->closeUserSock($user)) {
                 $this->send($fd, "226 File successfully transferred");
-            }
-            else
-            {
+            } else {
                 $this->send($fd, "550 Error during file-transfer");
             }
         }
@@ -125,32 +120,22 @@ class FtpServer extends Base
      * @param $fd
      * @param $cmd
      */
-    function cmd_RMD($fd, $cmd)
+    public function cmd_RMD($fd, $cmd)
     {
         $user = $this->getUser($fd);
         $dir = $this->fillDirName($user, $cmd[1]);
         $this->debug("RMDIR: $dir");
-        if (is_dir(dirname($dir)) and is_dir($dir))
-        {
-            if (count(glob($dir . "/*")))
-            {
+        if (is_dir(dirname($dir)) and is_dir($dir)) {
+            if (count(glob($dir . "/*"))) {
                 $this->send($fd, "550 Can't remove directory: Directory not empty");
-            }
-            elseif (rmdir($dir))
-            {
+            } elseif (rmdir($dir)) {
                 $this->send($fd, "250 The directory was successfully removed");
-            }
-            else
-            {
+            } else {
                 $this->send($fd, "550 Can't remove directory: Operation not permitted");
             }
-        }
-        elseif (is_dir(dirname($dir)) and file_exists($dir))
-        {
+        } elseif (is_dir(dirname($dir)) and file_exists($dir)) {
             $this->send($fd, "550 Can't remove directory: Not a directory");
-        }
-        else
-        {
+        } else {
             $this->send($fd, "550 Can't create directory: No such file or directory");
         }
     }
@@ -160,21 +145,16 @@ class FtpServer extends Base
      * @param $fd
      * @param $cmd
      */
-    function cmd_DELE($fd, $cmd)
+    public function cmd_DELE($fd, $cmd)
     {
         $user = $this->getUser($fd);
         $file = $this->fillDirName($user, $cmd[1]);
         $this->debug("DEL: $file");
-        if (!file_exists($file))
-        {
+        if (!file_exists($file)) {
             $this->send($fd, "550 Could not delete " . $cmd[1] . ": No such file or directory");
-        }
-        elseif (unlink($file))
-        {
+        } elseif (unlink($file)) {
             $this->send($fd, "250 Deleted " . $cmd[1]);
-        }
-        else
-        {
+        } else {
             $this->send($fd, "550 Could not delete " . $cmd[1] . ": Permission denied");
         }
     }
@@ -184,7 +164,7 @@ class FtpServer extends Base
      * @param $fd
      * @param $cmd
      */
-    function cmd_SYST($fd, $cmd)
+    public function cmd_SYST($fd, $cmd)
     {
         $this->send($fd, "215 UNIX Type: L8");
     }
@@ -194,27 +174,19 @@ class FtpServer extends Base
      * @param $fd
      * @param $cmd
      */
-    function cmd_MKD($fd, $cmd)
+    public function cmd_MKD($fd, $cmd)
     {
         $user = $this->getUser($fd);
         $path = $this->getAbsDir($user).$cmd[1];
 
-        if (!is_dir(dirname($path)))
-        {
+        if (!is_dir(dirname($path))) {
             $this->send($fd, "550 Can't create directory: No such file or directory");
-        }
-        elseif(file_exists($path))
-        {
+        } elseif (file_exists($path)) {
             $this->send($fd, "550 Can't create directory: File exists");
-        }
-        else
-        {
-            if (mkdir($path))
-            {
+        } else {
+            if (mkdir($path)) {
                 $this->send($fd, "257 \"" . $cmd[1] . "\" : The directory was successfully created");
-            }
-            else
-            {
+            } else {
                 $this->send($fd, "550 Can't create directory: Permission denied");
             }
         }
@@ -225,22 +197,17 @@ class FtpServer extends Base
      * @param $fd
      * @param $cmd
      */
-    function cmd_RNTO($fd, $cmd)
+    public function cmd_RNTO($fd, $cmd)
     {
         $user = $this->getUser($fd);
         $old_file = $this->users[$user]['rename'];
         $new_file = $this->fillDirName($user, $cmd[1]);
         $this->debug("RENAME: $old_file to $new_file");
-        if (empty($old_file) or !is_dir(dirname($new_file)))
-        {
+        if (empty($old_file) or !is_dir(dirname($new_file))) {
             $this->send($fd, "451 Rename/move failure: No such file or directory");
-        }
-        elseif (rename($old_file, $new_file))
-        {
+        } elseif (rename($old_file, $new_file)) {
             $this->send($fd, "250 File successfully renamed or moved");
-        }
-        else
-        {
+        } else {
             $this->send($fd, "451 Rename/move failure: Operation not permitted");
         }
         unset($this->users[$user]['rename']);
@@ -251,16 +218,13 @@ class FtpServer extends Base
      * @param $fd
      * @param $cmd
      */
-    function cmd_RNFR($fd, $cmd)
+    public function cmd_RNFR($fd, $cmd)
     {
         $user = $this->getUser($fd);
         $file = $this->fillDirName($user, $cmd[1]);
-        if (!file_exists($file))
-        {
+        if (!file_exists($file)) {
             $this->send($fd, "550 Sorry, but that file doesn't exist");
-        }
-        else
-        {
+        } else {
             $this->users[$user]['rename'] = $file;
             $this->send($fd, "350 RNFR accepted - file exists, ready for destination");
         }
@@ -271,25 +235,19 @@ class FtpServer extends Base
      * @param $fd
      * @param $cmd
      */
-    function cmd_SITE($fd, $cmd)
+    public function cmd_SITE($fd, $cmd)
     {
-        if (substr($cmd[1], 0, 6) == "CHMOD ")
-        {
+        if (substr($cmd[1], 0, 6) == "CHMOD ") {
             $user = $this->getUser($fd);
             $chmod = explode(" ", $cmd[1], 3);
             $file = $this->fillDirName($user, $chmod[2]);
             $this->debug("CHMOD: $file to {$chmod[1]}");
-            if (chmod($file, octdec($chmod[1])))
-            {
+            if (chmod($file, octdec($chmod[1]))) {
                 $this->send($fd, "200 Permissions changed on {$chmod[2]}");
-            }
-            else
-            {
+            } else {
                 $this->send($fd, "550 Could not change perms on " . $chmod[2] . ": Permission denied");
             }
-        }
-        else
-        {
+        } else {
             $this->send($fd, "500 Unknown Command");
         }
     }
@@ -299,17 +257,14 @@ class FtpServer extends Base
      * @param $fd
      * @param $cmd
      */
-    function cmd_USER($fd, $cmd)
+    public function cmd_USER($fd, $cmd)
     {
-        if (preg_match("/^([a-z0-9]+)$/", $cmd[1]))
-        {
+        if (preg_match("/^([a-z0-9]+)$/", $cmd[1])) {
             $user = $cmd[1];
             $this->connections[$fd]['user'] = $user;
             $this->users[$user]['fd'] = $fd;
             $this->send($fd, "331 User $user OK. Password required");
-        }
-        else
-        {
+        } else {
             $this->send($fd, "530 Login authentication failed");
         }
     }
@@ -319,27 +274,21 @@ class FtpServer extends Base
      * @param $fd
      * @param $cmd
      */
-    function cmd_PASS($fd, $cmd)
+    public function cmd_PASS($fd, $cmd)
     {
         $user = $this->connections[$fd]['user'];
         $pass = $cmd[1];
-        if (isset($this->users[$user]) and $this->users[$user]['password'] == $pass)
-        {
-            if ($this->users[$user]['chroot'])
-            {
+        if (isset($this->users[$user]) and $this->users[$user]['password'] == $pass) {
+            if ($this->users[$user]['chroot']) {
                 $dir = "/";
-            }
-            else
-            {
+            } else {
                 $dir = $this->users[$user]['home'];
             }
             $this->users[$user]['pwd'] = $dir;
             $this->send($fd, "230 OK. Current restricted directory is " . $dir);
             $this->connections[$fd]['login'] = true;
-            //send($socket,"230 0 Kbytes used (0%) - authorized: 102400 Kb\r\n");
-        }
-        else
-        {
+        //send($socket,"230 0 Kbytes used (0%) - authorized: 102400 Kb\r\n");
+        } else {
             $this->send($fd, "530 Login authentication failed");
         }
     }
@@ -349,36 +298,28 @@ class FtpServer extends Base
      * @param $fd
      * @param $cmd
      */
-    function cmd_RETR($fd, $cmd)
+    public function cmd_RETR($fd, $cmd)
     {
         $user = $this->getUser($fd);
         $ftpsock = $this->getUserSock($user);
-        if (($file = $this->getFile($user, $cmd[1])) != false)
-        {
+        if (($file = $this->getFile($user, $cmd[1])) != false) {
             $this->send($fd, "150 Connecting to client");
-            if ($fp = fopen($file, "r"))
-            {
-                while (!feof($fp))
-                {
+            if ($fp = fopen($file, "r")) {
+                while (!feof($fp)) {
                     $cont = fread($fp, 1024);
-                    if (!fwrite($ftpsock, $cont)) break;
+                    if (!fwrite($ftpsock, $cont)) {
+                        break;
+                    }
                 }
-                if (fclose($fp) and $this->closeUserSock($user))
-                {
+                if (fclose($fp) and $this->closeUserSock($user)) {
                     $this->send($fd, "226 File successfully transferred");
-                }
-                else
-                {
+                } else {
                     $this->send($fd, "550 Error during file-transfer");
                 }
-            }
-            else
-            {
+            } else {
                 $this->send($fd, "550 Can't open " . $cmd[1] . ": Permission denied");
             }
-        }
-        else
-        {
+        } else {
             $this->send($fd, "550 Can't open " . $cmd[1] . ": No such file or directory");
         }
     }
@@ -388,9 +329,9 @@ class FtpServer extends Base
      * @param $fd
      * @param $cmd
      */
-    function cmd_QUIT($fd, $cmd)
+    public function cmd_QUIT($fd, $cmd)
     {
-        $this->send($fd,"221 Goodbye.");
+        $this->send($fd, "221 Goodbye.");
         unset($this->connections[$fd]);
     }
 
@@ -399,10 +340,9 @@ class FtpServer extends Base
      * @param $fd
      * @param $cmd
      */
-    function cmd_TYPE($fd, $cmd)
+    public function cmd_TYPE($fd, $cmd)
     {
-        switch ($cmd[1])
-        {
+        switch ($cmd[1]) {
             case "A":
                 $type = "ASCII";
                 break;
@@ -418,23 +358,19 @@ class FtpServer extends Base
      * @param $fd
      * @param $cmd
      */
-    function cmd_LIST($fd, $cmd)
+    public function cmd_LIST($fd, $cmd)
     {
         $user = $this->getUser($fd);
         $ftpsock = $this->getUserSock($user);
-        if (!$ftpsock)
-        {
+        if (!$ftpsock) {
             $this->send($fd, "501 Connection Error");
             return;
         }
         $this->send($fd, "150 Opening ASCII mode data connection for file list");
         $path = $this->getAbsDir($user);
-        if (isset($cmd[1]) and preg_match("/\-(.*)a/", $cmd[1]))
-        {
+        if (isset($cmd[1]) and preg_match("/\-(.*)a/", $cmd[1])) {
             $showHidden = true;
-        }
-        else
-        {
+        } else {
             $showHidden = false;
         }
         $filelist = $this->getFileList($path, $showHidden);
@@ -448,83 +384,68 @@ class FtpServer extends Base
      * @param $fd
      * @param $cmd
      */
-    function cmd_PORT($fd, $cmd)
+    public function cmd_PORT($fd, $cmd)
     {
         $user = $this->getUser($fd);
         $port = explode(",", $cmd[1]);
-        if (count($port) != 6)
-        {
+        if (count($port) != 6) {
             $this->send($fd, "501 Syntax error in IP address");
-        }
-        else
-        {
-            if (!$this->isIPAddress($port))
-            {
+        } else {
+            if (!$this->isIPAddress($port)) {
                 $this->send($fd, "501 Syntax error in IP address");
                 return;
             }
             $ip = $port[0] . "." . $port[1] . "." . $port[2] . "." . $port[3];
             $port = hexdec(dechex($port[4]) . dechex($port[5]));
-            if ($port < 1024)
-            {
+            if ($port < 1024) {
                 $this->send($fd, "501 Sorry, but I won't connect to ports < 1024");
-            }
-            elseif ($port > 65000)
-            {
+            } elseif ($port > 65000) {
                 $this->send($fd, "501 Sorry, but I won't connect to ports > 65000");
-            }
-            else
-            {
+            } else {
                 $ftpsock = fsockopen($ip, $port);
-                if ($ftpsock)
-                {
+                if ($ftpsock) {
                     $this->users[$user]['sock'] = $ftpsock;
                     $this->users[$user]['pasv'] = false;
                     $this->send($fd, "200 PORT command successful");
-                }
-                else
-                {
+                } else {
                     $this->send($fd, "501 Connection failed");
                 }
             }
         }
     }
 
-    function onReceive($serv, $fd, $tid, $recv_data)
+    public function onReceive($serv, $fd, $tid, $recv_data)
     {
         $read = trim($recv_data);
         echo "[<--]\t" . $read . "\n";
         $cmd = explode(" ", $read, 2);
 
         $func = 'cmd_'.$cmd[0];
-        if (!method_exists($this, $func))
-        {
+        if (!method_exists($this, $func)) {
             $this->send($fd, "500 Unknown Command");
             return;
         }
-        if (empty($this->connections[$fd]['login']))
-        {
-            switch($cmd[0])
-            {
+        if (empty($this->connections[$fd]['login'])) {
+            switch ($cmd[0]) {
                 case 'TYPE':
                 case 'USER':
                 case 'PASS':
                 case 'QUIT':
                     break;
                 default:
-                    $this->send($fd,"530 You aren't logged in");
+                    $this->send($fd, "530 You aren't logged in");
                     return;
             }
         }
         $this->$func($fd, $cmd);
     }
 
-    function debug($msg)
+    public function debug($msg)
     {
         echo "[DD]\t".$msg."\n";
     }
 
-    function getUser($fd)
+    public function getUser($fd)
     {
         return $this->connections[$fd]['user'];
     }
@@ -534,7 +455,7 @@ class FtpServer extends Base
      * @param $user
      * @return bool
      */
-    function closeUserSock($user)
+    public function closeUserSock($user)
     {
         fclose($this->users[$user]['sock']);
         $this->users[$user]['sock'] = 0;
@@ -545,25 +466,20 @@ class FtpServer extends Base
      * @param $user
      * @return resource
      */
-    function getUserSock($user)
+    public function getUserSock($user)
     {
         //被动模式
-        if ($this->users[$user]['pasv'] == true)
-        {
-            if (empty($this->users[$user]['sock']))
-            {
+        if ($this->users[$user]['pasv'] == true) {
+            if (empty($this->users[$user]['sock'])) {
                 $sock = stream_socket_accept($this->users[$user]['serv_sock'], 1);
 
-                if ($sock)
-                {
+                if ($sock) {
                     $peer = stream_socket_get_name($sock, true);
                     $this->debug("Accept: success client is $peer.");
                     $this->users[$user]['sock'] = $sock;
                     //关闭server socket
                     fclose($this->users[$user]['serv_sock']);
-                }
-                else
-                {
+                } else {
                     $this->debug("Accept: failed.");
                     return false;
                 }
@@ -572,51 +488,44 @@ class FtpServer extends Base
         return $this->users[$user]['sock'];
     }
 
-    function getFile($user, $file)
+    public function getFile($user, $file)
     {
         $file = $this->fillDirName($user, $file);
         $this->debug("GET: $file");
 
-        if (is_file($file))
-        {
+        if (is_file($file)) {
             return realpath($file);
-        }
-        else
-        {
+        } else {
             return false;
         }
     }
 
-    function cmd_CDUP($fd, $cmd)
+    public function cmd_CDUP($fd, $cmd)
     {
         $cmd[1] = '..';
         $this->cmd_CWD($fd, $cmd);
     }
 
-    function cmd_EPSV($fd, $cmd)
+    public function cmd_EPSV($fd, $cmd)
     {
         $user = $this->getUser($fd);
-        $sock = stream_socket_server('tcp://0.0.0.0:0',$errno , $errstr, STREAM_SERVER_BIND | STREAM_SERVER_LISTEN);
-        if ($sock)
-        {
+        $sock = stream_socket_server('tcp://0.0.0.0:0', $errno, $errstr, STREAM_SERVER_BIND | STREAM_SERVER_LISTEN);
+        if ($sock) {
             $addr = stream_socket_get_name($sock, false);
             list($ip, $port) = explode(':', $addr);
             $this->send($fd, "229 Entering Extended Passive Mode (|||$port|)");
             $this->users[$user]['serv_sock'] = $sock;
             $this->users[$user]['pasv'] = true;
-        }
-        else
-        {
+        } else {
             $this->send($fd, "500 failed to create data socket.");
         }
     }
 
-    function cmd_PASV($fd, $cmd)
+    public function cmd_PASV($fd, $cmd)
     {
         $user = $this->getUser($fd);
         $sock = stream_socket_server('tcp://0.0.0.0:0', $errno, $errstr, STREAM_SERVER_BIND | STREAM_SERVER_LISTEN);
-        if ($sock)
-        {
+        if ($sock) {
             $addr = stream_socket_get_name($sock, false);
             list($ip, $port) = explode(':', $addr);
             $this->debug("ServerSock: $ip:$port");
@@ -624,9 +533,7 @@ class FtpServer extends Base
             $this->send($fd, "227 Entering Passive Mode ({$ip},".(intval($port) >> 8 & 0xff).",".(intval($port) & 0xff).").");
             $this->users[$user]['serv_sock'] = $sock;
             $this->users[$user]['pasv'] = true;
-        }
-        else
-        {
+        } else {
             $this->send($fd, "500 failed to create data socket.");
         }
     }
@@ -637,25 +544,25 @@ class FtpServer extends Base
      * @param $showHidden
      * @return string
      */
-    function getFileList($rdir, $showHidden = false)
+    public function getFileList($rdir, $showHidden = false)
     {
         $filelist = '';
-        if ($handle = opendir($rdir))
-        {
-            while (false !== ($file = readdir($handle)))
-            {
-                if ($file == '.' or $file == '..')
-                {
+        if ($handle = opendir($rdir)) {
+            while (false !== ($file = readdir($handle))) {
+                if ($file == '.' or $file == '..') {
                     continue;
                 }
 
-                if ($file{0} == "." and !$showHidden)
-                {
+                if ($file{0} == "." and !$showHidden) {
                     continue;
                 }
 
                 $stats = stat($rdir . "/" . $file);
-                if (is_dir($rdir . "/" . $file)) $mode = "d"; else $mode = "-";
+                if (is_dir($rdir . "/" . $file)) {
+                    $mode = "d";
+                } else {
+                    $mode = "-";
+                }
                 $moded = sprintf("%o", ($stats['mode'] & 000777));
                 $mode1 = substr($moded, 0, 1);
                 $mode2 = substr($moded, 1, 1);
@@ -739,13 +646,21 @@ class FtpServer extends Base
                         break;
                 }
                 $uidfill = "";
-                for ($i = strlen($stats['uid']); $i < 5; $i++) $uidfill .= " ";
+                for ($i = strlen($stats['uid']); $i < 5; $i++) {
+                    $uidfill .= " ";
+                }
                 $gidfill = "";
-                for ($i = strlen($stats['gid']); $i < 5; $i++) $gidfill .= " ";
+                for ($i = strlen($stats['gid']); $i < 5; $i++) {
+                    $gidfill .= " ";
+                }
                 $sizefill = "";
-                for ($i = strlen($stats['size']); $i < 11; $i++) $sizefill .= " ";
+                for ($i = strlen($stats['size']); $i < 11; $i++) {
+                    $sizefill .= " ";
+                }
                 $nlinkfill = "";
-                for ($i = strlen($stats['nlink']); $i < 5; $i++) $nlinkfill .= " ";
+                for ($i = strlen($stats['nlink']); $i < 5; $i++) {
+                    $nlinkfill .= " ";
+                }
                 $mtime = date("M d H:i", $stats['mtime']);
                 $filelist .= $mode . $nlinkfill . $stats['nlink'] . " " . $stats['uid'] . $uidfill . $stats['gid'] . $gidfill . $sizefill . $stats['size'] . " " . $mtime . " " . $file . "\r\n";
             }
@@ -759,24 +674,21 @@ class FtpServer extends Base
      * @param $user
      * @param $pwd
      */
-    function setUserDir($user, $cdir)
+    public function setUserDir($user, $cdir)
     {
         $old_dir = $this->users[$user]['pwd'];
-        if ($old_dir == $cdir)
-        {
+        if ($old_dir == $cdir) {
             return $cdir;
         }
         
-        if($cdir[0] != '/')
-        {
+        if ($cdir[0] != '/') {
             $cdir = $old_dir.'/'.$cdir ;
         }
         
         $this->debug("CHDIR: $old_dir -> $cdir");
         $this->users[$user]['pwd'] = $cdir;
         $abs_dir = realpath($this->getAbsDir($user));
-        if (!$abs_dir)
-        {
+        if (!$abs_dir) {
             $this->users[$user]['pwd'] = $old_dir;
             return false;
         }
@@ -790,21 +702,19 @@ class FtpServer extends Base
      * @param $file
      * @return string
      */
-    function fillDirName($user, $file)
+    public function fillDirName($user, $file)
     {
         //发过来的文件名不带路径需要补齐
-        if (substr($file, 0, 1) != "/")
-        {
+        if (substr($file, 0, 1) != "/") {
             $file = $this->getUserDir($user) . "/" . $file;
         }
-        if ($this->users[$user]['chroot'])
-        {
+        if ($this->users[$user]['chroot']) {
             $file = $this->users[$user]['home'].$file;
         }
         return $file;
     }
 
-    function getUserDir($user)
+    public function getUserDir($user)
     {
         return $this->users[$user]['pwd'];
     }
@@ -814,14 +724,11 @@ class FtpServer extends Base
      * @param $user
      * @return string
      */
-    function getAbsDir($user)
+    public function getAbsDir($user)
     {
-        if (!$this->users[$user]['chroot'])
-        {
+        if (!$this->users[$user]['chroot']) {
             $rdir = $this->users[$user]['pwd'];
-        }
-        else
-        {
+        } else {
             $rdir = $this->users[$user]['home'].$this->users[$user]['pwd'];
         }
         return $rdir;

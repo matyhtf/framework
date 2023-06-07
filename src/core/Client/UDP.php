@@ -19,7 +19,7 @@ class UDP extends Socket
      * @param bool $udp_connect 是否启用connect方式
      * @return bool
      */
-    function connect($host, $port, $timeout = 0.1, $udp_connect = true)
+    public function connect($host, $port, $timeout = 0.1, $udp_connect = true)
     {
         //判断超时为0或负数
         if (empty($host) or empty($port) or $timeout <= 0) {
@@ -52,7 +52,7 @@ class UDP extends Socket
      * @param string $data
      * @return $n or false
      */
-    function send($data)
+    public function send($data)
     {
         $len = strlen($data);
         $n = socket_sendto($this->sock, $data, $len, 0, $this->host, $this->port);
@@ -71,9 +71,11 @@ class UDP extends Socket
      * @param int $length 接收数据的长度
      * @param bool $waitall 等待接收到全部数据后再返回，注意waitall=true,超过包长度会阻塞住
      */
-    function recv($length = 65535, $waitall = 0)
+    public function recv($length = 65535, $waitall = 0)
     {
-        if ($waitall) $waitall = MSG_WAITALL;
+        if ($waitall) {
+            $waitall = MSG_WAITALL;
+        }
         $ret = socket_recvfrom($this->sock, $data, $length, $waitall, $this->remote_host, $this->remote_port);
         if ($ret === false) {
             $this->set_error();
@@ -90,9 +92,11 @@ class UDP extends Socket
     /**
      * 关闭socket连接
      */
-    function close()
+    public function close()
     {
-        if ($this->sock) socket_close($this->sock);
+        if ($this->sock) {
+            socket_close($this->sock);
+        }
         $this->sock = null;
     }
 }

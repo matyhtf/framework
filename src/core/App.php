@@ -69,7 +69,7 @@ class App
     /**
      * 可使用的组件
      */
-    static $modules = array(
+    public static $modules = array(
         'redis' => true,  //redis
         'mongo' => true,  //mongodb
         'db' => true,  //数据库
@@ -101,18 +101,18 @@ class App
         'event' => true,
     );
 
-    static $default_controller = array('controller' => 'page', 'view' => 'index');
+    public static $default_controller = array('controller' => 'page', 'view' => 'index');
 
-    static $charset = 'utf-8';
-    static $debug = false;
+    public static $charset = 'utf-8';
+    public static $debug = false;
 
     /**
      * 开启 Swoole-2.x 协程模式
      * @var bool
      */
-    static $enableCoroutine = false;
-    static $coroutineStreamHook = [];
-    static $coroutineStreamHookSupported = ['redis', 'db'];
+    public static $enableCoroutine = false;
+    public static $coroutineStreamHook = [];
+    public static $coroutineStreamHookSupported = ['redis', 'db'];
     protected static $coroutineInit = false;
     const coroModuleDb = 1;
     const coroModuleRedis = 2;
@@ -122,15 +122,15 @@ class App
      * 是否缓存 echo 输出
      * @var bool
      */
-    static $enableOutputBuffer = true;
+    public static $enableOutputBuffer = true;
 
-    static $setting = array();
+    public static $setting = array();
     public $error_call = array();
     /**
      * 应用实例实例
      * @var self
      */
-    static public $app;
+    public static $app;
     public $pagecache;
 
     /**
@@ -208,7 +208,7 @@ class App
         $this->router(array($this, 'urlRoute'));
     }
 
-    function getEnv($key, $default = null)
+    public function getEnv($key, $default = null)
     {
         if ($this->environmentVariables === null) {
             $dotenv = Dotenv::createImmutable($this->getPath());
@@ -222,7 +222,7 @@ class App
      * @param $dir
      * @return static
      */
-    static function getInstance($dir = '')
+    public static function getInstance($dir = '')
     {
         if (empty($dir) and empty(self::$app)) {
             throw new \RuntimeException("No application was created");
@@ -236,7 +236,7 @@ class App
     /**
      * 获取 Application 的路径
      */
-    function getPath(): string
+    public function getPath(): string
     {
         return $this->app_path;
     }
@@ -245,7 +245,7 @@ class App
      * 获取资源消耗
      * @return array
      */
-    function runtime()
+    public function runtime()
     {
         // 显示运行时间
         $return['time'] = number_format((microtime(true) - $this->env['runtime']['start']), 4) . 's';
@@ -260,7 +260,7 @@ class App
      * 压缩内容
      * @return null
      */
-    function gzip()
+    public function gzip()
     {
         //不要在文件中加入UTF-8 BOM头
         //ob_end_clean();
@@ -277,7 +277,7 @@ class App
      * 初始化环境
      * @return null
      */
-    function __init()
+    public function __init()
     {
         #DEBUG
         if (defined('DEBUG') and strtolower(DEBUG) == 'on') {
@@ -298,7 +298,7 @@ class App
         $this->callHook(self::HOOK_INIT);
     }
 
-    static function go($func)
+    public static function go($func)
     {
         $app = self::getInstance();
 
@@ -318,19 +318,19 @@ class App
         });
     }
 
-    static function coroInit()
+    public static function coroInit()
     {
         self::getInstance()->callHook(self::HOOK_INIT);
         self::getInstance()->callHook(self::HOOK_BEFORE_ACTION);
     }
 
-    static function coroClean()
+    public static function coroClean()
     {
         self::getInstance()->callHook(self::HOOK_AFTER_ACTION);
         self::getInstance()->callHook(self::HOOK_CLEAN);
     }
 
-    static function setCoroutineStreamHook($type = null)
+    public static function setCoroutineStreamHook($type = null)
     {
         if ($type) {
             if (!in_array($type, self::$coroutineStreamHookSupported)) {
@@ -348,7 +348,7 @@ class App
      * @param $type
      * @param $subtype
      */
-    function callHook($type, $subtype = false)
+    public function callHook($type, $subtype = false)
     {
         if ($subtype and isset($this->hooks[$type][$subtype])) {
             foreach ($this->hooks[$type][$subtype] as $f) {
@@ -383,7 +383,7 @@ class App
     /**
      * 清理
      */
-    function __clean()
+    public function __clean()
     {
         $this->env['runtime'] = array();
         $this->callHook(self::HOOK_CLEAN);
@@ -396,7 +396,7 @@ class App
      * @param $prepend bool
      * @param $subtype bool
      */
-    function addHook($type, $func, $prepend = false, $subtype = false)
+    public function addHook($type, $func, $prepend = false, $subtype = false)
     {
         if ($subtype) {
             if ($prepend) {
@@ -417,7 +417,7 @@ class App
      * 清理钩子程序
      * @param $type
      */
-    function clearHook($type = 0)
+    public function clearHook($type = 0)
     {
         if ($type == 0) {
             $this->hooks = array();
@@ -430,7 +430,7 @@ class App
      * 在请求之前执行一个函数
      * @param callable $callback
      */
-    function beforeRequest(callable $callback)
+    public function beforeRequest(callable $callback)
     {
         $this->addHook(self::HOOK_INIT, $callback);
     }
@@ -439,7 +439,7 @@ class App
      * 在请求之后执行一个函数
      * @param callable $callback
      */
-    function afterRequest(callable $callback)
+    public function afterRequest(callable $callback)
     {
         $this->addHook(self::HOOK_CLEAN, $callback);
     }
@@ -449,7 +449,7 @@ class App
      * @param callable $callback
      * @param mixed $subtype
      */
-    function beforeAction(callable $callback, $subtype = false)
+    public function beforeAction(callable $callback, $subtype = false)
     {
         $this->addHook(self::HOOK_BEFORE_ACTION, $callback, false, $subtype);
     }
@@ -459,12 +459,12 @@ class App
      * @param callable $callback
      * @param mixed $subtype
      */
-    function afterAction(callable $callback, $subtype = false)
+    public function afterAction(callable $callback, $subtype = false)
     {
         $this->addHook(self::HOOK_AFTER_ACTION, $callback, false, $subtype);
     }
 
-    function __get($lib_name)
+    public function __get($lib_name)
     {
         //如果不存在此对象，从工厂中创建一个
         if (empty($this->$lib_name)) {
@@ -524,7 +524,7 @@ class App
      * @return bool
      * @throws NotFound
      */
-    function unloadModule($module, $object_id = 'all')
+    public function unloadModule($module, $object_id = 'all')
     {
         //卸载全部
         if ($object_id == 'all') {
@@ -573,7 +573,7 @@ class App
      * @return mixed
      * @throws NotFound
      */
-    function __call($func, $param)
+    public function __call($func, $param)
     {
         //swoole built-in module
         if (isset($this->multi_instance[$func])) {
@@ -603,7 +603,7 @@ class App
      * @param IFace\Router $router
      * @param $prepend bool
      */
-    function addRouter(IFace\Router $router, $prepend = false)
+    public function addRouter(IFace\Router $router, $prepend = false)
     {
         $this->addHook(self::HOOK_ROUTE, array($router, 'handle'), $prepend);
     }
@@ -612,7 +612,7 @@ class App
      * 设置路由器
      * @param $function
      */
-    function router($function)
+    public function router($function)
     {
         $this->router_function = $function;
     }
@@ -651,7 +651,7 @@ class App
         return $mvc;
     }
 
-    function handlerServer(Request $request)
+    public function handlerServer(Request $request)
     {
         $response = new Response();
         $request->setGlobal();
@@ -699,7 +699,7 @@ class App
     /**
      * 加载所有模块
      */
-    function loadAllModules($type = null)
+    public function loadAllModules($type = null)
     {
         $support = ['db', 'redis', 'cache'];
         if (!empty($type) and in_array($type, $support)) {
@@ -710,7 +710,6 @@ class App
                 }
             }
         } else {
-
             foreach ($support as $_type) {
                 $conf = $this->config[$_type];
                 if (!empty($conf)) {
@@ -722,7 +721,7 @@ class App
         }
     }
 
-    function runHttpServer($host = '0.0.0.0', $port = 9501, $config = array())
+    public function runHttpServer($host = '0.0.0.0', $port = 9501, $config = array())
     {
         define('SWOOLE_SERVER', true);
         define('SWOOLE_HTTP_SERVER', true);
@@ -740,7 +739,7 @@ class App
      * @throws Exception
      * @throws NotFound
      */
-    function handle()
+    public function handle()
     {
         if (empty($this->request)) {
             $this->request = new Request();
@@ -867,7 +866,7 @@ class App
         }
     }
 
-    function reloadController($mvc, $controller_file)
+    public function reloadController($mvc, $controller_file)
     {
         if (extension_loaded('runkit') and $this->server->config['apps']['auto_reload']) {
             clearstatcache();
@@ -886,7 +885,7 @@ class App
      * @param $class
      * @throws NotFound
      */
-    function addCommand($class)
+    public function addCommand($class)
     {
         if (!class_exists($class)) {
             throw new NotFound("Command[$class] not found.");
@@ -899,7 +898,7 @@ class App
         }
     }
 
-    function addCatcher(callable $catcher, $persistent = false)
+    public function addCatcher(callable $catcher, $persistent = false)
     {
         $this->catchers[] = ['handler' => $catcher, 'persistent' => $persistent];
     }
@@ -908,7 +907,7 @@ class App
      * 命令行工具
      * @throws Exception
      */
-    function runConsole()
+    public function runConsole()
     {
         $app = new Symfony\Component\Console\Application("<info>Swoole Framework</info> Console Tool.");
         $app->add(new Command\MakeController());

@@ -1,5 +1,6 @@
 <?php
 namespace SPF\Cache;
+
 use SPF;
 
 /**
@@ -13,10 +14,9 @@ class Redis implements SPF\IFace\Cache
     protected $config;
     protected $redis;
 
-    function __construct($config)
+    public function __construct($config)
     {
-        if (empty($config['redis_id']))
-        {
+        if (empty($config['redis_id'])) {
             $config['redis_id'] = 'master';
         }
         $this->config = $config;
@@ -30,10 +30,9 @@ class Redis implements SPF\IFace\Cache
      * @param $expire
      * @return bool
      */
-    function set($key, $value, $expire = 0)
+    public function set($key, $value, $expire = 0)
     {
-        if ($expire <= 0)
-        {
+        if ($expire <= 0) {
             $expire = 0x7fffffff;
         }
         return $this->redis->setex($key, $expire, serialize($value));
@@ -44,7 +43,7 @@ class Redis implements SPF\IFace\Cache
      * @param $key
      * @return mixed
      */
-    function get($key)
+    public function get($key)
     {
         return unserialize($this->redis->get($key));
     }
@@ -54,7 +53,7 @@ class Redis implements SPF\IFace\Cache
      * @param $key
      * @return bool
      */
-    function delete($key)
+    public function delete($key)
     {
         return $this->redis->del($key);
     }

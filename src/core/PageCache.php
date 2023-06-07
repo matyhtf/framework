@@ -8,22 +8,19 @@ namespace SPF;
  */
 class PageCache
 {
-	public $cache_dir;
-	public $expire;
+    public $cache_dir;
+    public $expire;
 
     /**
      * @param int $expire
      * @param string $cache_dir
      */
-    function __construct($expire = 3600, $cache_dir = '')
+    public function __construct($expire = 3600, $cache_dir = '')
     {
         $this->expire = $expire;
-        if ($cache_dir === '')
-        {
+        if ($cache_dir === '') {
             $this->cache_dir = WEBPATH . '/cache/pages_c';
-        }
-        else
-        {
+        } else {
             $this->cache_dir = $cache_dir;
         }
     }
@@ -32,7 +29,7 @@ class PageCache
      * 建立缓存
      * @param $content
      */
-    function create($content)
+    public function create($content)
     {
         file_put_contents($this->cache_dir . '/' . base64_encode($_SERVER['REQUEST_URI']) . '.html', $content);
     }
@@ -40,7 +37,7 @@ class PageCache
     /**
      * 加载缓存
      */
-    function load()
+    public function load()
     {
         include($this->cache_dir . '/' . base64_encode($_SERVER['REQUEST_URI']) . '.html');
     }
@@ -49,19 +46,14 @@ class PageCache
      * 检查是否存在有效缓存
      * @return bool
      */
-    function isCached()
+    public function isCached()
     {
         $file = $this->cache_dir . '/' . base64_encode($_SERVER['REQUEST_URI']) . '.html';
-        if (!file_exists($file))
-        {
+        if (!file_exists($file)) {
             return false;
-        }
-        elseif (filemtime($file) + $this->expire < time())
-        {
+        } elseif (filemtime($file) + $this->expire < time()) {
             return false;
-        }
-        else
-        {
+        } else {
             return true;
         }
     }

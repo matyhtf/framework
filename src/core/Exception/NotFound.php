@@ -8,5 +8,4 @@ namespace SPF\Exception;
  */
 class NotFound extends \Exception
 {
-
 }

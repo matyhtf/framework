@@ -14,7 +14,7 @@ class Redis extends Base
      * @param $config
      * @throws SPF\Exception\InvalidParam
      */
-    function __construct($config)
+    public function __construct($config)
     {
         parent::__construct($config);
         SPF\App::getInstance()->beforeAction([$this, '_createObject'], SPF\App::coroModuleRedis);
@@ -24,35 +24,30 @@ class Redis extends Base
     /**
      * @return bool|CoRedis
      */
-    function create()
+    public function create()
     {
         $redis = new CoRedis($this->config);
-        if ($redis->connect($this->config['host'], $this->config['port']) === false)
-        {
+        if ($redis->connect($this->config['host'], $this->config['port']) === false) {
             return false;
         }
-        if (!empty($this->config['password']))
-        {
+        if (!empty($this->config['password'])) {
             $redis->auth($this->config['password']);
         }
-        if (isset($this->config['database']))
-        {
-            if (!$redis->select(intval($this->config['database'])))
-            {
+        if (isset($this->config['database'])) {
+            if (!$redis->select(intval($this->config['database']))) {
                 return false;
             }
         }
         return $redis;
     }
 
-    function get($key)
+    public function get($key)
     {
         /**
          * @var $redis CoRedis
          */
         $redis = $this->_getObject();
-        if (!$redis)
-        {
+        if (!$redis) {
             return false;
         }
         return $redis->get($key);
@@ -64,17 +59,13 @@ class Redis extends Base
          * @var $redis CoRedis
          */
         $redis = $this->_getObject();
-        if (!$redis)
-        {
+        if (!$redis) {
             return false;
         }
 
-        if ($expire)
-        {
+        if ($expire) {
             return $redis->setEx($key, $expire, $value);
-        }
-        else
-        {
+        } else {
             return $redis->set($key, $value);
         }
     }
@@ -91,8 +82,7 @@ class Redis extends Base
          * @var $redis CoRedis
          */
         $redis = $this->_getObject();
-        if (!$redis)
-        {
+        if (!$redis) {
             return false;
         }
         return $redis->setBit($key, $offset, $value);
@@ -110,8 +100,7 @@ class Redis extends Base
          * @var $redis CoRedis
          */
         $redis = $this->_getObject();
-        if (!$redis)
-        {
+        if (!$redis) {
             return false;
         }
 
@@ -130,8 +119,7 @@ class Redis extends Base
          * @var $redis CoRedis
          */
         $redis = $this->_getObject();
-        if (!$redis)
-        {
+        if (!$redis) {
             return false;
         }
 
@@ -150,12 +138,11 @@ class Redis extends Base
          * @var $redis CoRedis
          */
         $redis = $this->_getObject();
-        if (!$redis)
-        {
+        if (!$redis) {
             return false;
         }
 
-        return $redis->lSet($key,$index, $value);
+        return $redis->lSet($key, $index, $value);
     }
 
     /**
@@ -168,8 +155,7 @@ class Redis extends Base
          * @var $redis CoRedis
          */
         $redis = $this->_getObject();
-        if (!$redis)
-        {
+        if (!$redis) {
             return false;
         }
 
@@ -186,8 +172,7 @@ class Redis extends Base
          * @var $redis CoRedis
          */
         $redis = $this->_getObject();
-        if (!$redis)
-        {
+        if (!$redis) {
             return false;
         }
 
@@ -223,8 +208,7 @@ class Redis extends Base
          * @var $redis CoRedis
          */
         $redis = $this->_getObject();
-        if (!$redis)
-        {
+        if (!$redis) {
             return false;
         }
 
@@ -242,8 +226,7 @@ class Redis extends Base
          * @var $redis CoRedis
          */
         $redis = $this->_getObject();
-        if (!$redis)
-        {
+        if (!$redis) {
             return false;
         }
 
@@ -262,8 +245,7 @@ class Redis extends Base
          * @var $redis CoRedis
          */
         $redis = $this->_getObject();
-        if (!$redis)
-        {
+        if (!$redis) {
             return false;
         }
 
@@ -280,8 +262,7 @@ class Redis extends Base
          * @var $redis CoRedis
          */
         $redis = $this->_getObject();
-        if (!$redis)
-        {
+        if (!$redis) {
             return false;
         }
 
@@ -297,8 +278,7 @@ class Redis extends Base
          * @var $redis CoRedis
          */
         $redis = $this->_getObject();
-        if (!$redis)
-        {
+        if (!$redis) {
             return false;
         }
 
@@ -314,8 +294,7 @@ class Redis extends Base
          * @var $redis CoRedis
          */
         $redis = $this->_getObject();
-        if (!$redis)
-        {
+        if (!$redis) {
             return false;
         }
 
@@ -331,8 +310,7 @@ class Redis extends Base
          * @var $redis CoRedis
          */
         $redis = $this->_getObject();
-        if (!$redis)
-        {
+        if (!$redis) {
             return false;
         }
 
@@ -348,8 +326,7 @@ class Redis extends Base
          * @var $redis CoRedis
          */
         $redis = $this->_getObject();
-        if (!$redis)
-        {
+        if (!$redis) {
             return false;
         }
 
@@ -366,8 +343,7 @@ class Redis extends Base
          * @var $redis CoRedis
          */
         $redis = $this->_getObject();
-        if (!$redis)
-        {
+        if (!$redis) {
             return false;
         }
 
@@ -384,8 +360,7 @@ class Redis extends Base
          * @var $redis CoRedis
          */
         $redis = $this->_getObject();
-        if (!$redis)
-        {
+        if (!$redis) {
             return false;
         }
 
@@ -402,8 +377,7 @@ class Redis extends Base
          * @var $redis CoRedis
          */
         $redis = $this->_getObject();
-        if (!$redis)
-        {
+        if (!$redis) {
             return false;
         }
 
@@ -420,8 +394,7 @@ class Redis extends Base
          * @var $redis CoRedis
          */
         $redis = $this->_getObject();
-        if (!$redis)
-        {
+        if (!$redis) {
             return false;
         }
 
@@ -437,8 +410,7 @@ class Redis extends Base
          * @var $redis CoRedis
          */
         $redis = $this->_getObject();
-        if (!$redis)
-        {
+        if (!$redis) {
             return false;
         }
 
@@ -455,8 +427,7 @@ class Redis extends Base
          * @var $redis CoRedis
          */
         $redis = $this->_getObject();
-        if (!$redis)
-        {
+        if (!$redis) {
             return false;
         }
 
@@ -472,8 +443,7 @@ class Redis extends Base
          * @var $redis CoRedis
          */
         $redis = $this->_getObject();
-        if (!$redis)
-        {
+        if (!$redis) {
             return false;
         }
 
@@ -489,8 +459,7 @@ class Redis extends Base
          * @var $redis CoRedis
          */
         $redis = $this->_getObject();
-        if (!$redis)
-        {
+        if (!$redis) {
             return false;
         }
 
@@ -506,8 +475,7 @@ class Redis extends Base
          * @var $redis CoRedis
          */
         $redis = $this->_getObject();
-        if (!$redis)
-        {
+        if (!$redis) {
             return false;
         }
 
@@ -523,8 +491,7 @@ class Redis extends Base
          * @var $redis CoRedis
          */
         $redis = $this->_getObject();
-        if (!$redis)
-        {
+        if (!$redis) {
             return false;
         }
 
@@ -540,8 +507,7 @@ class Redis extends Base
          * @var $redis CoRedis
          */
         $redis = $this->_getObject();
-        if (!$redis)
-        {
+        if (!$redis) {
             return false;
         }
 
@@ -557,8 +523,7 @@ class Redis extends Base
          * @var $redis CoRedis
          */
         $redis = $this->_getObject();
-        if (!$redis)
-        {
+        if (!$redis) {
             return false;
         }
 
@@ -574,8 +539,7 @@ class Redis extends Base
          * @var $redis CoRedis
          */
         $redis = $this->_getObject();
-        if (!$redis)
-        {
+        if (!$redis) {
             return false;
         }
 
@@ -592,8 +556,7 @@ class Redis extends Base
          * @var $redis CoRedis
          */
         $redis = $this->_getObject();
-        if (!$redis)
-        {
+        if (!$redis) {
             return false;
         }
 
@@ -610,8 +573,7 @@ class Redis extends Base
          * @var $redis CoRedis
          */
         $redis = $this->_getObject();
-        if (!$redis)
-        {
+        if (!$redis) {
             return false;
         }
 
@@ -629,8 +591,7 @@ class Redis extends Base
          * @var $redis CoRedis
          */
         $redis = $this->_getObject();
-        if (!$redis)
-        {
+        if (!$redis) {
             return false;
         }
 
@@ -646,8 +607,7 @@ class Redis extends Base
          * @var $redis CoRedis
          */
         $redis = $this->_getObject();
-        if (!$redis)
-        {
+        if (!$redis) {
             return false;
         }
 
@@ -664,8 +624,7 @@ class Redis extends Base
          * @var $redis CoRedis
          */
         $redis = $this->_getObject();
-        if (!$redis)
-        {
+        if (!$redis) {
             return false;
         }
 
@@ -682,8 +641,7 @@ class Redis extends Base
          * @var $redis CoRedis
          */
         $redis = $this->_getObject();
-        if (!$redis)
-        {
+        if (!$redis) {
             return false;
         }
 
@@ -699,8 +657,7 @@ class Redis extends Base
          * @var $redis CoRedis
          */
         $redis = $this->_getObject();
-        if (!$redis)
-        {
+        if (!$redis) {
             return false;
         }
 
@@ -716,8 +673,7 @@ class Redis extends Base
          * @var $redis CoRedis
          */
         $redis = $this->_getObject();
-        if (!$redis)
-        {
+        if (!$redis) {
             return false;
         }
 
@@ -733,8 +689,7 @@ class Redis extends Base
          * @var $redis CoRedis
          */
         $redis = $this->_getObject();
-        if (!$redis)
-        {
+        if (!$redis) {
             return false;
         }
 
@@ -750,8 +705,7 @@ class Redis extends Base
          * @var $redis CoRedis
          */
         $redis = $this->_getObject();
-        if (!$redis)
-        {
+        if (!$redis) {
             return false;
         }
 
@@ -767,8 +721,7 @@ class Redis extends Base
          * @var $redis CoRedis
          */
         $redis = $this->_getObject();
-        if (!$redis)
-        {
+        if (!$redis) {
             return false;
         }
 
@@ -784,8 +737,7 @@ class Redis extends Base
          * @var $redis CoRedis
          */
         $redis = $this->_getObject();
-        if (!$redis)
-        {
+        if (!$redis) {
             return false;
         }
 
@@ -802,8 +754,7 @@ class Redis extends Base
          * @var $redis CoRedis
          */
         $redis = $this->_getObject();
-        if (!$redis)
-        {
+        if (!$redis) {
             return false;
         }
 
@@ -819,8 +770,7 @@ class Redis extends Base
          * @var $redis CoRedis
          */
         $redis = $this->_getObject();
-        if (!$redis)
-        {
+        if (!$redis) {
             return false;
         }
 
@@ -837,8 +787,7 @@ class Redis extends Base
          * @var $redis CoRedis
          */
         $redis = $this->_getObject();
-        if (!$redis)
-        {
+        if (!$redis) {
             return false;
         }
 
@@ -854,8 +803,7 @@ class Redis extends Base
          * @var $redis CoRedis
          */
         $redis = $this->_getObject();
-        if (!$redis)
-        {
+        if (!$redis) {
             return false;
         }
 
@@ -871,8 +819,7 @@ class Redis extends Base
          * @var $redis CoRedis
          */
         $redis = $this->_getObject();
-        if (!$redis)
-        {
+        if (!$redis) {
             return false;
         }
 
@@ -888,8 +835,7 @@ class Redis extends Base
          * @var $redis CoRedis
          */
         $redis = $this->_getObject();
-        if (!$redis)
-        {
+        if (!$redis) {
             return false;
         }
 
@@ -905,8 +851,7 @@ class Redis extends Base
          * @var $redis CoRedis
          */
         $redis = $this->_getObject();
-        if (!$redis)
-        {
+        if (!$redis) {
             return false;
         }
 
@@ -922,8 +867,7 @@ class Redis extends Base
          * @var $redis CoRedis
          */
         $redis = $this->_getObject();
-        if (!$redis)
-        {
+        if (!$redis) {
             return false;
         }
 
@@ -939,8 +883,7 @@ class Redis extends Base
          * @var $redis CoRedis
          */
         $redis = $this->_getObject();
-        if (!$redis)
-        {
+        if (!$redis) {
             return false;
         }
 
@@ -956,8 +899,7 @@ class Redis extends Base
          * @var $redis CoRedis
          */
         $redis = $this->_getObject();
-        if (!$redis)
-        {
+        if (!$redis) {
             return false;
         }
 
@@ -973,8 +915,7 @@ class Redis extends Base
          * @var $redis CoRedis
          */
         $redis = $this->_getObject();
-        if (!$redis)
-        {
+        if (!$redis) {
             return false;
         }
 
@@ -990,8 +931,7 @@ class Redis extends Base
          * @var $redis CoRedis
          */
         $redis = $this->_getObject();
-        if (!$redis)
-        {
+        if (!$redis) {
             return false;
         }
 
@@ -1007,8 +947,7 @@ class Redis extends Base
          * @var $redis CoRedis
          */
         $redis = $this->_getObject();
-        if (!$redis)
-        {
+        if (!$redis) {
             return false;
         }
 
@@ -1024,8 +963,7 @@ class Redis extends Base
          * @var $redis CoRedis
          */
         $redis = $this->_getObject();
-        if (!$redis)
-        {
+        if (!$redis) {
             return false;
         }
 
@@ -1041,8 +979,7 @@ class Redis extends Base
          * @var $redis CoRedis
          */
         $redis = $this->_getObject();
-        if (!$redis)
-        {
+        if (!$redis) {
             return false;
         }
 
@@ -1058,8 +995,7 @@ class Redis extends Base
          * @var $redis CoRedis
          */
         $redis = $this->_getObject();
-        if (!$redis)
-        {
+        if (!$redis) {
             return false;
         }
 
@@ -1075,8 +1011,7 @@ class Redis extends Base
          * @var $redis CoRedis
          */
         $redis = $this->_getObject();
-        if (!$redis)
-        {
+        if (!$redis) {
             return false;
         }
 
@@ -1092,8 +1027,7 @@ class Redis extends Base
          * @var $redis CoRedis
          */
         $redis = $this->_getObject();
-        if (!$redis)
-        {
+        if (!$redis) {
             return false;
         }
 
@@ -1109,8 +1043,7 @@ class Redis extends Base
          * @var $redis CoRedis
          */
         $redis = $this->_getObject();
-        if (!$redis)
-        {
+        if (!$redis) {
             return false;
         }
 
@@ -1126,8 +1059,7 @@ class Redis extends Base
          * @var $redis CoRedis
          */
         $redis = $this->_getObject();
-        if (!$redis)
-        {
+        if (!$redis) {
             return false;
         }
 
@@ -1143,8 +1075,7 @@ class Redis extends Base
          * @var $redis CoRedis
          */
         $redis = $this->_getObject();
-        if (!$redis)
-        {
+        if (!$redis) {
             return false;
         }
 
@@ -1160,8 +1091,7 @@ class Redis extends Base
          * @var $redis CoRedis
          */
         $redis = $this->_getObject();
-        if (!$redis)
-        {
+        if (!$redis) {
             return false;
         }
 
@@ -1179,8 +1109,7 @@ class Redis extends Base
          * @var $redis CoRedis
          */
         $redis = $this->_getObject();
-        if (!$redis)
-        {
+        if (!$redis) {
             return false;
         }
 
@@ -1198,8 +1127,7 @@ class Redis extends Base
          * @var $redis CoRedis
          */
         $redis = $this->_getObject();
-        if (!$redis)
-        {
+        if (!$redis) {
             return false;
         }
 
@@ -1217,8 +1145,7 @@ class Redis extends Base
          * @var $redis CoRedis
          */
         $redis = $this->_getObject();
-        if (!$redis)
-        {
+        if (!$redis) {
             return false;
         }
 
@@ -1236,8 +1163,7 @@ class Redis extends Base
          * @var $redis CoRedis
          */
         $redis = $this->_getObject();
-        if (!$redis)
-        {
+        if (!$redis) {
             return false;
         }
 
@@ -1253,8 +1179,7 @@ class Redis extends Base
          * @var $redis CoRedis
          */
         $redis = $this->_getObject();
-        if (!$redis)
-        {
+        if (!$redis) {
             return false;
         }
 
@@ -1271,8 +1196,7 @@ class Redis extends Base
          * @var $redis CoRedis
          */
         $redis = $this->_getObject();
-        if (!$redis)
-        {
+        if (!$redis) {
             return false;
         }
 
@@ -1290,8 +1214,7 @@ class Redis extends Base
          * @var $redis CoRedis
          */
         $redis = $this->_getObject();
-        if (!$redis)
-        {
+        if (!$redis) {
             return false;
         }
 
@@ -1309,8 +1232,7 @@ class Redis extends Base
          * @var $redis CoRedis
          */
         $redis = $this->_getObject();
-        if (!$redis)
-        {
+        if (!$redis) {
             return false;
         }
 
@@ -1328,8 +1250,7 @@ class Redis extends Base
          * @var $redis CoRedis
          */
         $redis = $this->_getObject();
-        if (!$redis)
-        {
+        if (!$redis) {
             return false;
         }
 
@@ -1347,8 +1268,7 @@ class Redis extends Base
          * @var $redis CoRedis
          */
         $redis = $this->_getObject();
-        if (!$redis)
-        {
+        if (!$redis) {
             return false;
         }
 
@@ -1366,8 +1286,7 @@ class Redis extends Base
          * @var $redis CoRedis
          */
         $redis = $this->_getObject();
-        if (!$redis)
-        {
+        if (!$redis) {
             return false;
         }
 
@@ -1385,8 +1304,7 @@ class Redis extends Base
          * @var $redis CoRedis
          */
         $redis = $this->_getObject();
-        if (!$redis)
-        {
+        if (!$redis) {
             return false;
         }
 
@@ -1404,8 +1322,7 @@ class Redis extends Base
          * @var $redis CoRedis
          */
         $redis = $this->_getObject();
-        if (!$redis)
-        {
+        if (!$redis) {
             return false;
         }
 
@@ -1421,8 +1338,7 @@ class Redis extends Base
          * @var $redis CoRedis
          */
         $redis = $this->_getObject();
-        if (!$redis)
-        {
+        if (!$redis) {
             return false;
         }
 
@@ -1438,8 +1354,7 @@ class Redis extends Base
          * @var $redis CoRedis
          */
         $redis = $this->_getObject();
-        if (!$redis)
-        {
+        if (!$redis) {
             return false;
         }
 
@@ -1455,8 +1370,7 @@ class Redis extends Base
          * @var $redis CoRedis
          */
         $redis = $this->_getObject();
-        if (!$redis)
-        {
+        if (!$redis) {
             return false;
         }
 
@@ -1475,8 +1389,7 @@ class Redis extends Base
          * @var $redis CoRedis
          */
         $redis = $this->_getObject();
-        if (!$redis)
-        {
+        if (!$redis) {
             return false;
         }
 
@@ -1493,8 +1406,7 @@ class Redis extends Base
          * @var $redis CoRedis
          */
         $redis = $this->_getObject();
-        if (!$redis)
-        {
+        if (!$redis) {
             return false;
         }
 
@@ -1510,8 +1422,7 @@ class Redis extends Base
          * @var $redis CoRedis
          */
         $redis = $this->_getObject();
-        if (!$redis)
-        {
+        if (!$redis) {
             return false;
         }
 
@@ -1527,8 +1438,7 @@ class Redis extends Base
          * @var $redis CoRedis
          */
         $redis = $this->_getObject();
-        if (!$redis)
-        {
+        if (!$redis) {
             return false;
         }
 
@@ -1538,7 +1448,9 @@ class Redis extends Base
     /**
      * @return mixed
      */
-    public function zCount(){}
+    public function zCount()
+    {
+    }
 
     /**
      * @return mixed
@@ -1549,8 +1461,7 @@ class Redis extends Base
          * @var $redis CoRedis
          */
         $redis = $this->_getObject();
-        if (!$redis)
-        {
+        if (!$redis) {
             return false;
         }
 
@@ -1566,8 +1477,7 @@ class Redis extends Base
          * @var $redis CoRedis
          */
         $redis = $this->_getObject();
-        if (!$redis)
-        {
+        if (!$redis) {
             return false;
         }
 
@@ -1577,42 +1487,58 @@ class Redis extends Base
     /**
      * @return mixed
      */
-    public function zRangeByScore(){}
+    public function zRangeByScore()
+    {
+    }
 
     /**
      * @return mixed
      */
-    public function zRevRangeByScore(){}
+    public function zRevRangeByScore()
+    {
+    }
 
     /**
      * @return mixed
      */
-    public function zRangeByLex(){}
+    public function zRangeByLex()
+    {
+    }
 
     /**
      * @return mixed
      */
-    public function zRevRangeByLex(){}
+    public function zRevRangeByLex()
+    {
+    }
 
     /**
      * @return mixed
      */
-    public function zInter(){}
+    public function zInter()
+    {
+    }
 
     /**
      * @return mixed
      */
-    public function zinterstore(){}
+    public function zinterstore()
+    {
+    }
 
     /**
      * @return mixed
      */
-    public function zUnion(){}
+    public function zUnion()
+    {
+    }
 
     /**
      * @return mixed
      */
-    public function zunionstore(){}
+    public function zunionstore()
+    {
+    }
 
     /**
      * @param $key[required]
@@ -1625,8 +1551,7 @@ class Redis extends Base
          * @var $redis CoRedis
          */
         $redis = $this->_getObject();
-        if (!$redis)
-        {
+        if (!$redis) {
             return false;
         }
 
@@ -1642,8 +1567,7 @@ class Redis extends Base
          * @var $redis CoRedis
          */
         $redis = $this->_getObject();
-        if (!$redis)
-        {
+        if (!$redis) {
             return false;
         }
 
@@ -1660,8 +1584,7 @@ class Redis extends Base
          * @var $redis CoRedis
          */
         $redis = $this->_getObject();
-        if (!$redis)
-        {
+        if (!$redis) {
             return false;
         }
 
@@ -1679,8 +1602,7 @@ class Redis extends Base
          * @var $redis CoRedis
          */
         $redis = $this->_getObject();
-        if (!$redis)
-        {
+        if (!$redis) {
             return false;
         }
 
@@ -1691,40 +1613,52 @@ class Redis extends Base
      * @param $key[required]
      * @return mixed
      */
-    public function decr($key){}
+    public function decr($key)
+    {
+    }
 
     /**
      * @param $key[required]
      * @param $integer[required]
      * @return mixed
      */
-    public function getBit($key, $integer){}
+    public function getBit($key, $integer)
+    {
+    }
 
     /**
      * @return mixed
      */
-    public function lInsert(){}
-
-    /**
-     * @param $key[required]
-     * @param $integer[required]
-     * @return mixed
-     */
-    public function lGet($key, $integer){}
+    public function lInsert()
+    {
+    }
 
     /**
      * @param $key[required]
      * @param $integer[required]
      * @return mixed
      */
-    public function lIndex($key, $integer){}
+    public function lGet($key, $integer)
+    {
+    }
 
     /**
      * @param $key[required]
      * @param $integer[required]
      * @return mixed
      */
-    public function setTimeout($key, $integer){}
+    public function lIndex($key, $integer)
+    {
+    }
+
+    /**
+     * @param $key[required]
+     * @param $integer[required]
+     * @return mixed
+     */
+    public function setTimeout($key, $integer)
+    {
+    }
 
     /**
      * @param $key[required]
@@ -1737,8 +1671,7 @@ class Redis extends Base
          * @var $redis CoRedis
          */
         $redis = $this->_getObject();
-        if (!$redis)
-        {
+        if (!$redis) {
             return false;
         }
 
@@ -1748,100 +1681,136 @@ class Redis extends Base
     /**
      * @return mixed
      */
-    public function pexpire(){}
+    public function pexpire()
+    {
+    }
 
     /**
      * @param $key[required]
      * @param $integer[required]
      * @return mixed
      */
-    public function expireAt($key, $integer){}
+    public function expireAt($key, $integer)
+    {
+    }
 
     /**
      * @param $key[required]
      * @param $integer[required]
      * @return mixed
      */
-    public function pexpireAt($key, $integer){}
+    public function pexpireAt($key, $integer)
+    {
+    }
 
     /**
      * @param $key[required]
      * @param $integer[required]
      * @return mixed
      */
-    public function move($key, $integer){}
+    public function move($key, $integer)
+    {
+    }
 
     /**
      * @return mixed
      */
-    public function select(){}
+    public function select()
+    {
+    }
 
     /**
      * @return mixed
      */
-    public function getRange(){}
+    public function getRange()
+    {
+    }
 
     /**
      * @return mixed
      */
-    public function listTrim(){}
+    public function listTrim()
+    {
+    }
 
     /**
      * @return mixed
      */
-    public function ltrim(){}
+    public function ltrim()
+    {
+    }
 
     /**
      * @return mixed
      */
-    public function lGetRange(){}
+    public function lGetRange()
+    {
+    }
 
     /**
      * @return mixed
      */
-    public function lRange(){}
+    public function lRange()
+    {
+    }
 
     /**
      * @return mixed
      */
-    public function lRem(){}
+    public function lRem()
+    {
+    }
 
     /**
      * @return mixed
      */
-    public function lRemove(){}
+    public function lRemove()
+    {
+    }
 
     /**
      * @return mixed
      */
-    public function zDeleteRangeByRank(){}
+    public function zDeleteRangeByRank()
+    {
+    }
 
     /**
      * @return mixed
      */
-    public function zRemRangeByRank(){}
+    public function zRemRangeByRank()
+    {
+    }
 
     /**
      * @param $key[required]
      * @param $float_number[required]
      * @return mixed
      */
-    public function incrByFloat($key, $float_number){}
+    public function incrByFloat($key, $float_number)
+    {
+    }
 
     /**
      * @return mixed
      */
-    public function hIncrByFloat(){}
+    public function hIncrByFloat()
+    {
+    }
 
     /**
      * @return mixed
      */
-    public function bitCount(){}
+    public function bitCount()
+    {
+    }
 
     /**
      * @return mixed
      */
-    public function bitOp(){}
+    public function bitOp()
+    {
+    }
 
     /**
      * @return mixed
@@ -1852,8 +1821,7 @@ class Redis extends Base
          * @var $redis CoRedis
          */
         $redis = $this->_getObject();
-        if (!$redis)
-        {
+        if (!$redis) {
             return false;
         }
 
@@ -1863,48 +1831,62 @@ class Redis extends Base
     /**
      * @return mixed
      */
-    public function sMove(){}
+    public function sMove()
+    {
+    }
 
     /**
      * @return mixed
      */
-    public function sDiff(){}
+    public function sDiff()
+    {
+    }
 
     /**
      * @return mixed
      */
-    public function sDiffStore(){}
+    public function sDiffStore()
+    {
+    }
 
     /**
      * @return mixed
      */
-    public function sUnion(){}
+    public function sUnion()
+    {
+    }
 
     /**
      * @return mixed
      */
-    public function sUnionStore(){}
+    public function sUnionStore()
+    {
+    }
 
     /**
      * @return mixed
      */
-    public function sInter(){}
+    public function sInter()
+    {
+    }
 
     /**
      * @return mixed
      */
-    public function sInterStore(){}
+    public function sInterStore()
+    {
+    }
 
     /**
      * @return mixed
      */
-    public function sRemove($key, $member){
+    public function sRemove($key, $member)
+    {
         /**
          * @var $redis CoRedis
          */
         $redis = $this->_getObject();
-        if (!$redis)
-        {
+        if (!$redis) {
             return false;
         }
 
@@ -1920,8 +1902,7 @@ class Redis extends Base
          * @var $redis CoRedis
          */
         $redis = $this->_getObject();
-        if (!$redis)
-        {
+        if (!$redis) {
             return false;
         }
 
@@ -1937,8 +1918,7 @@ class Redis extends Base
          * @var $redis CoRedis
          */
         $redis = $this->_getObject();
-        if (!$redis)
-        {
+        if (!$redis) {
             return false;
         }
 
@@ -1954,8 +1934,7 @@ class Redis extends Base
          * @var $redis CoRedis
          */
         $redis = $this->_getObject();
-        if (!$redis)
-        {
+        if (!$redis) {
             return false;
         }
 
@@ -1971,8 +1950,7 @@ class Redis extends Base
          * @var $redis CoRedis
          */
         $redis = $this->_getObject();
-        if (!$redis)
-        {
+        if (!$redis) {
             return false;
         }
 
@@ -1982,36 +1960,49 @@ class Redis extends Base
     /**
      * @return mixed
      */
-    public function pSubscribe(){}
+    public function pSubscribe()
+    {
+    }
 
     /**
      * @return mixed
      */
-    public function subscribe(){}
+    public function subscribe()
+    {
+    }
 
     /**
      * @return mixed
      */
-    public function multi(){}
+    public function multi()
+    {
+    }
 
     /**
      * @return mixed
      */
-    public function exec(){}
+    public function exec()
+    {
+    }
 
     /**
      * @return mixed
      */
-    public function evaluate(){}
+    public function evaluate()
+    {
+    }
 
     /**
      * @return mixed
      */
-    public function evalSha(){}
+    public function evalSha()
+    {
+    }
 
     /**
      * @return mixed
      */
-    public function script(){}
-
+    public function script()
+    {
+    }
 }

@@ -17,7 +17,7 @@ class HttpQueue implements SPF\IFace\Queue
     private $base;
     private $server_url;
 
-    function __construct($config)
+    public function __construct($config)
     {
         if (!empty($config['server_url'])) {
             $this->server_url = $config['server_url'];
@@ -65,7 +65,7 @@ class HttpQueue implements SPF\IFace\Queue
         }
     }
 
-    function push($data)
+    public function push($data)
     {
         $result = $this->doPost("put", $data);
         if ($result == "HTTPSQS_PUT_OK") {
@@ -79,7 +79,7 @@ class HttpQueue implements SPF\IFace\Queue
         }
     }
 
-    function pop()
+    public function pop()
     {
         $result = $this->doGet("get");
         if ($result == false || $result == "HTTPSQS_ERROR" || $result == false) {
@@ -90,7 +90,7 @@ class HttpQueue implements SPF\IFace\Queue
         }
     }
 
-    function status()
+    public function status()
     {
         $result = $this->doGet("status");
         if ($result == false || $result == "HTTPSQS_ERROR" || $result == false) {

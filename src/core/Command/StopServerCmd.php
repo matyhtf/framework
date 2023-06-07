@@ -15,7 +15,6 @@ class StopServerCmd extends Command
             ->setName('stop')
             ->setDescription('stop server')
             ->setHelp('This command allow you to stop server');
-
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)

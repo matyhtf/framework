@@ -34,6 +34,7 @@
     "ext-posix": "*"
   },
   "require-dev": {
-    "phpunit/phpunit": "8.5.x-dev"
+    "phpunit/phpunit": "8.5.x-dev",
+    "friendsofphp/php-cs-fixer": "^2.1"
   }
 }

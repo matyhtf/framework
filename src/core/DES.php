@@ -33,24 +33,19 @@ class DES
      */
     public function __construct($key, $cipher = null, $mode = 'cbc', $base64 = true, $padding = self::PADDING_NONE)
     {
-        if (!function_exists('mcrypt_create_iv'))
-        {
+        if (!function_exists('mcrypt_create_iv')) {
             throw new \Exception(__CLASS__ . " require mcrypt extension.");
         }
 
         $this->key = $key;
-        if (!$cipher)
-        {
+        if (!$cipher) {
             $this->cipher = self::getCipher($key);
-        }
-        else
-        {
+        } else {
             $this->cipher = $cipher;
         }
         $this->base64Encoding = $base64;
         $this->padding = $padding;
-        switch (strtolower($mode))
-        {
+        switch (strtolower($mode)) {
             case 'ofb':
                 $this->mode = MCRYPT_MODE_OFB;
                 break;
@@ -66,10 +61,9 @@ class DES
         }
     }
 
-    static function getCipher($key)
+    public static function getCipher($key)
     {
-        switch (strlen($key))
-        {
+        switch (strlen($key)) {
             case 8:
                 $mcrypt = MCRYPT_DES;
                 break;
@@ -85,18 +79,18 @@ class DES
         return $mcrypt;
     }
 
-    function createIV()
+    public function createIV()
     {
         $source = PHP_OS == 'WINNT' ? MCRYPT_RAND : MCRYPT_DEV_RANDOM;
         $this->iv = mcrypt_create_iv($this->blockSize, $source);
     }
 
-    function getIV()
+    public function getIV()
     {
         return $this->iv;
     }
 
-    function setIV($iv)
+    public function setIV($iv)
     {
         $this->iv = $iv;
         $this->blockSize = mcrypt_get_block_size($this->cipher, $this->mode);
@@ -110,17 +104,13 @@ class DES
     public function encode($str)
     {
         //是否补码
-        if ($this->padding)
-        {
+        if ($this->padding) {
             $str = self::PADDING_PKCS5 == $this->padding ? $this->addPKCS5Padding($str) : $this->addPKCS7Padding($str);
         }
         //是否进行BASE64编码
-        if ($this->base64Encoding)
-        {
+        if ($this->base64Encoding) {
             $_str = base64_encode($str);
-        }
-        else
-        {
+        } else {
             $_str = $str;
         }
         return mcrypt_encrypt($this->cipher, $this->key, $_str, $this->mode, $this->iv);
@@ -135,17 +125,13 @@ class DES
     {
         $ret = mcrypt_decrypt($this->cipher, $this->key, $str, $this->mode, $this->iv);
         //去除补码
-        if ($this->padding)
-        {
+        if ($this->padding) {
             $ret =  self::PADDING_PKCS5 == $this->padding ? $this->stripPKCS5Padding($ret) : $this->stripPKCS7Padding($ret);
         }
         //是否使用BASE64编码
-        if ($this->base64Encoding)
-        {
+        if ($this->base64Encoding) {
             return base64_decode($ret);
-        }
-        else
-        {
+        } else {
             return $ret;
         }
     }
@@ -159,12 +145,10 @@ class DES
     public function stripPKCS5Padding($source)
     {
         $pad = ord($source{strlen($source) - 1});
-        if ($pad > strlen($source))
-        {
+        if ($pad > strlen($source)) {
             return false;
         }
-        if (strspn($source, chr($pad), strlen($source) - $pad) != $pad)
-        {
+        if (strspn($source, chr($pad), strlen($source) - $pad) != $pad) {
             return false;
         }
         $ret = substr($source, 0, -1 * $pad);
@@ -174,8 +158,7 @@ class DES
     public function addPKCS7Padding($source)
     {
         $pad = $this->blockSize - (strlen($source) % $this->blockSize);
-        if ($pad <= $this->blockSize)
-        {
+        if ($pad <= $this->blockSize) {
             $char = chr($pad);
             $source .= str_repeat($char, $pad);
         }
@@ -186,15 +169,12 @@ class DES
     {
         $char = substr($source, -1, 1);
         $num = ord($char);
-        if ($num > 8)
-        {
+        if ($num > 8) {
             return $source;
         }
         $len = strlen($source);
-        for ($i = $len - 1; $i >= $len - $num; $i--)
-        {
-            if (ord(substr($source, $i, 1)) != $num)
-            {
+        for ($i = $len - 1; $i >= $len - $num; $i--) {
+            if (ord(substr($source, $i, 1)) != $num) {
                 return $source;
             }
         }

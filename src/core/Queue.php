@@ -5,23 +5,23 @@ class Queue
 {
     public $server;
 
-	function __construct($config, $server_type)
+    public function __construct($config, $server_type)
     {
-    	$this->queue = new $server_type($config);
+        $this->queue = new $server_type($config);
     }
 
-    function push($data)
+    public function push($data)
     {
-    	return $this->queue->push($data);
+        return $this->queue->push($data);
     }
 
-    function pop()
+    public function pop()
     {
-    	return $this->queue->pop();
+        return $this->queue->pop();
     }
 
-    function __call($method, $param=array())
+    public function __call($method, $param=array())
     {
-    	return call_user_func_array(array($this->queue, $method), $param);
+        return call_user_func_array(array($this->queue, $method), $param);
     }
 }

@@ -17,7 +17,7 @@ class Template extends \Smarty
     public $if_pagecache = false;
     public $cache_life = 3600;
 
-    function __construct()
+    public function __construct()
     {
         $this->compile_dir = App::getInstance()->app_path . "/cache/templates_c";
         $this->config_dir = App::getInstance()->app_path . "/configs";
@@ -27,17 +27,17 @@ class Template extends \Smarty
         parent::__construct();
     }
 
-    function __init()
+    public function __init()
     {
         $this->clear_all_assign();
     }
 
-    function set_template_dir($dir)
+    public function set_template_dir($dir)
     {
         $this->template_dir = App::getInstance()->app_path . '/' . $dir;
     }
 
-    function set_cache($time = 3600)
+    public function set_cache($time = 3600)
     {
         $this->caching = 1;
         $this->cache_lifetime = $time;
@@ -47,7 +47,7 @@ class Template extends \Smarty
      * 缓存当前页面
      * @return bool
      */
-    function pagecache()
+    public function pagecache()
     {
         $pagecache = new PageCache($this->cache_life);
         if ($pagecache->isCached()) {
@@ -63,15 +63,16 @@ class Template extends \Smarty
      * @param $key
      * @param $value
      */
-    function ref($key, &$value)
+    public function ref($key, &$value)
     {
         $this->_tpl_vars[$key] = &$value;
     }
 
-    function display($template = null, $cache_id = null, $complile_id = null)
+    public function display($template = null, $cache_id = null, $complile_id = null)
     {
         if ($template == null) {
-            $php = SPF\App::getInstance();;
+            $php = SPF\App::getInstance();
+            ;
             $template = $php->env['mvc']['controller'] . '_' . $php->env['mvc']['view'] . '.html';
         }
         if ($this->if_pagecache) {
@@ -92,7 +93,7 @@ class Template extends \Smarty
      * @param string $path
      * @return bool
      */
-    function outhtml($template, $filename, $path = '')
+    public function outhtml($template, $filename, $path = '')
     {
         if ($path == '') {
             $path = dirname($filename);
@@ -106,8 +107,10 @@ class Template extends \Smarty
         return true;
     }
 
-    function push($data)
+    public function push($data)
     {
-        foreach ($data as $key => $value) $this->assign($key, $value);
+        foreach ($data as $key => $value) {
+            $this->assign($key, $value);
+        }
     }
 }

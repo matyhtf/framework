@@ -1,5 +1,6 @@
 <?php
 namespace SPF\Protocol;
+
 use SPF;
 
 abstract class CometServer extends WebSocket
@@ -29,16 +30,15 @@ abstract class CometServer extends WebSocket
     /**
      * @param $serv \swoole_server
      */
-    function onStart($serv, $worker_id = 0)
+    public function onStart($serv, $worker_id = 0)
     {
-        if ($worker_id < $serv->setting['worker_num'])
-        {
+        if ($worker_id < $serv->setting['worker_num']) {
             $serv->tick(1000, array($this, 'onTimer'));
         }
         parent::onStart($serv, $worker_id);
     }
 
-    function createNewSession()
+    public function createNewSession()
     {
         $session = new CometSession();
         $this->sessions[$session->id] = $session;
@@ -49,13 +49,11 @@ abstract class CometServer extends WebSocket
      * Http请求回调
      * @param SPF\Request $request
      */
-    function onHttpRequest(SPF\Request $request)
+    public function onHttpRequest(SPF\Request $request)
     {
         //新连接
-        if (empty($request->post['session_id']))
-        {
-            if (empty($request->post['type']) or $request->post['type'] != 'connect')
-            {
+        if (empty($request->post['session_id'])) {
+            if (empty($request->post['type']) or $request->post['type'] != 'connect') {
                 goto access_deny;
             }
             $this->log("Connect [fd={$request->fd}]");
@@ -66,8 +64,7 @@ abstract class CometServer extends WebSocket
             return $response;
         }
 
-        if (empty($request->post['type']) or empty($request->post['session_id']) or empty($this->sessions[$request->post['session_id']]))
-        {
+        if (empty($request->post['type']) or empty($request->post['session_id']) or empty($this->sessions[$request->post['session_id']])) {
             access_deny:
             $response = new SPF\Response;
             $response->setHeader('Connection', 'close');
@@ -79,27 +76,21 @@ abstract class CometServer extends WebSocket
         $session_id = $request->post['session_id'];
         $session = $this->getSession($session_id);
 
-        if ($request->post['type'] == 'pub')
-        {
+        if ($request->post['type'] == 'pub') {
             $response = new SPF\Response;
             $response->setHeader('Access-Control-Allow-Origin', $this->origin);
             $response->body = json_encode(array('success' => 1, ));
             $this->response($request, $response);
             $this->log("Publish [fd={$request->fd}, session=$session_id]");
             $this->onMessage($session_id, $request->post);
-        }
-        elseif($request->post['type'] == 'sub')
-        {
+        } elseif ($request->post['type'] == 'sub') {
             $this->wait_requests[$session_id] = $request;
             $this->fd_session_map[$request->fd] = $session_id;
             $this->log("Subscribe [fd={$request->fd}, session=$session_id]");
-            if ($session->getMessageCount() > 0)
-            {
+            if ($session->getMessageCount() > 0) {
                 $this->sendMessage($session);
             }
-        }
-        else
-        {
+        } else {
             $session = $this->createNewSession();
             $response = new SPF\Response;
             $response->setHeader('Connection', 'close');
@@ -113,10 +104,9 @@ abstract class CometServer extends WebSocket
      * @param $session_id
      * @return bool | CometSession
      */
-    function getSession($session_id)
+    public function getSession($session_id)
     {
-        if (!isset($this->sessions[$session_id]))
-        {
+        if (!isset($this->sessions[$session_id])) {
             return false;
         }
         return $this->sessions[$session_id];
@@ -128,30 +118,24 @@ abstract class CometServer extends WebSocket
      * @param string $data
      * @return bool
      */
-    function send($session_id, $data, $opcode = self::OPCODE_TEXT_FRAME, $end = true)
+    public function send($session_id, $data, $opcode = self::OPCODE_TEXT_FRAME, $end = true)
     {
         //WebSocket
-        if (!$this->isCometClient($session_id))
-        {
+        if (!$this->isCometClient($session_id)) {
             return parent::send($session_id, $data, $opcode, $end);
         }
         //CometSession
-        else
-        {
+        else {
             $session = $this->getSession($session_id);
-            if (!$session)
-            {
+            if (!$session) {
                 $this->log("CometSesesion #$session_id no exists. Send failed.");
                 return false;
-            }
-            else
-            {
+            } else {
                 $session->pushMessage($data);
             }
 
             //有等待的Request可以直接发送数据
-            if (isset($this->wait_requests[$session_id]))
-            {
+            if (isset($this->wait_requests[$session_id])) {
                 return $this->sendMessage($session);
             }
         }
@@ -162,7 +146,7 @@ abstract class CometServer extends WebSocket
      * @param CometSession $session
      * @return bool
      */
-    function sendMessage(CometSession $session)
+    public function sendMessage(CometSession $session)
     {
         $request = $this->wait_requests[$session->id];
         $response = new SPF\Response;
@@ -176,14 +160,12 @@ abstract class CometServer extends WebSocket
      * 定时器，检查某些连接是否已超过最大时间
      * @param $timerId
      */
-    function onTimer($timerId)
+    public function onTimer($timerId)
     {
         $now = time();
         //echo "timer $interval\n";
-        foreach ($this->wait_requests as $id => $request)
-        {
-            if ($request->time < $now - $this->request_timeout)
-            {
+        foreach ($this->wait_requests as $id => $request) {
+            if ($request->time < $now - $this->request_timeout) {
                 $response = new SPF\Response;
                 $response->setHeader('Access-Control-Allow-Origin', $this->origin);
                 $response->body = json_encode(array('success' => 0, 'text' => 'timeout'));
@@ -199,15 +181,14 @@ abstract class CometServer extends WebSocket
      *
      * @return bool
      */
-    function isCometClient($client_id)
+    public function isCometClient($client_id)
     {
         return strlen($client_id) === 32;
     }
 
-    final function onClose($serv, $fd, $reactor_id)
+    final public function onClose($serv, $fd, $reactor_id)
     {
-        if (isset($this->fd_session_map[$fd]))
-        {
+        if (isset($this->fd_session_map[$fd])) {
             $session_id = $this->fd_session_map[$fd];
             unset($this->fd_session_map[$fd], $this->wait_requests[$session_id], $this->sessions[$session_id]);
             //再执行一次
@@ -225,22 +206,22 @@ class CometSession extends \SplQueue
      */
     protected $msg_queue;
 
-    function __construct()
+    public function __construct()
     {
         $this->id = md5(uniqid('', true));
     }
 
-    function getMessageCount()
+    public function getMessageCount()
     {
         return count($this);
     }
 
-    function pushMessage($msg)
+    public function pushMessage($msg)
     {
         return $this->enqueue($msg);
     }
 
-    function popMessage()
+    public function popMessage()
     {
         return $this->dequeue();
     }

@@ -17,7 +17,7 @@ class GeneralView
     protected $swoole;
     public $action = 'list';
     public $app_name;
-    static public $method_prefix = 'admin';
+    public static $method_prefix = 'admin';
 
     /**
      * @var Model
@@ -27,9 +27,9 @@ class GeneralView
 
     //保存读取到的变量
     public $vars = array();
-    static public $page_key = 'page';
-    static public $pagesize_key = 'pagesize';
-    static public $pagesize_default = 10;
+    public static $page_key = 'page';
+    public static $pagesize_key = 'pagesize';
+    public static $pagesize_default = 10;
 
     public $error_txt = '错误的参数';
     public $del_info = '删除成功！';
@@ -43,58 +43,51 @@ class GeneralView
     public $del_callback;
     public $detail_callback;
 
-    function __construct($swoole)
+    public function __construct($swoole)
     {
         $this->swoole = $swoole;
     }
 
-    function setParam($gets)
+    public function setParam($gets)
     {
         $this->gets = $gets;
     }
 
-    function display($tpl = '')
+    public function display($tpl = '')
     {
-        if ($tpl)
-        {
+        if ($tpl) {
             $this->swoole->tpl->display($tpl);
-        }
-        else
-        {
+        } else {
             $this->swoole->tpl->display(self::$method_prefix . '_' . $this->app_name . '_' . $this->action . '.html');
         }
     }
 
-    function setModel($model_name)
+    public function setModel($model_name)
     {
         $this->model = model($model_name);
     }
 
-    function setTable($table_name)
+    public function setTable($table_name)
     {
         $this->model = table($table_name);
     }
 
-    function geturl($add = '')
+    public function geturl($add = '')
     {
         return $_SERVER['PHP_SELF'] . '?action=' . $this->action . '&' . $add;
     }
 
-    function run()
+    public function run()
     {
-        if (!empty($_GET['action']))
-        {
+        if (!empty($_GET['action'])) {
             $this->action = $_GET['action'];
         }
         $this->action = Validate::word($this->action);
 
         $method = self::$method_prefix . '_' . $this->action;
-        if (method_exists($this, $method))
-        {
+        if (method_exists($this, $method)) {
             call_user_func(array($this, $method));
-        }
-        else
-        {
+        } else {
             Error::info('GeneralView Error!', "View <b>{$this->app_name}->{$method}</b> Not Found!");
         }
     }
@@ -102,14 +95,11 @@ class GeneralView
     /**
      * 处理上传文件
      */
-    function proc_upfiles()
+    public function proc_upfiles()
     {
-        if (!empty($_FILES))
-        {
-            foreach ($_FILES as $k => $f)
-            {
-                if (!empty($_FILES[$k]['type']))
-                {
+        if (!empty($_FILES)) {
+            foreach ($_FILES as $k => $f) {
+                if (!empty($_FILES[$k]['type'])) {
                     $_POST[$k] = $this->swoole->upload->save($k);
                 }
             }
@@ -119,27 +109,22 @@ class GeneralView
     /**
      * 处理删除请求
      */
-    function action_del()
+    public function action_del()
     {
-        if (isset($_GET['del']))
-        {
+        if (isset($_GET['del'])) {
             $del = (int)$_GET['del'];
             $this->model->del($del);
 
             return true;
-        }
-        else
-        {
+        } else {
             return false;
         }
     }
 
-    function trim_post()
+    public function trim_post()
     {
-        foreach ($_POST as &$val)
-        {
-            if (is_array($val))
-            {
+        foreach ($_POST as &$val) {
+            if (is_array($val)) {
                 $val = implode(',', $val);
             }
             $val = trim($val);
@@ -151,10 +136,8 @@ class GeneralView
      */
     private function filter_field()
     {
-        foreach ($_POST as $k => $v)
-        {
-            if (strpos($this->gets['select'], $k) === false)
-            {
+        foreach ($_POST as $k => $v) {
+            if (strpos($this->gets['select'], $k) === false) {
                 unset($_POST[$k]);
             }
         }
@@ -165,53 +148,40 @@ class GeneralView
      * @param $trim
      * @return bool
      */
-    function action_post($trim = false)
+    public function action_post($trim = false)
     {
-        if ($_POST)
-        {
+        if ($_POST) {
             $this->proc_upfiles();
-            if ($trim)
-            {
+            if ($trim) {
                 $this->trim_post();
             }
-            if ($this->post_callback)
-            {
+            if ($this->post_callback) {
                 call_user_func($this->post_callback, $this);
             }
 
-            if (isset($this->gets['select']))
-            {
+            if (isset($this->gets['select'])) {
                 $this->filter_field();
             }
-            if (isset($_GET['id']))
-            {
-                if ($this->gets['set_disable'])
-                {
+            if (isset($_GET['id'])) {
+                if ($this->gets['set_disable']) {
                     return false;
                 }
-                if ($this->set_callback)
-                {
+                if ($this->set_callback) {
                     call_user_func($this->set_callback, $this);
                 }
                 $this->model->set((int)$_GET['id'], $_POST);
-            }
-            else
-            {
-                if ($this->gets['add_disable'])
-                {
+            } else {
+                if ($this->gets['add_disable']) {
                     return false;
                 }
-                if ($this->add_callback)
-                {
+                if ($this->add_callback) {
                     call_user_func($this->add_callback, $this);
                 }
                 $this->model->put($_POST);
             }
 
             return true;
-        }
-        else
-        {
+        } else {
             return false;
         }
     }
@@ -220,13 +190,11 @@ class GeneralView
      * 处理详细内容请求
      * @return unknown_type
      */
-    function action_detail()
+    public function action_detail()
     {
-        if (isset($_GET['id']))
-        {
+        if (isset($_GET['id'])) {
             $this->vars['det'] = $this->model->get((int)$_GET['id'])->get();
-            if ($this->detail_callback)
-            {
+            if ($this->detail_callback) {
                 call_user_func($this->detail_callback, $this);
             }
             $this->swoole->tpl->assign('det', $this->vars['det']);
@@ -241,7 +209,7 @@ class GeneralView
      * 处理内容列表请求
      * @return unknown_type
      */
-    function action_list()
+    public function action_list()
     {
         $_model = $this->model;
         $gets = $this->gets;
@@ -264,16 +232,14 @@ class GeneralView
         $this->swoole->tpl->ref('list', $this->vars['list']);
     }
 
-    function handle_entity_op($config)
+    public function handle_entity_op($config)
     {
-        if (!isset($config['model']))
-        {
+        if (!isset($config['model'])) {
             die('参数错误！');
         }
         $_model = model($config['model']);
 
-        if ($_POST['job'] == 'push')
-        {
+        if ($_POST['job'] == 'push') {
             $digg = (int)$_POST['push'];
             $set['digest'] = $digg;
             $get['in'] = array('id', implode(',', $_POST['ids']));
@@ -282,51 +248,40 @@ class GeneralView
         }
     }
 
-    function __get($key)
+    public function __get($key)
     {
         return $this->vars[$key];
     }
 
-    function handle_entity_add($config)
+    public function handle_entity_add($config)
     {
-        if (!isset($config['model']))
-        {
+        if (!isset($config['model'])) {
             die('参数错误！');
         }
-        if (empty($config['tpl.add']))
-        {
+        if (empty($config['tpl.add'])) {
             $config['tpl.add'] = dirname(__DIR__) . '/data/tpl/admin_entity_add.html';
         }
-        if (empty($config['tpl.modify']))
-        {
+        if (empty($config['tpl.modify'])) {
             $config['tpl.modify'] = dirname(__DIR__) . '/data/tpl/admin_entity_modify.html';
         }
 
         $_model = model($config['model']);
 
-        if ($_POST)
-        {
+        if ($_POST) {
             $this->proc_upfiles();
-            if (!empty($_POST['id']))
-            {
+            if (!empty($_POST['id'])) {
                 //如果得到id，说明提交的是修改的操作
                 $id = $_POST['id'];
-                if ($_model->set($_POST['id'], $_POST))
-                {
+                if ($_model->set($_POST['id'], $_POST)) {
                     JS::js_back('修改成功', -2);
                     exit;
-                }
-                else
-                {
+                } else {
                     JS::js_back('修改失败', -1);
                     exit;
                 }
-            }
-            else
-            {
+            } else {
                 //如果没得到id，说明提交的是添加操作
-                if (empty($_POST['title']))
-                {
+                if (empty($_POST['title'])) {
                     JS::js_back('标题不能为空！');
                     exit;
                 }
@@ -334,21 +289,16 @@ class GeneralView
                 JS::js_back('添加成功');
                 exit;
             }
-        }
-        else
-        {
+        } else {
             $this->swoole->plugin->load('fckeditor');
-            if (isset($_GET['id']))
-            {
+            if (isset($_GET['id'])) {
                 $id = $_GET['id'];
                 $news = $_model->get($id)->get();
                 $editor = editor("content", $news['content'], 480);
                 $this->swoole->tpl->assign('editor', $editor);
                 $this->swoole->tpl->assign('news', $news);
                 $this->swoole->tpl->display($config['tpl.modify']);
-            }
-            else
-            {
+            } else {
                 $editor = editor("content", "", 480);
                 $this->swoole->tpl->assign('editor', $editor);
                 $this->swoole->tpl->display($config['tpl.add']);
@@ -356,35 +306,27 @@ class GeneralView
         }
     }
 
-    function handle_entity_center($config)
+    public function handle_entity_center($config)
     {
-        if (!isset($config['model']) or !isset($config['name']))
-        {
+        if (!isset($config['model']) or !isset($config['name'])) {
             die('参数错误！');
         }
         $_model = model($config['model']);
         $this->swoole->tpl->assign('act_name', $config['name']);
-        if (empty($config['tpl.add']))
-        {
+        if (empty($config['tpl.add'])) {
             $config['tpl.add'] = dirname(__DIR__) . '/data/tpl/admin_entity_center_add.html';
         }
-        if (empty($config['tpl.list']))
-        {
+        if (empty($config['tpl.list'])) {
             $config['tpl.list'] = dirname(__DIR__) . '/data/tpl/admin_entity_center_list.html';
         }
-        if (isset($config['limit']) and $config['limit'] === true)
-        {
+        if (isset($config['limit']) and $config['limit'] === true) {
             $this->swoole->tpl->assign('limit', true);
-        }
-        else
-        {
+        } else {
             $this->swoole->tpl->assign('limit', false);
         }
 
-        if (isset($_GET['add']))
-        {
-            if (!empty($_POST['name']))
-            {
+        if (isset($_GET['add'])) {
+            if (!empty($_POST['name'])) {
                 $data['name'] = trim($_POST['name']);
                 $data['pagename'] = trim($_POST['pagename']);
                 $data['keywords'] = trim($_POST['keywords']);
@@ -392,33 +334,25 @@ class GeneralView
                 $data['intro'] = trim($_POST['intro']);
 
                 #增加
-                if (empty($_POST['id']))
-                {
+                if (empty($_POST['id'])) {
                     unset($_POST['id']);
                     $_model->put($data);
                     JS::js_back('增加成功！');
                 }
                 #修改
-                else
-                {
+                else {
                     $_model->set((int)$_POST['id'], $data);
                     JS::js_back('增加成功！');
                 }
-            }
-            else
-            {
-                if (!empty($_GET['id']))
-                {
+            } else {
+                if (!empty($_GET['id'])) {
                     $data = $_model->get((int)$_GET['id'])->get();
                     $this->swoole->tpl->assign('data', $data);
                 }
                 $this->swoole->tpl->display($config['tpl.add']);
             }
-        }
-        else
-        {
-            if (!empty($_GET['del']))
-            {
+        } else {
+            if (!empty($_GET['del'])) {
                 $del_id = intval($_GET['del']);
                 $_model->del($del_id);
                 JS::js_back('删除成功！');
@@ -435,67 +369,51 @@ class GeneralView
         }
     }
 
-    function handle_catelog_center($config)
+    public function handle_catelog_center($config)
     {
-        if (!isset($config['model']) or !isset($config['name']))
-        {
+        if (!isset($config['model']) or !isset($config['name'])) {
             die('参数错误！');
         }
         $_model = model($config['model']);
         $this->swoole->tpl->assign('act_name', $config['name']);
-        if (empty($config['tpl.add']))
-        {
+        if (empty($config['tpl.add'])) {
             $config['tpl.add'] = dirname(__DIR__) . '/data/tpl/admin_catelog_center_add.html';
         }
-        if (empty($config['tpl.list']))
-        {
+        if (empty($config['tpl.list'])) {
             $config['tpl.list'] = dirname(__DIR__) . '/data/tpl/admin_catelog_center_list.html';
         }
-        if (isset($config['limit']) and $config['limit'] === true)
-        {
+        if (isset($config['limit']) and $config['limit'] === true) {
             $this->swoole->tpl->assign('limit', true);
-        }
-        else
-        {
+        } else {
             $this->swoole->tpl->assign('limit', false);
         }
 
-        if (isset($_GET['add']))
-        {
-            if (!empty($_POST['name']))
-            {
+        if (isset($_GET['add'])) {
+            if (!empty($_POST['name'])) {
                 $data['name'] = trim($_POST['name']);
                 $data['pagename'] = trim($_POST['pagename']);
                 $data['fid'] = intval($_POST['fid']);
                 $data['intro'] = trim($_POST['intro']);
                 $data['keywords'] = trim($_POST['keywords']);
                 #增加
-                if (empty($_POST['id']))
-                {
+                if (empty($_POST['id'])) {
                     $_model->put($data);
                     JS::js_back('增加成功！');
                 }
                 #修改
-                else
-                {
+                else {
                     $_model->set((int)$_POST['id'], $data);
                     JS::js_back('修改成功！');
                 }
-            }
-            else
-            {
-                if (!empty($_GET['id']))
-                {
+            } else {
+                if (!empty($_GET['id'])) {
                     $data = $_model->get((int)$_GET['id'])->get();
                     $this->swoole->tpl->assign('data', $data);
                 }
                 $this->swoole->tpl->display($config['tpl.add']);
             }
-        }
-        else
-        {
-            if (!empty($_GET['del']))
-            {
+        } else {
+            if (!empty($_GET['del'])) {
                 $del_id = intval($_GET['del']);
                 $_model->del($del_id);
                 JS::js_back('删除成功！');
@@ -512,22 +430,19 @@ class GeneralView
         }
     }
 
-    function handle_attachment($config)
+    public function handle_attachment($config)
     {
-        if (!isset($config['entity']) or !isset($config['attach']) or !isset($config['entity_id']))
-        {
+        if (!isset($config['entity']) or !isset($config['attach']) or !isset($config['entity_id'])) {
             die('参数错误！');
         }
         $_mm = model($config['entity']);
         $_ma = model($config['attach']);
 
         $this->swoole->tpl->assign('config', $config);
-        if ($_POST)
-        {
+        if ($_POST) {
             $_ma->put($_POST);
         }
-        if (isset($_GET['del']))
-        {
+        if (isset($_GET['del'])) {
             $dels['id'] = (int)$_GET['del'];
             $dels['aid'] = $config['entity_id'];
             $dels['limit'] = 1;
@@ -539,8 +454,7 @@ class GeneralView
         $list = $_ma->gets($get, $pager);
         $this->swoole->tpl->assign('list', $list);
         $this->swoole->tpl->assign('pager', array('total' => $pager->total, 'render' => $pager->render()));
-        if (empty($config['tpl.list']))
-        {
+        if (empty($config['tpl.list'])) {
             $config['tpl.list'] = dirname(__DIR__) . '/data/tpl/admin_attachment.html';
         }
         $this->swoole->tpl->display($config['tpl.list']);

@@ -24,26 +24,20 @@ class MakeController extends Command
     {
         $args = $input->getArguments();
         $name = ucfirst($args['name']);
-        if (!is_dir(\SPF\App::getInstance()->app_path.'/controllers'))
-        {
+        if (!is_dir(\SPF\App::getInstance()->app_path.'/controllers')) {
             MakeApplication::init(\SPF\App::getInstance()->app_path);
         }
         $file = \SPF\App::getInstance()->app_path . '/controllers/' . $name . '.php';
-        if (is_file($file))
-        {
+        if (is_file($file)) {
             $output->writeln("<error>Controller[$name](file=$file) already exists!</error>");
-        }
-        elseif (self::init($name, $file))
-        {
+        } elseif (self::init($name, $file)) {
             $output->writeln("<info>success!</info>");
-        }
-        else
-        {
+        } else {
             $output->writeln("<error>file_put_content($file) failed.!</error>");
         }
     }
 
-    static function init($name, $file)
+    public static function init($name, $file)
     {
         $code = "<?php\nnamespace App\\Controller;\n\n";
         $code .= "use SPF\\Controller;\n\n";

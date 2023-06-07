@@ -156,7 +156,7 @@ class RpcServer extends Command
 
         exec('ps -ef | grep "rpc-server" | awk "{print $2}" | xargs kill -9', $output);
         $this->removePidFile();
-        foreach($output as $line) {
+        foreach ($output as $line) {
             $this->info($line);
         }
 
@@ -171,7 +171,7 @@ class RpcServer extends Command
         $serverClass = Config::get('app.serverClass');
         $sdkVersion = $serverClass::SDK_VERSION;
 
-        $listens = array_map(function($item) {
+        $listens = array_map(function ($item) {
             return $item['protocol'] . '://' . $item['host'] . ':' . $item['port'];
         }, Config::get('app.server'));
         $pid = $this->getPid();
@@ -193,7 +193,7 @@ class RpcServer extends Command
 
     /**
      * 获取PID文件路径
-     * 
+     *
      * @return string
      */
     protected function pidFile()
@@ -208,7 +208,7 @@ class RpcServer extends Command
 
     /**
      * 获取Server的PID，PID不存在时为0
-     * 
+     *
      * @return int
      */
     protected function getPid($pidFile = null)
@@ -225,9 +225,9 @@ class RpcServer extends Command
 
     /**
      * Rpc Server是否正在运行
-     * 
+     *
      * @param int $pid
-     * 
+     *
      * @return bool
      */
     protected function isRunning($pid)

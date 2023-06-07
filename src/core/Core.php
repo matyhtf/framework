@@ -4,5 +4,4 @@ namespace SPF;
 
 class Core extends App
 {
-
 }

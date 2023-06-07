@@ -29,10 +29,9 @@ class Proxy
     const DB_MASTER = 1;
     const DB_SLAVE = 2;
 
-    function __construct($config)
+    public function __construct($config)
     {
-        if (empty($config['slaves']))
-        {
+        if (empty($config['slaves'])) {
             throw new LocalProxyException("require slaves options.");
         }
         $this->config = $config;
@@ -40,16 +39,13 @@ class Proxy
 
     protected function getDB($type = self::DB_SLAVE)
     {
-        if ($this->forceMaster)
-        {
+        if ($this->forceMaster) {
             goto master;
         }
 
         //只读的语句
-        if ($type == self::DB_SLAVE)
-        {
-            if (empty($this->slaveDB))
-            {
+        if ($type == self::DB_SLAVE) {
+            if (empty($this->slaveDB)) {
                 //连接到从库
                 $config = $this->config;
                 //从从库中随机选取一个
@@ -60,12 +56,9 @@ class Proxy
                 $this->slaveDB = $this->connect($config);
             }
             return $this->slaveDB;
-        }
-        else
-        {
+        } else {
             master:
-            if (empty($this->masterDB))
-            {
+            if (empty($this->masterDB)) {
                 //连接到主库
                 $config = $this->config;
                 unset($config['slaves'], $config['use_proxy']);
@@ -75,19 +68,16 @@ class Proxy
         }
     }
 
-    function query($sql)
+    public function query($sql)
     {
         $command = substr($sql, 0, 6);
         //只读的语句
-        if (strcasecmp($command, 'select') === 0)
-        {
-           if($this->forceMaster){
-             $sql = "/*master*/".$sql;
+        if (strcasecmp($command, 'select') === 0) {
+            if ($this->forceMaster) {
+                $sql = "/*master*/".$sql;
             }
             $db = $this->getDB(self::DB_SLAVE);
-        }
-        else
-        {
+        } else {
             $this->forceMaster = true;
             $db = $this->getDB(self::DB_MASTER);
         }
@@ -101,7 +91,7 @@ class Proxy
         return $db;
     }
 
-    function __call($method, $args)
+    public function __call($method, $args)
     {
         $db = $this->getDB(false);
         return call_user_func_array(array($db, $method), $args);
@@ -110,5 +100,4 @@ class Proxy
 
 class LocalProxyException extends \Exception
 {
-
 }

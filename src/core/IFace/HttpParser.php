@@ -3,7 +3,7 @@ namespace SPF\IFace;
 
 interface HttpParser
 {
-    function parseHeader($header);
-    function parseBody($request);
-    function parseCookie($request);
+    public function parseHeader($header);
+    public function parseBody($request);
+    public function parseCookie($request);
 }

@@ -27,7 +27,7 @@ class ProtocolHeader
      * @param int $serVersion
      * @param int $sdkVersion
      * @param int $reserve
-     * 
+     *
      * @return string
      */
     public static function encode(
@@ -56,7 +56,7 @@ class ProtocolHeader
 
     /**
      * @param string $request
-     * 
+     *
      * @return array ['header' => header, 'body' => body]
      */
     public static function decode($request)

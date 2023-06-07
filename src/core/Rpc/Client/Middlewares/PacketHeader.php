@@ -11,7 +11,7 @@ class PacketHeader
     /**
      * @param \SPF\Rpc\Client\Request $request
      * @param \Closure $next
-     * 
+     *
      * @return $next($request)
      */
     public static function handle(Request $request, \Closure $next)
@@ -21,7 +21,7 @@ class PacketHeader
 
         $response = $next($request);
 
-        // 对包体解析32字节header 
+        // 对包体解析32字节header
         return static::decodePacket($response);
     }
 

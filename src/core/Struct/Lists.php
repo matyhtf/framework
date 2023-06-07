@@ -11,7 +11,7 @@ class Lists extends BaseStruct implements Iterator, Countable
 {
     /**
      * List items
-     * 
+     *
      * @var array
      */
     protected $items = [];
@@ -23,21 +23,21 @@ class Lists extends BaseStruct implements Iterator, Countable
 
     /**
      * ListItem type
-     * 
+     *
      * @var string
      */
     protected $type = null;
 
     /**
      * ListItem type whether build in
-     * 
+     *
      * @var bool
      */
     protected $typeBuildIn = false;
 
     /**
      * Function gettype return value and standard type map
-     * 
+     *
      * @var array
      */
     protected $typeMap = [
@@ -64,7 +64,7 @@ class Lists extends BaseStruct implements Iterator, Countable
 
     /**
      * @param string $type
-     * 
+     *
      * @throw Exception
      */
     private function initType(string $type)
@@ -102,7 +102,7 @@ class Lists extends BaseStruct implements Iterator, Countable
 
     /**
      * @var mixed $item
-     * 
+     *
      * @return self
      */
     public function append($item)
@@ -116,7 +116,7 @@ class Lists extends BaseStruct implements Iterator, Countable
 
     /**
      * @param mixed $item
-     * 
+     *
      * @return self
      */
     public function push($item)
@@ -126,7 +126,7 @@ class Lists extends BaseStruct implements Iterator, Countable
 
     /**
      * @param mixed $item
-     * 
+     *
      * @return self
      */
     public function prepend($item)
@@ -140,7 +140,7 @@ class Lists extends BaseStruct implements Iterator, Countable
 
     /**
      * @param mixed $item
-     * 
+     *
      * @return self
      */
     public function unshift($item)
@@ -150,7 +150,7 @@ class Lists extends BaseStruct implements Iterator, Countable
 
     /**
      * @param int $index
-     * 
+     *
      * @return mixed
      */
     public function get(int $index)
@@ -164,14 +164,14 @@ class Lists extends BaseStruct implements Iterator, Countable
 
     /**
      * Replace all items.
-     * 
+     *
      * @param array $items
-     * 
+     *
      * @return self
      */
     public function replace(array $items)
     {
-        foreach($items as $item) {
+        foreach ($items as $item) {
             $this->validItem($item);
         }
 
@@ -181,7 +181,7 @@ class Lists extends BaseStruct implements Iterator, Countable
     }
 
     /**
-     * @return string 
+     * @return string
      */
     public function getItemType()
     {

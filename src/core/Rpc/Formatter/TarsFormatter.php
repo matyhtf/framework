@@ -11,10 +11,10 @@ class TarsFormatter implements Formatter
 
     /**
      * 对响应的数据进行encode，然后交由通讯协议进行传输
-     * 
+     *
      * @param mixed $data
      * @param string $funcName
-     * 
+     *
      * @return string
      */
     public static function encode($data, $funcName = '')
@@ -61,10 +61,10 @@ class TarsFormatter implements Formatter
 
     /**
      * 对响应的数据进行encode，然后交由通讯协议进行传输
-     * 
+     *
      * @param mixed $response
      * @param string $funcName
-     * 
+     *
      * @return string
      */
     public static function encodeResponse($response, $request)
@@ -83,7 +83,7 @@ class TarsFormatter implements Formatter
         }
 
         // &取地址符参数输出
-        foreach($request['func_params']['params'] as $param) {
+        foreach ($request['func_params']['params'] as $param) {
             if ($param['ref']) {
                 $value = $request['req_params'][$param['index']];
                 $buffers[] = self::packBuffer($param['type'], $value, $param['index'] + 1);
@@ -106,9 +106,9 @@ class TarsFormatter implements Formatter
 
     /**
      * 对通讯协议获取的请求数据进行decode
-     * 
+     *
      * @param string $buffer
-     * 
+     *
      * @return mixed
      */
     public static function decodeRequest($buffer)

@@ -30,26 +30,20 @@ class MakeModel extends Command
         $args = $input->getArguments();
         $name = ucfirst($args['name']);
         $table =  strtolower($args['table']);
-        if (!is_dir(\SPF\App::getInstance()->app_path.'/models'))
-        {
+        if (!is_dir(\SPF\App::getInstance()->app_path.'/models')) {
             MakeApplication::init(\SPF\App::getInstance()->app_path);
         }
         $file = \SPF\App::getInstance()->app_path . '/models/' . $name . '.php';
-        if (is_file($file))
-        {
+        if (is_file($file)) {
             $output->writeln("<error>Model[$name] already exists!</error>");
-        }
-        elseif (self::init($name, $table, $file))
-        {
+        } elseif (self::init($name, $table, $file)) {
             $output->writeln("<info>success!</info>");
-        }
-        else
-        {
+        } else {
             $output->writeln("<error>file_put_content($file) failed.!</error>");
         }
     }
 
-    static function init($name, $table, $file)
+    public static function init($name, $table, $file)
     {
         $code = "<?php\nnamespace App\\Model;\n\n";
         $code .= "use SPF\\Model;\n\n";

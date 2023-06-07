@@ -37,7 +37,7 @@ class Database
     const TYPE_COMYSQL = 4;
     const TYPE_COHOOKMYSQL = 5;
 
-    function __construct($db_config)
+    public function __construct($db_config)
     {
         switch ($db_config['type']) {
             case self::TYPE_MYSQL:
@@ -62,7 +62,7 @@ class Database
     /**
      * 初始化参数
      */
-    function __init()
+    public function __init()
     {
         $this->check_status();
         $this->db_apt->init();
@@ -73,7 +73,7 @@ class Database
     /**
      * 检查连接状态，如果连接断开，则重新连接
      */
-    function check_status()
+    public function check_status()
     {
         if (!$this->_db->ping()) {
             $this->_db->close();
@@ -85,7 +85,7 @@ class Database
      * 启动事务处理
      * @return bool
      */
-    function start()
+    public function start()
     {
         if ($this->query('set autocommit = 0') === false) {
             return false;
@@ -97,7 +97,7 @@ class Database
      * 提交事务处理
      * @return bool
      */
-    function commit()
+    public function commit()
     {
         if ($this->query('COMMIT') === false) {
             return false;
@@ -110,7 +110,7 @@ class Database
      * 事务回滚
      * @return bool
      */
-    function rollback()
+    public function rollback()
     {
         if ($this->query('ROLLBACK') === false) {
             return false;
@@ -221,7 +221,7 @@ class Database
      * 获取最近一次执行的SQL语句
      * @return string
      */
-    function getSql()
+    public function getSql()
     {
         return $this->lastSql;
     }
@@ -232,7 +232,7 @@ class Database
      * @param array $args
      * @return mixed
      */
-    function __call($method, $args = array())
+    public function __call($method, $args = array())
     {
         return $this->_db->{$method}(...$args);
     }

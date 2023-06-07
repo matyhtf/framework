@@ -55,7 +55,7 @@ abstract class Socket
      * @param float $recv_timeout 接收超时
      * @param float $send_timeout 发送超时
      */
-    function set_timeout($timeout_recv, $timeout_send)
+    public function set_timeout($timeout_recv, $timeout_send)
     {
         $_timeout_recv_sec = (int)$timeout_recv;
         $_timeout_send_sec = (int)$timeout_send;
@@ -79,7 +79,7 @@ abstract class Socket
     /**
      * 设置socket参数
      */
-    function setopt($opt, $set)
+    public function setopt($opt, $set)
     {
         socket_set_option($this->sock, SOL_SOCKET, $opt, $set);
     }
@@ -87,12 +87,12 @@ abstract class Socket
     /**
      * 获取socket参数
      */
-    function getopt($opt)
+    public function getopt($opt)
     {
         return socket_get_option($this->sock, SOL_SOCKET, $opt);
     }
 
-    function getSocket()
+    public function getSocket()
     {
         return $this->sock;
     }
@@ -102,7 +102,7 @@ abstract class Socket
      * @param $sendbuf_size
      * @param $recvbuf_size
      */
-    function set_bufsize($sendbuf_size, $recvbuf_size)
+    public function set_bufsize($sendbuf_size, $recvbuf_size)
     {
         $this->setopt(SO_SNDBUF, $sendbuf_size);
         $this->setopt(SO_RCVBUF, $recvbuf_size);
@@ -111,7 +111,7 @@ abstract class Socket
     /**
      * 析构函数
      */
-    function __destruct()
+    public function __destruct()
     {
         $this->close();
     }

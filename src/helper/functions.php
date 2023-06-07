@@ -64,7 +64,8 @@ function debug()
  */
 function error($error_id, $stop = true)
 {
-    $php = SPF\App::getInstance();;
+    $php = SPF\App::getInstance();
+    ;
     $error = new \SPF\Error($error_id);
     if (isset($php->error_call[$error_id])) {
         call_user_func($php->error_call[$error_id], $error);
@@ -109,7 +110,8 @@ function swoole_error_handler($errno, $errstr, $errfile, $errline)
 }
 
 if (!function_exists('env')) {
-    function env($key, $default = null) {
+    function env($key, $default = null)
+    {
         return SPF\App::getInstance()->getEnv($key, $default);
     }
 }

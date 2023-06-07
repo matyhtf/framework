@@ -3,12 +3,12 @@ namespace SPF\Platform;
 
 class Windows
 {
-    function kill($pid, $signo)
+    public function kill($pid, $signo)
     {
         return false;
     }
 
-    function fork()
+    public function fork()
     {
         return false;
     }

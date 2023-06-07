@@ -18,11 +18,11 @@ class ReflectionClassParams
     public $project_src;
     public $map = [];
 
-    static $isInited = false;
-    static $obj = null;
+    public static $isInited = false;
+    public static $obj = null;
 
 
-    function __construct($namespace, $project_src)
+    public function __construct($namespace, $project_src)
     {
         if (empty($namespace) or empty($project_src)) {
             throw new RuntimeException("namespace or src can not be empty", 1);
@@ -35,7 +35,7 @@ class ReflectionClassParams
         $this->project_src = $project_src;
     }
 
-    static function getInstance($namespace, $project_src)
+    public static function getInstance($namespace, $project_src)
     {
         if (!self::$obj) {
             self::$obj = new self($namespace, $project_src);
@@ -50,7 +50,7 @@ class ReflectionClassParams
      * @return array
      * @throws \ReflectionException
      */
-    function getMap()
+    public function getMap()
     {
         if (self::$isInited) {
             return $this->map;

@@ -9,14 +9,14 @@ class Validator
 {
     /**
      * User defined validate rules.
-     * 
+     *
      * @var array
      */
     protected static $rules = [];
 
     /**
      * User defined validate failed error messages.
-     * 
+     *
      * @var array
      */
     protected static $messages = [
@@ -25,14 +25,14 @@ class Validator
 
     /**
      * Validate class with method, params map.
-     * 
+     *
      * @var array
      */
     protected static $validateMap = [];
 
     /**
      * Add new rule, event replace the framework rules.
-     * 
+     *
      * @param string $rule
      * @param callable $func function($attribute, $value, $params = [], $args = [])
      */
@@ -44,7 +44,7 @@ class Validator
 
     /**
      * Add new rule, event replace the framework validate fail error messages.
-     * 
+     *
      * @param string $rule
      * @param callable $func function($field, $value, $params = [], $args = [])
      */
@@ -56,7 +56,7 @@ class Validator
 
     /**
      * Set the validate class with method, params.
-     * 
+     *
      * @param array $map
      */
     public static function setValidateMap(array $map)
@@ -74,16 +74,16 @@ class Validator
 
     /**
      * Recursive get value from arguments with field join with dot(.)
-     * 
+     *
      * @param string $field such as object.user.userName
      * @param mixed $args
      * @param mixed $default
-     * 
+     *
      * @return mixed
      */
     public static function getValueFromArgs($field, $args, $default = null)
     {
-        foreach(explode('.', $field) as $key) {
+        foreach (explode('.', $field) as $key) {
             if (is_scalar($args)) {
                 return $default;
             } elseif (is_array($args)) {
@@ -163,7 +163,7 @@ class Validator
     public static function validate($args, $argRules)
     {
         $errors = [];
-        foreach($args as $idx => $value) {
+        foreach ($args as $idx => $value) {
             if (!isset($argRules[$idx])) {
                 continue;
             }
@@ -182,7 +182,7 @@ class Validator
 
     /**
      * Validate field rules.
-     * 
+     *
      * @param array $rules
      * @param string $field
      * @param mixed $value
@@ -210,8 +210,8 @@ class Validator
     }
 
     /**
-     * Recurve Validate Field Extends Rules 
-     * 
+     * Recurve Validate Field Extends Rules
+     *
      * @param array $extends
      * @param string $fieldPrefix
      * @param mixed $value
@@ -240,9 +240,9 @@ class Validator
 
     /**
      * Replace validate rule from snake_case to camelCase.
-     * 
+     *
      * @param string $rule
-     * 
+     *
      * @return string
      */
     protected static function replaceRuleName($rule)
@@ -254,13 +254,13 @@ class Validator
 
     /**
      * Format validate fail error message.
-     * 
+     *
      * @param string $rule
      * @param string $field
      * @param mixed value
      * @param array $params
      * @param array $args
-     * 
+     *
      * @return string
      */
     protected static function formatFailMessage($rule, $field, $value, $params = [], $args = [])

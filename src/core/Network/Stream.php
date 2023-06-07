@@ -9,10 +9,9 @@ class Stream
      * @param $event
      * @return unknown_type
      */
-    static function close($socket,$event=null)
+    public static function close($socket, $event=null)
     {
-        if($event)
-        {
+        if ($event) {
             event_del($event);
             event_free($event);
         }
@@ -25,24 +24,26 @@ class Stream
      * @param $length
      * @return string
      */
-    static function read($fp,$length)
+    public static function read($fp, $length)
     {
         $data = '';
-        while($buf = fread($fp, $length))
-        {
+        while ($buf = fread($fp, $length)) {
             $data .= $buf;
-            if(strlen($buf) < $length) break;
+            if (strlen($buf) < $length) {
+                break;
+            }
         }
         return $data;
     }
 
-    static function write($fp, $string)
+    public static function write($fp, $string)
     {
         $length = strlen($string);
-        for($written = 0; $written < $length; $written += $fwrite)
-        {
+        for ($written = 0; $written < $length; $written += $fwrite) {
             $fwrite = fwrite($fp, substr($string, $written));
-            if($fwrite<=0 or $fwrite===false) return $written;
+            if ($fwrite<=0 or $fwrite===false) {
+                return $written;
+            }
         }
         return $written;
     }

@@ -19,7 +19,7 @@ class WebSocketParser
      * 压入解析队列
      * @param $data
      */
-    function push($data)
+    public function push($data)
     {
         $this->buffer .= $data;
     }
@@ -29,13 +29,11 @@ class WebSocketParser
      * @return bool|WebSocketFrame
      * @throws SPF\Http\WebSocketException
      */
-    function pop()
+    public function pop()
     {
         //当前有等待的frame
-        if ($this->frame)
-        {
-            if (strlen($this->buffer) >= $this->frame->length)
-            {
+        if ($this->frame) {
+            if (strlen($this->buffer) >= $this->frame->length) {
                 //分包
                 $this->frame->data = substr($this->buffer, 0, $this->frame->length);
                 self::unMask($this->frame);
@@ -44,16 +42,13 @@ class WebSocketParser
                 $this->frame = null;
                 $this->buffer = substr($this->buffer, $frame->length);
                 return $frame;
-            }
-            else
-            {
+            } else {
                 return false;
             }
         }
 
         $buffer = &$this->buffer;
-        if (strlen($buffer) < 2)
-        {
+        if (strlen($buffer) < 2) {
             return false;
         }
 
@@ -79,30 +74,26 @@ class WebSocketParser
         $data_offset++;
 
         //126 short
-        if ($length == 0x7e)
-        {
+        if ($length == 0x7e) {
             //2 byte
             $handle = unpack('nl', substr($buffer, $data_offset, 2));
             $data_offset += 2;
             $length = $handle['l'];
         }
         //127 int64
-        elseif ($length > 0x7e)
-        {
+        elseif ($length > 0x7e) {
             //8 byte
             $handle = unpack('Nh/Nl', substr($buffer, $data_offset, 8));
             $data_offset += 8;
             $length = $handle['l'];
             //超过最大允许的长度了，恶意的连接，需要关闭
-            if ($length > $this->maxFrameSize)
-            {
+            if ($length > $this->maxFrameSize) {
                 throw new WebSocketException("frame length is too big.", self::ERR_TOO_LONG);
             }
         }
 
         //mask-key: int32
-        if ($frame->mask)
-        {
+        if ($frame->mask) {
             $frame->mask = array_map('ord', str_split(substr($buffer, $data_offset, 4)));
             $data_offset += 4;
         }
@@ -111,16 +102,14 @@ class WebSocketParser
         $buffer = substr($buffer, $data_offset);
 
         //数据长度为0的帧
-        if (0 === $length)
-        {
+        if (0 === $length) {
             $frame->finish = true;
             $frame->data = '';
             return $frame;
         }
 
         //完整的一个数据帧
-        if (strlen($buffer) >= $length)
-        {
+        if (strlen($buffer) >= $length) {
             $frame->finish = true;
             $frame->data = substr($buffer, 0, $length);
             //清理buffer
@@ -129,8 +118,7 @@ class WebSocketParser
             return $frame;
         }
         //需要继续等待数据
-        else
-        {
+        else {
             $frame->finish = false;
             $this->frame = $frame;
             return false;
@@ -140,14 +128,12 @@ class WebSocketParser
     /**
      * @param $frame WebSocketFrame
      */
-    static function unMask($frame)
+    public static function unMask($frame)
     {
-        if ($frame->mask)
-        {
+        if ($frame->mask) {
             $maskC = 0;
             $data = $frame->data;
-            for ($j = 0, $_length = $frame->length; $j < $_length; ++$j)
-            {
+            for ($j = 0, $_length = $frame->length; $j < $_length; ++$j) {
                 $data[$j] = chr(ord($frame->data[$j]) ^ $frame->mask[$maskC]);
                 $maskC = ($maskC + 1) % 4;
             }
@@ -172,5 +158,4 @@ class WebSocketFrame
 
 class WebSocketException extends \Exception
 {
-
 }

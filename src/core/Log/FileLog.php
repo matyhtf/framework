@@ -1,5 +1,6 @@
 <?php
 namespace SPF\Log;
+
 /**
  * 文件日志类
  * @author Tianfeng.Han
@@ -21,10 +22,9 @@ class FileLog extends \SPF\Log implements \SPF\IFace\Log
     protected $enable_cache = true;
     protected $date;
 
-    function __construct($config)
+    public function __construct($config)
     {
-        if (is_string($config))
-        {
+        if (is_string($config)) {
             $file = $config;
             $config = array('file' => $file);
         }
@@ -32,48 +32,34 @@ class FileLog extends \SPF\Log implements \SPF\IFace\Log
         $this->archive = isset($config['date']) && $config['date'] == true;
         $this->verbose = isset($config['verbose']) && $config['verbose'] == true;
         $this->enable_cache = isset($config['enable_cache']) ? (bool) $config['enable_cache'] : true;
-        if (isset($config['level']))
-        {
+        if (isset($config['level'])) {
             $this->log_line = (int) $config['level'];
         }
 
         //按日期存储日志
-        if ($this->archive)
-        {
-            if (isset($config['dir']))
-            {
+        if ($this->archive) {
+            if (isset($config['dir'])) {
                 $this->date = date('Ymd');
                 $this->log_dir = rtrim($config['dir'], '/');
                 $this->log_file = $this->log_dir.'/'.$this->date.'.log';
-            }
-            else
-            {
+            } else {
                 throw new \Exception(__CLASS__.": require \$config['dir']");
             }
-        }
-        else
-        {
-            if (isset($config['file']))
-            {
+        } else {
+            if (isset($config['file'])) {
                 $this->log_file = $config['file'];
-            }
-            else
-            {
+            } else {
                 throw new \Exception(__CLASS__.": require \$config[file]");
             }
         }
 
         //自动创建目录
         $dir = dirname($this->log_file);
-        if (file_exists($dir))
-        {
-            if (!is_writeable($dir) && !chmod($dir, 0777))
-            {
+        if (file_exists($dir)) {
+            if (!is_writeable($dir) && !chmod($dir, 0777)) {
                 throw new \Exception(__CLASS__.": {$dir} unwriteable.");
             }
-        }
-        elseif (mkdir($dir, 0777, true) === false)
-        {
+        } elseif (mkdir($dir, 0777, true) === false) {
             throw new \Exception(__CLASS__.": mkdir dir {$dir} fail.");
         }
 
@@ -82,11 +68,10 @@ class FileLog extends \SPF\Log implements \SPF\IFace\Log
         parent::__construct($config);
     }
 
-    function format($msg, $level, &$date = null)
+    public function format($msg, $level, &$date = null)
     {
         $level = self::convert($level);
-        if ($level < $this->level_line)
-        {
+        if ($level < $this->level_line) {
             return false;
         }
         $level_str = self::$level_str[$level];
@@ -94,14 +79,12 @@ class FileLog extends \SPF\Log implements \SPF\IFace\Log
         $now = new \DateTime('now');
         $date = $now->format('Ymd');
         $log = $now->format(self::$date_format)."\t{$level_str}\t{$msg}";
-        if ($this->verbose)
-        {
+        if ($this->verbose) {
             $debug_info = debug_backtrace();
             $file = isset($debug_info[1]['file']) ? $debug_info[1]['file'] : null;
             $line = isset($debug_info[1]['line']) ? $debug_info[1]['line'] : null;
 
-            if ($file && $line)
-            {
+            if ($file && $line) {
                 $log .= "\t{$file}\t{$line}";
             }
         }
@@ -116,24 +99,22 @@ class FileLog extends \SPF\Log implements \SPF\IFace\Log
      * @param $level int 事件类型
      * @return bool
      */
-    function put($msg, $level = self::INFO)
+    public function put($msg, $level = self::INFO)
     {
         $msg = $this->format($msg, $level, $date);
         if ($msg === false) {
             return false;
         }
 
-        if (!isset($this->queue[$date]))
-        {
+        if (!isset($this->queue[$date])) {
             $this->queue[$date] = array();
         }
         $this->queue[$date][] = $msg;
 
         // 如果没有开启缓存，直接将缓冲区的内容写入文件
         // 如果缓冲区内容日志条数达到一定程度，写入文件
-        if (count($this->queue,  COUNT_RECURSIVE) >= 11
-            || $this->enable_cache == false)
-        {
+        if (count($this->queue, COUNT_RECURSIVE) >= 11
+            || $this->enable_cache == false) {
             $this->flush();
         }
     }
@@ -141,22 +122,19 @@ class FileLog extends \SPF\Log implements \SPF\IFace\Log
     /**
      * 将日志队列（缓冲区）的日志写入文件
      */
-    function flush()
+    public function flush()
     {
-        if (empty($this->queue))
-        {
+        if (empty($this->queue)) {
             return;
         }
 
-        foreach ($this->queue as $date => $logs)
-        {
+        foreach ($this->queue as $date => $logs) {
             $date = strval($date);
             $log_str = implode('', $logs);
 
             // 按日期存储日志的情况下，如果日期变化（第二天）
             // 重新设置一下log文件和文件指针
-            if ($this->archive && $this->date != $date)
-            {
+            if ($this->archive && $this->date != $date) {
                 fclose($this->fp);
                 $this->date = $date;
                 $this->log_file = $this->log_dir.'/'.$this->date.'.log';
@@ -164,14 +142,10 @@ class FileLog extends \SPF\Log implements \SPF\IFace\Log
             }
 
             //fputs($this->fp, $log_str);
-            if ($this->cut_file && filesize($this->log_file) > 209715200) //200M
-            {
-                if ($this->archive)
-                {
+            if ($this->cut_file && filesize($this->log_file) > 209715200) { //200M
+                if ($this->archive) {
                     $new_log_file = $this->log_dir.'/'.$this->date.'.log.'.date('His');
-                }
-                else
-                {
+                } else {
                     $new_log_file = $this->log_file.".".date('YmdHis');
                 }
                 fclose($this->fp);
@@ -186,8 +160,7 @@ class FileLog extends \SPF\Log implements \SPF\IFace\Log
 
     private function openFile($file)
     {
-        if (!file_exists($file) && touch($file))
-        {
+        if (!file_exists($file) && touch($file)) {
             $old = umask(0);
             chmod($file, 0777);
             umask($old);
@@ -195,15 +168,14 @@ class FileLog extends \SPF\Log implements \SPF\IFace\Log
 
         $fp = fopen($this->log_file, 'a+');
 
-        if (!$fp)
-        {
+        if (!$fp) {
             throw new \Exception(__CLASS__.": can not open log_file[{$file}].");
         }
 
         return $fp;
     }
 
-    function __destruct()
+    public function __destruct()
     {
         $this->flush();
     }

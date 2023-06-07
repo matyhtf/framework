@@ -14,7 +14,7 @@ class MsgQ implements SPF\IFace\Queue
     protected $msgtype = 1;
     protected $msg;
 
-    function __construct($config)
+    public function __construct($config)
     {
         if (!empty($config['msgid'])) {
             $this->msgid = $config['msgid'];
@@ -29,7 +29,7 @@ class MsgQ implements SPF\IFace\Queue
         $this->msg = msg_get_queue($this->msgid);
     }
 
-    function pop()
+    public function pop()
     {
         $ret = msg_receive($this->msg, 0, $this->msgtype, 65525, $data);
         if ($ret) {
@@ -38,7 +38,7 @@ class MsgQ implements SPF\IFace\Queue
         return false;
     }
 
-    function push($data)
+    public function push($data)
     {
         return msg_send($this->msg, $this->msgtype, $data);
     }

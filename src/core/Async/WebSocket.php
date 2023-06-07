@@ -15,26 +15,22 @@ class WebSocket extends SPF\Client\WebSocket
      */
     public function connect($timeout = 0.5)
     {
-        if (!extension_loaded('swoole'))
-        {
+        if (!extension_loaded('swoole')) {
             throw new \Exception('swoole extension is required for WebSocketAsync');
         }
 
         //没有onMessage
-        if (!$this->_callback('message'))
-        {
+        if (!$this->_callback('message')) {
             throw new \Exception('no message event callback.');
         }
 
         $type = SWOOLE_TCP;
-        if ($this->ssl)
-        {
+        if ($this->ssl) {
             $type |= SWOOLE_SSL;
         }
 
         $this->socket = new \swoole_client($type, SWOOLE_SOCK_ASYNC);
-        if ($this->ssl_key_file)
-        {
+        if ($this->ssl_key_file) {
             $this->socket->set(array(
                 'ssl_key_file' => $this->ssl_key_file,
                 'ssl_cert_file' => $this->ssl_cert_file
@@ -56,8 +52,7 @@ class WebSocket extends SPF\Client\WebSocket
      */
     public function on($event, $callable)
     {
-        switch($event)
-        {
+        switch ($event) {
             case 'open':
             case 'message':
             case 'close':
@@ -95,50 +90,34 @@ class WebSocket extends SPF\Client\WebSocket
     final public function onReceive(\swoole_client $socket, $data)
     {
         //已建立连接并完成了握手，解析数据帧
-        if ($this->handshake)
-        {
+        if ($this->handshake) {
             $this->parser->push($data);
-            try
-            {
-                while (true)
-                {
+            try {
+                while (true) {
                     $frame = $this->parser->pop($data);
-                    if ($frame and $callable = $this->_callback('message'))
-                    {
+                    if ($frame and $callable = $this->_callback('message')) {
                         call_user_func($callable, $this, $frame);
-                    }
-                    else
-                    {
+                    } else {
                         return;
                     }
                 }
-            }
-            catch (SPF\Http\WebSocketException $e)
-            {
-                if ($e->getCode() == SPF\Http\WebSocketParser::ERR_TOO_LONG)
-                {
+            } catch (SPF\Http\WebSocketException $e) {
+                if ($e->getCode() == SPF\Http\WebSocketParser::ERR_TOO_LONG) {
                     $this->socket->close();
                     $this->connected = false;
                 }
             }
         }
         //握手
-        else
-        {
+        else {
             $this->buffer .= $data;
-            if (substr($this->buffer, -4, 4) == "\r\n\r\n")
-            {
-                if ($this->doHandShake($this->buffer) and $callable = $this->_callback('open'))
-                {
+            if (substr($this->buffer, -4, 4) == "\r\n\r\n") {
+                if ($this->doHandShake($this->buffer) and $callable = $this->_callback('open')) {
                     call_user_func($callable, $this, $this->header);
-                }
-                else
-                {
+                } else {
                     $this->disconnect();
                 }
-            }
-            else
-            {
+            } else {
                 return;
             }
         }
@@ -149,8 +128,7 @@ class WebSocket extends SPF\Client\WebSocket
      */
     public function onError(\swoole_client $socket)
     {
-        if ($callable = $this->_callback('error'))
-        {
+        if ($callable = $this->_callback('error')) {
             call_user_func($callable, $this);
         }
     }
@@ -160,8 +138,7 @@ class WebSocket extends SPF\Client\WebSocket
      */
     public function onClose(\swoole_client $socket)
     {
-        if ($callable = $this->_callback('close'))
-        {
+        if ($callable = $this->_callback('close')) {
             call_user_func($callable, $this);
         }
     }

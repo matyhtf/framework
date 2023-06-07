@@ -13,14 +13,14 @@ class ForRpcSdk extends Standard
 {
     /**
      * The special stmts.
-     * 
+     *
      * @var array ['name' => Stmt]
      */
     protected $specialStmts = [];
 
     /**
      * Prepend namespace prefix.
-     * 
+     *
      * @var bool
      */
     public $prependNamespacePrefix = true;
@@ -33,7 +33,7 @@ class ForRpcSdk extends Standard
      *
      * @return string Pretty printed statements
      */
-    protected function pStmts(array $nodes, bool $indent = true) : string 
+    protected function pStmts(array $nodes, bool $indent = true) : string
     {
         if ($indent) {
             $this->indent();
@@ -72,14 +72,14 @@ class ForRpcSdk extends Standard
 
     /**
      * The node weather can be printed.
-     * 
+     *
      * @param Node $node
-     * 
+     *
      * @return boolean
      */
     protected function canPrint($node)
     {
-        // any special node can print 
+        // any special node can print
         if ($this->isSpecialNode($node)) {
             return true;
         }
@@ -96,7 +96,7 @@ class ForRpcSdk extends Standard
 
     /**
      * filter and transfer the node struct
-     * 
+     *
      * @param Node $node
      */
     protected function filterPrint($node)
@@ -116,7 +116,7 @@ class ForRpcSdk extends Standard
 
         // append a call rpc method to the class
         if ($node instanceof Stmt\Class_) {
-            foreach($this->getSpecailStmt('appendCallRpc') as $stmt) {
+            foreach ($this->getSpecailStmt('appendCallRpc') as $stmt) {
                 $node->stmts[] = $stmt;
             }
         }
@@ -140,14 +140,14 @@ class ForRpcSdk extends Standard
             $this->removeNamespaceUseIfMatched($node);
 
             $namespaceUsing = $this->getSpecailStmt('appendNamespaceUsing');
-            while($stmt = array_pop($namespaceUsing)) {
+            while ($stmt = array_pop($namespaceUsing)) {
                 array_unshift($node->stmts, $stmt);
             }
         }
 
         // append namespace use prefix
         if ($node instanceof Stmt\Use_) {
-            foreach($node->uses as $namespaceUse) {
+            foreach ($node->uses as $namespaceUse) {
                 $use = (string) $namespaceUse->name;
                 if (strpos($use, RpcSdk::$namespacePrefix) === 0 && RpcSdk::$newNamespacePrefix && !is_subclass_of($use, BaseStruct::class)) {
                     $use = RpcSdk::$newNamespacePrefix . $use;
@@ -159,16 +159,16 @@ class ForRpcSdk extends Standard
 
     /**
      * Remove namespace uses matched provided rules.
-     * 
+     *
      * @param Stmt\Namespace_ $node
      */
     protected function removeNamespaceUseIfMatched(Stmt\Namespace_ $node)
     {
-        foreach($node->stmts as $pIndex => $stmt) {
+        foreach ($node->stmts as $pIndex => $stmt) {
             if ($stmt instanceof Stmt\Use_) {
                 foreach ($stmt->uses as $index => $namespaceUse) {
                     $use = (string) $namespaceUse->name;
-                    foreach(RpcSdk::$removeNamespaces as $pattern) {
+                    foreach (RpcSdk::$removeNamespaces as $pattern) {
                         $pregPattern = '/' . str_replace(['\\', '/'], ['\\\\', '\/'], $pattern) . '/';
                         if (preg_match($pregPattern, $use)) {
                             unset($stmt->uses[$index]);
@@ -186,7 +186,7 @@ class ForRpcSdk extends Standard
 
     /**
      * Whether if prepend namespace prefix
-     * 
+     *
      * @param Stmt $node
      * @param string $namespace
      */
@@ -204,9 +204,9 @@ class ForRpcSdk extends Standard
 
     /**
      * Whether if prepend line break
-     * 
+     *
      * @param Node $node
-     * 
+     *
      * @return boolean
      */
     protected function ifPrependLn($node)
@@ -218,9 +218,9 @@ class ForRpcSdk extends Standard
 
     /**
      * The node weather is special.
-     * 
+     *
      * @param Node $node
-     * 
+     *
      * @return boolean
      */
     protected function isSpecialNode($node)
@@ -230,10 +230,10 @@ class ForRpcSdk extends Standard
 
     /**
      * Set special stmts.
-     * 
+     *
      * @param string $name stmt`s name
      * @param Stmt|Stmt[] $stmt stmt`s experission
-     * 
+     *
      * @return $this
      */
     public function setSpecialStmt($name, $stmt)
@@ -245,9 +245,9 @@ class ForRpcSdk extends Standard
 
     /**
      * Get the special stmt named $name
-     * 
+     *
      * @param string $name
-     * 
+     *
      * @return Stmt|Stmt[]
      */
     public function getSpecailStmt($name)

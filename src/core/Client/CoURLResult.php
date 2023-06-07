@@ -16,7 +16,7 @@ class CoURLResult
     public $error;
     public $info;
 
-    function __construct($url, $callback, $multiHandle)
+    public function __construct($url, $callback, $multiHandle)
     {
         $this->url = $url;
         $this->callback = $callback;
@@ -25,11 +25,11 @@ class CoURLResult
         $this->id = intval($this->curl->getHandle());
     }
 
-    function execute()
+    public function execute()
     {
         if ($this->method == CoURL::METHOD_GET) {
             $this->curl->get($this->url);
-        } else if ($this->method == CoURL::METHOD_POST) {
+        } elseif ($this->method == CoURL::METHOD_POST) {
             $this->curl->post($this->url, $this->data);
         }
     }

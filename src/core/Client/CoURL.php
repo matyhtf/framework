@@ -9,7 +9,7 @@ class CoURL
     const METHOD_GET = 1;
     const METHOD_POST = 2;
 
-    function __construct()
+    public function __construct()
     {
         $this->handle = curl_multi_init();
     }
@@ -20,7 +20,7 @@ class CoURL
      * @param null $callback
      * @return CoURLResult
      */
-    function get($url, $callback = null)
+    public function get($url, $callback = null)
     {
         $ret = new CoURLResult($url, $callback, $this->handle);
         $ret->method = self::METHOD_GET;
@@ -34,7 +34,7 @@ class CoURL
      * @param null $callback
      * @return CoURLResult
      */
-    function post($url, $data, $callback = null)
+    public function post($url, $data, $callback = null)
     {
         $ret = new CoURLResult($url, $callback, $this->handle);
         $ret->method = self::METHOD_POST;
@@ -43,10 +43,9 @@ class CoURL
         return $ret;
     }
 
-    function wait($timeout = 2)
+    public function wait($timeout = 2)
     {
-        foreach($this->requests as $req)
-        {
+        foreach ($this->requests as $req) {
             /**
              * @var CoURLResult $req
              */
@@ -57,17 +56,13 @@ class CoURL
         $n = 0;
         $active = true;
 
-        while ($active)
-        {
-            if (($status = curl_multi_exec($mhandle, $active)) != CURLM_CALL_MULTI_PERFORM)
-            {
-                if ($status != CURLM_OK)
-                {
+        while ($active) {
+            if (($status = curl_multi_exec($mhandle, $active)) != CURLM_CALL_MULTI_PERFORM) {
+                if ($status != CURLM_OK) {
                     break;
                 }
                 //如果没有准备就绪，就再次调用curl_multi_exec
-                while ($done = curl_multi_info_read($mhandle))
-                {
+                while ($done = curl_multi_info_read($mhandle)) {
                     $ch = $done["handle"];
                     $key = intval($ch);
                     /**
@@ -77,16 +72,14 @@ class CoURL
                     $retObj->info = curl_getinfo($ch);
                     $retObj->error = curl_error($ch);
                     $retObj->result = curl_multi_getcontent($ch);
-                    if ($retObj->callback)
-                    {
+                    if ($retObj->callback) {
                         call_user_func($retObj->callback, $retObj);
                     }
                     curl_multi_remove_handle($mhandle, $ch);
                     curl_close($ch);
                     unset($this->requests[$key]);
                     $n ++;
-                    if ($active > 0)
-                    {
+                    if ($active > 0) {
                         curl_multi_select($mhandle, $timeout);
                     }
                 }

@@ -26,7 +26,7 @@ class Event
     protected $config;
     protected $async = false;
 
-    function __construct($config)
+    public function __construct($config)
     {
         $this->config = $config;
     }
@@ -76,7 +76,7 @@ class Event
      * @return mixed
      * @throws Exception\NotFound
      */
-    function trigger($type, $data)
+    public function trigger($type, $data)
     {
         /**
          * 异步，将事件压入队列
@@ -91,7 +91,7 @@ class Event
         }
     }
 
-    function _worker()
+    public function _worker()
     {
         $queue = $this->getQueueInstance();
 
@@ -110,7 +110,7 @@ class Event
      * @param bool $daemon
      * @throws Exception\NotFound
      */
-    function runWorker($worker_num = 1, $daemon = false)
+    public function runWorker($worker_num = 1, $daemon = false)
     {
         if ($worker_num > 1 or $daemon) {
             if (!class_exists('\Swoole\Process')) {

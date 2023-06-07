@@ -6,7 +6,7 @@ interface HotReloadable
 {
     /**
      * @param callable|string|array $callback
-     * 
+     *
      * @return self
      */
     public function setCallback($callback);

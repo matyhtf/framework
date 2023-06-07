@@ -13,7 +13,7 @@ trait TcpProtocol
 {
     /**
      * 创建tcp服务
-     * 
+     *
      * @param array $conn 配置信息
      */
     protected function createTcpServer($conn)

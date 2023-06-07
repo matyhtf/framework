@@ -9,10 +9,10 @@ class Config extends ArrayObject
     protected $config;
     protected $config_path = array();
     public $dir_num = 0;
-    static $debug = false;
-    static $active = false;
+    public static $debug = false;
+    public static $active = false;
 
-    function setPath($dir)
+    public function setPath($dir)
     {
         $_dir = realpath($dir);
         if ($_dir === false) {
@@ -38,7 +38,7 @@ class Config extends ArrayObject
     }
 
     #[\ReturnTypeWillChange]
-    function offsetGet($index)
+    public function offsetGet($index)
     {
         if (!isset($this->config[$index])) {
             $this->load($index);
@@ -46,7 +46,7 @@ class Config extends ArrayObject
         return isset($this->config[$index]) ? $this->config[$index] : false;
     }
 
-    function load($index)
+    public function load($index)
     {
         foreach ($this->config_path as $path) {
             $filename = $path . '/' . $index . '.php';
@@ -63,25 +63,25 @@ class Config extends ArrayObject
         }
     }
 
-    function set($key, $value)
+    public function set($key, $value)
     {
         $this->config[$key] = $value;
     }
 
     #[\ReturnTypeWillChange]
-    function offsetSet($index, $newval)
+    public function offsetSet($index, $newval)
     {
         $this->set($index, $newval);
     }
 
     #[\ReturnTypeWillChange]
-    function offsetUnset($index)
+    public function offsetUnset($index)
     {
         unset($this->config[$index]);
     }
 
     #[\ReturnTypeWillChange]
-    function offsetExists($index)
+    public function offsetExists($index)
     {
         if (!isset($this->config[$index])) {
             $this->load($index);

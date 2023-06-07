@@ -11,28 +11,28 @@ class RpcSdk
 {
     /**
      * Symfony console output instance.
-     * 
+     *
      * @var OutputInterface
      */
     protected $output = null;
 
     /**
      * Symfony console style instance.
-     * 
+     *
      * @var SymfonyStyle
      */
     protected $io = null;
 
     /**
      * Sdk root path.
-     * 
+     *
      * @var string
      */
     protected $rootPath = null;
 
     /**
      * Packagist domain.
-     * 
+     *
      * @var string
      */
     protected static $packagistDomain = 'https://packagist.org';
@@ -49,7 +49,7 @@ class RpcSdk
 
     /**
      * Set packagist domain.
-     * 
+     *
      * @param string $domain
      */
     public static function setPackagistDomain($domain)
@@ -59,7 +59,7 @@ class RpcSdk
 
     /**
      * Handle.
-     * 
+     *
      * @param string $root
      */
     public function handle($root)
@@ -100,7 +100,7 @@ class RpcSdk
         if ($retVal !== 0) {
             // need set remote.origin.url
             $this->writeln('<comment>未设置Git仓库地址</comment>');
-            while(true) {
+            while (true) {
                 $origin = $this->getIo()->ask('请填写SDK Git仓库地址');
                 if (!$origin) {
                     $this->writeln('<error>SDK Git仓库地址不能为空</error>');
@@ -243,7 +243,7 @@ class RpcSdk
         if (!is_file($cacheFile)) {
             exec("cd {$this->rootPath} && git config user.name", $output, $retVal);
             $defaultName = count($output) > 0 ? array_pop($output) : null;
-            while(true) {
+            while (true) {
                 $username = $this->getIo()->ask('请填写Packagist帐户名称', $defaultName);
                 if (empty($username)) {
                     $this->writeln('<error>帐户名称不能为空</error>');
@@ -289,7 +289,7 @@ class RpcSdk
 
     /**
      * Get the symfony console instance.
-     * 
+     *
      * @return OutputInterface
      */
     public function getOutput()
@@ -299,7 +299,7 @@ class RpcSdk
 
     /**
      * Get the symfony console style instance.
-     * 
+     *
      * @return SymfonyStyle
      */
     public function getIo()
@@ -309,7 +309,7 @@ class RpcSdk
 
     /**
      * Output log and line feed.
-     * 
+     *
      * @param string $msg
      */
     public function writeln($msg)
@@ -320,7 +320,7 @@ class RpcSdk
     /**
      * Output log.
      * if there doesn`s have symfony output instance, then console log by echo.
-     * 
+     *
      * @param string $msg
      * @return string $method
      */

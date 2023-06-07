@@ -44,7 +44,7 @@ class Request
 
     /**
      * 获取去除公共命名空间前缀的类名
-     * 
+     *
      * @return string
      */
     public function getSimpleClass()
@@ -74,7 +74,6 @@ class Request
 
     public function param($indexOrName)
     {
-
     }
 
     public function params()
@@ -101,7 +100,7 @@ class Request
     /**
      * @param string $name
      * @param mixed $defautl
-     * 
+     *
      * @return mixed
      */
     public function getConfig($name = null, $defautl = null)
@@ -115,7 +114,7 @@ class Request
 
     /**
      * 数据打包格式
-     * 
+     *
      * @return int
      */
     public function getFormat()

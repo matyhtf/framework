@@ -3,6 +3,6 @@ namespace SPF\IFace;
 
 interface Queue
 {
-    function push($data);
-    function pop();
+    public function push($data);
+    public function pop();
 }

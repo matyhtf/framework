@@ -11,42 +11,42 @@ class ClassMapToSdk
 {
     /**
      * 类中use的类名列表
-     * 
+     *
      * @var array
      */
     protected $classUses = [];
 
     /**
      * sdk根路径
-     * 
+     *
      * @var string
      */
     protected $rootDir;
 
     /**
      * sdk源码路径
-     * 
+     *
      * @var string
      */
     protected $srcDir;
 
     /**
      * sdk实现代码路径
-     * 
+     *
      * @var string
      */
     protected $sdkDir;
 
     /**
      * 服务端实现代码路径
-     * 
+     *
      * @var string
      */
     protected $libImplDir;
 
     /**
      * sdk命名空间前缀
-     * 
+     *
      * @var string
      */
     protected $sdkNs;
@@ -67,7 +67,7 @@ class ClassMapToSdk
      */
     public function handle($classMap, $withSdkTools = true, $withTarsFiles = false)
     {
-        foreach($classMap as $class => $methods) {
+        foreach ($classMap as $class => $methods) {
             $this->genClass($class, $methods);
         }
 
@@ -84,20 +84,21 @@ class ClassMapToSdk
 
     /**
      * 生成类文件
-     * 
+     *
      * @param string $class
      * @param string $methods
      */
     protected function genClass($class, $methods)
     {
-        $this->classUses = Config::get('app.tars2sdk.appendClassUses', []);;
+        $this->classUses = Config::get('app.tars2sdk.appendClassUses', []);
+        ;
 
         list($filename, $source) = $this->getSavePath($class);
         $ns = $this->getSaveClassNs($class);
         $className = $this->getSimpleClassName($class);
 
         $codeBody = '';
-        foreach($methods as $method => $param) {
+        foreach ($methods as $method => $param) {
             $codeBody .= $this->genMethod($class, $method, $param);
         }
 
@@ -107,7 +108,7 @@ class ClassMapToSdk
         
         // 命名空间去重、去除\前缀
         $this->classUses = array_unique($this->classUses);
-        foreach($this->classUses as &$use) {
+        foreach ($this->classUses as &$use) {
             $use = $this->removeNsPrefix($use);
             $code .= "use {$use};" . Utils::lineFeed(1);
         }
@@ -129,11 +130,11 @@ class ClassMapToSdk
 
     /**
      * 生成方法
-     * 
+     *
      * @param string $class
      * @param string $method
      * @param array $param
-     * 
+     *
      * @return string
      */
     protected function genMethod($class, $method, $param)
@@ -144,12 +145,12 @@ class ClassMapToSdk
         $code .= Utils::indent(1) . "public function {$method}(";
 
         // 对参数先后顺序排序
-        usort($param['params'], function($a, $b) {
+        usort($param['params'], function ($a, $b) {
             return $a['index'] - $b['index'] > 0 ? 1 : -1;
         });
 
         // 方法参数拼接
-        foreach($param['params'] as $funcParam) {
+        foreach ($param['params'] as $funcParam) {
             // 参数修饰符
             $flagAnd = $funcParam['ref'] ? '&' : '';
             if ($this->isStruct($funcParam['type'])) {
@@ -218,7 +219,7 @@ class ClassMapToSdk
             $funcParam['proto'] = $this->transferProto($funcParam['proto']);
 
             if (Utils::isVector($type) || Utils::isMap($type)) {
-                $code .= Utils::indent(2) . "\${$name} = TUPAPIWrapper::{$unpackMethod}(\"{$name}\", {$index}, new {$funcParam['proto']}, \$response, true);" . Utils::lineFeed(1);      
+                $code .= Utils::indent(2) . "\${$name} = TUPAPIWrapper::{$unpackMethod}(\"{$name}\", {$index}, new {$funcParam['proto']}, \$response, true);" . Utils::lineFeed(1);
             } elseif ($this->isStruct($funcParam['proto'])) {
                 $this->classUses[] = $funcParam['proto'];
                 $code .= Utils::indent(2) . "\${$name} = TUPAPIWrapper::{$unpackMethod}(\"{$name}\", {$index}, \$response, true);" . Utils::lineFeed(1);
@@ -258,9 +259,9 @@ class ClassMapToSdk
 
     /**
      * 根据类名获取简单类名
-     * 
+     *
      * @param string $class
-     * 
+     *
      * @return string
      */
     protected function getSimpleClassName($class)
@@ -272,9 +273,9 @@ class ClassMapToSdk
 
     /**
      * 内建类型转换
-     * 
+     *
      * @param string $type
-     * 
+     *
      * @return bool|string
      */
     protected function buildInType($type)
@@ -299,7 +300,7 @@ class ClassMapToSdk
 
     /**
      * 判断是否是结构体
-     * 
+     *
      * @return bool
      */
     protected function isStruct($type)
@@ -309,9 +310,9 @@ class ClassMapToSdk
 
     /**
      * 转换proto字段为可实例化对象
-     * 
+     *
      * @param string $proto
-     * 
+     *
      * @return string
      */
     protected function transferProto($proto)
@@ -336,9 +337,9 @@ class ClassMapToSdk
 
     /**
      * 根据类名计算保存路径
-     * 
+     *
      * @param string $class
-     * 
+     *
      * @return array
      */
     protected function getSavePath($class)
@@ -358,10 +359,10 @@ class ClassMapToSdk
 
     /**
      * 获取相对路径
-     * 
+     *
      * @param string $referPath 参考路径
      * @param string $absolutePath 绝对路径
-     * 
+     *
      * @return string
      */
     protected function getRelativePath($referPath, $absolutePath)
@@ -371,10 +372,10 @@ class ClassMapToSdk
 
     /**
      * 获取相对命名空间
-     * 
+     *
      * @param string $referNs 参考命名空间
      * @param string $absoluteNs 完整命名空间
-     * 
+     *
      * @return string
      */
     protected function getRelativeNs($referNs, $absoluteNs)
@@ -394,9 +395,9 @@ class ClassMapToSdk
 
     /**
      * 获取保存类的命名空间
-     * 
+     *
      * @param string $class
-     * 
+     *
      * @return string
      */
     protected function getSaveClassNs($class)
@@ -418,7 +419,7 @@ class ClassMapToSdk
     {
         $search = [];
         $replace = [];
-        foreach($this->classUses as $class) {
+        foreach ($this->classUses as $class) {
             if ($this->isStruct($class)) {
                 $search[] = $class;
                 $replace[] = $this->getSaveStructNs($class);
@@ -430,9 +431,9 @@ class ClassMapToSdk
 
     /**
      * 移除命名空间前缀
-     * 
+     *
      * @param string $ns
-     * 
+     *
      * @return string
      */
     protected function removeNsPrefix($ns)
@@ -455,7 +456,7 @@ class ClassMapToSdk
         }
 
         $structPath = Config::$rootPath . '/' . Config::getOrFailed('app.tars.dstPath') . '/' . Config::getOrFailed('app.tars.structDir');
-        foreach(Helper::recurseReadFolder($structPath) as $file) {
+        foreach (Helper::recurseReadFolder($structPath) as $file) {
             $code = file_get_contents($file);
 
             $code = $this->filterCopyStructContent($code);
@@ -470,9 +471,9 @@ class ClassMapToSdk
 
     /**
      * 替换struct类中的命名空间为sdk命名空间
-     * 
+     *
      * @param string $content
-     * 
+     *
      * @return string
      */
     protected function filterCopyStructContent($content)
@@ -510,7 +511,7 @@ class ClassMapToSdk
      */
     protected function copySdkTools()
     {
-        foreach(Config::get('app.tars2sdk.sdkTools') as $source => $target) {
+        foreach (Config::get('app.tars2sdk.sdkTools') as $source => $target) {
             // 使用相对路径时，自动补充$source的路径前缀为Config::$rootPath / sdktools
             if (strpos($source, '/') !== 0) {
                 $source = Config::$rootPath . '/sdktools/' . $source;

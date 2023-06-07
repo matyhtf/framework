@@ -7,36 +7,29 @@ use SPF\Tool;
 
 class Original implements Router
 {
-    function handle(&$uri)
+    public function handle(&$uri)
     {
         $request = \SPF\App::getInstance()->request;
         $array = App::$default_controller;
-        if (!empty($request->get["c"]))
-        {
+        if (!empty($request->get["c"])) {
             $array['controller'] = $request->get["c"];
         }
-        if (!empty($request->get["v"]))
-        {
+        if (!empty($request->get["v"])) {
             $array['view'] = $request->get["v"];
         }
         $request_uri = explode('/', $uri, 3);
-        if (count($request_uri) < 2)
-        {
+        if (count($request_uri) < 2) {
             return $array;
         }
         $array['controller'] = $request_uri[0];
         $array['view'] = $request_uri[1];
         Tool::$url_prefix = '';
-        if (isset($request_uri[2]))
-        {
+        if (isset($request_uri[2])) {
             $request_uri[2] = trim($request_uri[2], '/');
             $_id = str_replace('.html', '', $request_uri[2]);
-            if (is_numeric($_id))
-            {
+            if (is_numeric($_id)) {
                 $request->get['id'] = $_id;
-            }
-            else
-            {
+            } else {
                 Tool::$url_key_join = '-';
                 Tool::$url_param_join = '-';
                 Tool::$url_add_end = '.html';

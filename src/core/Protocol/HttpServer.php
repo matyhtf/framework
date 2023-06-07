@@ -10,7 +10,7 @@ use SPF;
  * @package SPF
  * @subpackage net.protocol
  */
-class HttpServer extends SPF\Protocol\WebServer implements  SPF\IFace\Protocol
+class HttpServer extends SPF\Protocol\WebServer implements SPF\IFace\Protocol
 {
     protected $swoole_server;
     protected $buffer_header = array();
@@ -25,7 +25,7 @@ class HttpServer extends SPF\Protocol\WebServer implements  SPF\IFace\Protocol
     const ST_WAIT   = 2; //等待数据
     const ST_ERROR  = 3; //错误，丢弃此包
 
-    function __construct($config = array())
+    public function __construct($config = array())
     {
         parent::__construct($config);
         $mimes = require(dirname(dirname(__DIR__)) . '/data/mimes.php');
@@ -34,10 +34,9 @@ class HttpServer extends SPF\Protocol\WebServer implements  SPF\IFace\Protocol
         $this->parser = new SPF\Http\Parser;
     }
 
-    function onStart($serv, $worker_id = 0)
+    public function onStart($serv, $worker_id = 0)
     {
-        if (isset($this->config['server']['user']))
-        {
+        if (isset($this->config['server']['user'])) {
             SPF\Console::changeUser($this->config['server']['user']);
         }
 
@@ -52,29 +51,29 @@ class HttpServer extends SPF\Protocol\WebServer implements  SPF\IFace\Protocol
     /**
      * @return \swoole_server
      */
-    function getSwooleServer()
+    public function getSwooleServer()
     {
         return $this->swoole_server;
     }
 
-    function onShutdown($serv)
+    public function onShutdown($serv)
     {
         $this->log(self::SOFTWARE . " shutdown");
     }
 
-    function onConnect($serv, $client_id, $from_id)
+    public function onConnect($serv, $client_id, $from_id)
     {
         $this->log("Event: client[#$client_id@$from_id] connect");
     }
 
 
-    function onClose($serv, $client_id, $from_id)
+    public function onClose($serv, $client_id, $from_id)
     {
         $this->log("Event: client[#$client_id@$from_id] close");
         $this->cleanBuffer($client_id);
     }
 
-    function cleanBuffer($fd)
+    public function cleanBuffer($fd)
     {
         unset($this->requests[$fd], $this->buffer_header[$fd]);
     }
@@ -84,24 +83,19 @@ class HttpServer extends SPF\Protocol\WebServer implements  SPF\IFace\Protocol
      * @param $http_data
      * @return bool|SPF\Request
      */
-    function checkHeader($client_id, $http_data)
+    public function checkHeader($client_id, $http_data)
     {
         //新的连接
-        if (!isset($this->requests[$client_id]))
-        {
-            if (!empty($this->buffer_header[$client_id]))
-            {
+        if (!isset($this->requests[$client_id])) {
+            if (!empty($this->buffer_header[$client_id])) {
                 $http_data = $this->buffer_header[$client_id].$http_data;
             }
             //HTTP结束符
             $ret = strpos($http_data, self::HTTP_EOF);
             //没有找到EOF，继续等待数据
-            if ($ret === false)
-            {
+            if ($ret === false) {
                 return false;
-            }
-            else
-            {
+            } else {
                 $this->buffer_header[$client_id] = '';
                 $request = new SPF\Request;
                 //GET没有body
@@ -113,16 +107,14 @@ class HttpServer extends SPF\Protocol\WebServer implements  SPF\IFace\Protocol
                 //保存请求
                 $this->requests[$client_id] = $request;
                 //解析失败
-                if ($request->header == false)
-                {
+                if ($request->header == false) {
                     $this->log("parseHeader failed. header=".$header);
                     return false;
                 }
             }
         }
         //POST请求需要合并数据
-        else
-        {
+        else {
             $request = $this->requests[$client_id];
             $request->body .= $http_data;
         }
@@ -133,24 +125,20 @@ class HttpServer extends SPF\Protocol\WebServer implements  SPF\IFace\Protocol
      * @param SPF\Request $request
      * @return int
      */
-    function checkPost(SPF\Request $request)
+    public function checkPost(SPF\Request $request)
     {
-        if (isset($request->header['Content-Length']))
-        {
+        if (isset($request->header['Content-Length'])) {
             //超过最大尺寸
-            if (intval($request->header['Content-Length']) > $this->config['server']['post_maxsize'])
-            {
+            if (intval($request->header['Content-Length']) > $this->config['server']['post_maxsize']) {
                 $this->log("checkPost failed. post_data is too long.");
                 return self::ST_ERROR;
             }
             //不完整，继续等待数据
-            if (intval($request->header['Content-Length']) > strlen($request->body))
-            {
+            if (intval($request->header['Content-Length']) > strlen($request->body)) {
                 return self::ST_WAIT;
             }
             //长度正确
-            else
-            {
+            else {
                 return self::ST_FINISH;
             }
         }
@@ -159,38 +147,31 @@ class HttpServer extends SPF\Protocol\WebServer implements  SPF\IFace\Protocol
         return self::ST_ERROR;
     }
 
-    function checkData($client_id, $http_data)
+    public function checkData($client_id, $http_data)
     {
-        if (isset($this->buffer_header[$client_id]))
-        {
+        if (isset($this->buffer_header[$client_id])) {
             $http_data = $this->buffer_header[$client_id].$http_data;
         }
         //检测头
         $request = $this->checkHeader($client_id, $http_data);
         //错误的http头
-        if ($request === false)
-        {
+        if ($request === false) {
             $this->buffer_header[$client_id] = $http_data;
             //超过最大HTTP头限制了
-            if (strlen($http_data) > self::HTTP_HEAD_MAXLEN)
-            {
+            if (strlen($http_data) > self::HTTP_HEAD_MAXLEN) {
                 $this->log("http header is too long.");
                 return self::ST_ERROR;
-            }
-            else
-            {
+            } else {
                 $this->log("wait request data. fd={$client_id}");
                 return self::ST_WAIT;
             }
         }
         //POST请求需要检测body是否完整
-        if ($request->meta['method'] == 'POST')
-        {
+        if ($request->meta['method'] == 'POST') {
             return $this->checkPost($request);
         }
         //GET请求直接进入处理流程
-        else
-        {
+        else {
             return self::ST_FINISH;
         }
     }
@@ -203,14 +184,13 @@ class HttpServer extends SPF\Protocol\WebServer implements  SPF\IFace\Protocol
      * @param $data
      * @return null
      */
-    function onReceive($serv, $client_id, $tid, $data)
+    public function onReceive($serv, $client_id, $tid, $data)
     {
         //检测request data完整性
         $ret = $this->checkData($client_id, $data);
-        switch($ret)
-        {
+        switch ($ret) {
             //错误的请求
-            case self::ST_ERROR;
+            case self::ST_ERROR:
                 $this->server->close($client_id);
                 return;
             //请求不完整，继续等待
@@ -233,7 +213,7 @@ class HttpServer extends SPF\Protocol\WebServer implements  SPF\IFace\Protocol
         /**
          * Socket连接信息
          */
-	    $info = $serv->connection_info($client_id);
+        $info = $serv->connection_info($client_id);
         $request->server['SWOOLE_CONNECTION_INFO'] = $info;
         $request->remote_ip = $info['remote_ip'];
         $request->remote_port = $info['remote_port'];
@@ -246,8 +226,7 @@ class HttpServer extends SPF\Protocol\WebServer implements  SPF\IFace\Protocol
         $request->server['REQUEST_METHOD'] = $request->meta['method'];
         $request->server['REQUEST_TIME'] = $request->time;
         $request->server['SERVER_PROTOCOL'] = $request->meta['protocol'];
-        if (!empty($request->meta['query']))
-        {
+        if (!empty($request->meta['query'])) {
             $_SERVER['QUERY_STRING'] = $request->meta['query'];
         }
         $request->setGlobal();
@@ -255,17 +234,15 @@ class HttpServer extends SPF\Protocol\WebServer implements  SPF\IFace\Protocol
         $this->currentRequest = $request;
         //处理请求，产生response对象
         $response = $this->onRequest($request);
-        if ($response and $response instanceof SPF\Response)
-        {
+        if ($response and $response instanceof SPF\Response) {
             //发送response
             $this->response($request, $response);
         }
     }
 
-    function afterResponse(SPF\Request $request, SPF\Response $response)
+    public function afterResponse(SPF\Request $request, SPF\Response $response)
     {
-        if (!$this->keepalive or $response->head['Connection'] == 'close')
-        {
+        if (!$this->keepalive or $response->head['Connection'] == 'close') {
             $this->server->close($request->fd);
         }
         $request->unsetGlobal();
@@ -280,23 +257,22 @@ class HttpServer extends SPF\Protocol\WebServer implements  SPF\IFace\Protocol
      * @param $request SPF\Request
      * @return null
      */
-    function parseRequest($request)
+    public function parseRequest($request)
     {
         $url_info = parse_url($request->meta['uri']);
         $request->meta['path'] = $url_info['path'];
-        if (isset($url_info['fragment'])) $request->meta['fragment'] = $url_info['fragment'];
-        if (isset($url_info['query']))
-        {
+        if (isset($url_info['fragment'])) {
+            $request->meta['fragment'] = $url_info['fragment'];
+        }
+        if (isset($url_info['query'])) {
             parse_str($url_info['query'], $request->get);
         }
         //POST请求,有http body
-        if ($request->meta['method'] === 'POST')
-        {
+        if ($request->meta['method'] === 'POST') {
             $this->parser->parseBody($request);
         }
         //解析Cookies
-        if (!empty($request->header['Cookie']))
-        {
+        if (!empty($request->header['Cookie'])) {
             $this->parser->parseCookie($request);
         }
     }
@@ -307,51 +283,39 @@ class HttpServer extends SPF\Protocol\WebServer implements  SPF\IFace\Protocol
      * @param $response SPF\Response
      * @return bool
      */
-    function response(SPF\Request $request, SPF\Response $response)
+    public function response(SPF\Request $request, SPF\Response $response)
     {
-        if (!isset($response->head['Date']))
-        {
+        if (!isset($response->head['Date'])) {
             $response->head['Date'] = gmdate("D, d M Y H:i:s T");
         }
-        if (!isset($response->head['Connection']))
-        {
+        if (!isset($response->head['Connection'])) {
             //keepalive
-            if ($this->keepalive and (isset($request->header['Connection']) and strtolower($request->header['Connection']) == 'keep-alive'))
-            {
+            if ($this->keepalive and (isset($request->header['Connection']) and strtolower($request->header['Connection']) == 'keep-alive')) {
                 $response->head['KeepAlive'] = 'on';
                 $response->head['Connection'] = 'keep-alive';
-            }
-            else
-            {
+            } else {
                 $response->head['KeepAlive'] = 'off';
                 $response->head['Connection'] = 'close';
             }
         }
         //过期命中
-        if ($this->expire and $response->http_status == 304)
-        {
+        if ($this->expire and $response->http_status == 304) {
             $out = $response->getHeader();
             return $this->server->send($request->fd, $out);
         }
         //压缩
-        if ($this->gzip)
-        {
-            if (!empty($request->header['Accept-Encoding']))
-            {
+        if ($this->gzip) {
+            if (!empty($request->header['Accept-Encoding'])) {
                 //gzip
-                if (strpos($request->header['Accept-Encoding'], 'gzip') !== false)
-                {
+                if (strpos($request->header['Accept-Encoding'], 'gzip') !== false) {
                     $response->head['Content-Encoding'] = 'gzip';
                     $response->body = gzencode($response->body, $this->config['server']['gzip_level']);
                 }
                 //deflate
-                elseif (strpos($request->header['Accept-Encoding'], 'deflate') !== false)
-                {
+                elseif (strpos($request->header['Accept-Encoding'], 'deflate') !== false) {
                     $response->head['Content-Encoding'] = 'deflate';
                     $response->body = gzdeflate($response->body, $this->config['server']['gzip_level']);
-                }
-                else
-                {
+                } else {
                     $this->log("Unsupported compression type : {$request->header['Accept-Encoding']}.");
                 }
             }
@@ -369,29 +333,32 @@ class HttpServer extends SPF\Protocol\WebServer implements  SPF\IFace\Protocol
      * @param SPF\Response $response
      * @param string          $content
      */
-    function httpError($code, SPF\Response $response, $content = '')
+    public function httpError($code, SPF\Response $response, $content = '')
     {
         $response->setHttpStatus($code);
         $response->head['Content-Type'] = 'text/html';
-        $response->body = SPF\Error::info(SPF\Response::$HTTP_HEADERS[$code],
+        $response->body = SPF\Error::info(
+            SPF\Response::$HTTP_HEADERS[$code],
             "<p>$content</p><hr><address>" . self::SOFTWARE . " at {$this->server->host}" .
-            " Port {$this->server->port}</address>");
+            " Port {$this->server->port}</address>"
+        );
     }
 
     /**
      * 捕获register_shutdown_function错误
      */
-    function onErrorShutDown()
+    public function onErrorShutDown()
     {
         $error = error_get_last();
-        if (!isset($error['type'])) return;
-        switch ($error['type'])
-        {
-            case E_ERROR :
-            case E_PARSE :
+        if (!isset($error['type'])) {
+            return;
+        }
+        switch ($error['type']) {
+            case E_ERROR:
+            case E_PARSE:
             case E_USER_ERROR:
-            case E_CORE_ERROR :
-            case E_COMPILE_ERROR :
+            case E_CORE_ERROR:
+            case E_COMPILE_ERROR:
                 break;
             default:
                 return;
@@ -402,7 +369,7 @@ class HttpServer extends SPF\Protocol\WebServer implements  SPF\IFace\Protocol
     /**
      * 捕获set_error_handle错误
      */
-    function onErrorHandle($errno, $errstr, $errfile, $errline)
+    public function onErrorHandle($errno, $errstr, $errfile, $errline)
     {
         $error = array(
             'message' => $errstr,
@@ -420,8 +387,7 @@ class HttpServer extends SPF\Protocol\WebServer implements  SPF\IFace\Protocol
     {
         $errorMsg = "{$error['message']} ({$error['file']}:{$error['line']})";
         $message = SPF\Error::info(self::SOFTWARE." Application Error", $errorMsg);
-        if (empty($this->currentResponse))
-        {
+        if (empty($this->currentResponse)) {
             $this->currentResponse = new SPF\Response();
         }
         $this->currentResponse->setHttpStatus(500);
@@ -435,7 +401,7 @@ class HttpServer extends SPF\Protocol\WebServer implements  SPF\IFace\Protocol
      * @param $request
      * @return SPF\Response
      */
-    function onRequest(SPF\Request $request)
+    public function onRequest(SPF\Request $request)
     {
         $response = new SPF\Response;
         $this->currentResponse = $response;
@@ -443,22 +409,17 @@ class HttpServer extends SPF\Protocol\WebServer implements  SPF\IFace\Protocol
         SPF\App::getInstance()->response = $response;
 
         //请求路径
-        if ($request->meta['path'][strlen($request->meta['path']) - 1] == '/')
-        {
+        if ($request->meta['path'][strlen($request->meta['path']) - 1] == '/') {
             $request->meta['path'] .= $this->config['request']['default_page'];
         }
 
-        if ($this->doStaticRequest($request, $response))
-        {
-             //pass
+        if ($this->doStaticRequest($request, $response)) {
+            //pass
         }
         /* 动态脚本 */
-        elseif (isset($this->dynamic_ext[$request->ext_name]) or empty($ext_name))
-        {
+        elseif (isset($this->dynamic_ext[$request->ext_name]) or empty($ext_name)) {
             $this->processDynamic($request, $response);
-        }
-        else
-        {
+        } else {
             $this->httpError(404, $response, "Http Not Found({($request->meta['path']})");
         }
         return $response;
@@ -470,20 +431,18 @@ class HttpServer extends SPF\Protocol\WebServer implements  SPF\IFace\Protocol
      * @param SPF\Response $response
      * @return bool
      */
-    function doStaticRequest(SPF\Request $request, SPF\Response $response)
+    public function doStaticRequest(SPF\Request $request, SPF\Response $response)
     {
         $path = explode('/', trim($request->meta['path'], '/'));
         //扩展名
         $request->ext_name = $ext_name = SPF\Upload::getFileExt($request->meta['path']);
         /* 检测是否拒绝访问 */
-        if (isset($this->deny_dir[$path[0]]))
-        {
+        if (isset($this->deny_dir[$path[0]])) {
             $this->httpError(403, $response, "服务器拒绝了您的访问({$request->meta['path']})");
             return true;
         }
         /* 是否静态目录 */
-        elseif (isset($this->static_dir[$path[0]]) or isset($this->static_ext[$ext_name]))
-        {
+        elseif (isset($this->static_dir[$path[0]]) or isset($this->static_ext[$ext_name])) {
             return $this->processStatic($request, $response);
         }
         return false;
@@ -495,29 +454,23 @@ class HttpServer extends SPF\Protocol\WebServer implements  SPF\IFace\Protocol
      * @param SPF\Response $response
      * @return bool
      */
-    function processStatic(SPF\Request $request, SPF\Response $response)
+    public function processStatic(SPF\Request $request, SPF\Response $response)
     {
         $path = $this->document_root . '/' . $request->meta['path'];
-        if (is_file($path))
-        {
+        if (is_file($path)) {
             $read_file = true;
-            if ($this->expire)
-            {
+            if ($this->expire) {
                 $expire = intval($this->config['server']['expire_time']);
                 $fstat = stat($path);
                 //过期控制信息
-                if (isset($request->header['If-Modified-Since']))
-                {
+                if (isset($request->header['If-Modified-Since'])) {
                     $lastModifiedSince = strtotime($request->header['If-Modified-Since']);
-                    if ($lastModifiedSince and $fstat['mtime'] <= $lastModifiedSince)
-                    {
+                    if ($lastModifiedSince and $fstat['mtime'] <= $lastModifiedSince) {
                         //不需要读文件了
                         $read_file = false;
                         $response->setHttpStatus(304);
                     }
-                }
-                else
-                {
+                } else {
                     $response->head['Cache-Control'] = "max-age={$expire}";
                     $response->head['Pragma'] = "max-age={$expire}";
                     $response->head['Last-Modified'] = date(self::DATE_FORMAT_HTTP, $fstat['mtime']);
@@ -525,15 +478,12 @@ class HttpServer extends SPF\Protocol\WebServer implements  SPF\IFace\Protocol
                 }
             }
             $ext_name = SPF\Upload::getFileExt($request->meta['path']);
-            if($read_file)
-            {
+            if ($read_file) {
                 $response->head['Content-Type'] = $this->mime_types[$ext_name];
                 $response->body = file_get_contents($path);
             }
             return true;
-        }
-        else
-        {
+        } else {
             return false;
         }
     }
@@ -543,27 +493,21 @@ class HttpServer extends SPF\Protocol\WebServer implements  SPF\IFace\Protocol
      * @param SPF\Request $request
      * @param SPF\Response $response
      */
-    function processDynamic(SPF\Request $request, SPF\Response $response)
+    public function processDynamic(SPF\Request $request, SPF\Response $response)
     {
         $path = $this->document_root . '/' . $request->meta['path'];
-        if (is_file($path))
-        {
+        if (is_file($path)) {
             $response->head['Content-Type'] = 'text/html';
             ob_start();
-            try
-            {
+            try {
                 include $path;
                 $response->body = ob_get_contents();
-            }
-            catch (\Exception $e)
-            {
+            } catch (\Exception $e) {
                 $response->setHttpStatus(500);
                 $response->body = $e->getMessage() . '!<br /><h1>' . self::SOFTWARE . '</h1>';
             }
             ob_end_clean();
-        }
-        else
-        {
+        } else {
             $this->httpError(404, $response, "页面不存在({$request->meta['path']})！");
         }
     }
