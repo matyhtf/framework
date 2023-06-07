@@ -4,11 +4,6 @@ namespace SPF;
 /**
  * 表单处理器
  * 用于生成HTML表单项
- * @author Tianfeng.Han
- * @package SwooleSystem
- * @subpackage HTML
- * @link http://www.swoole.com/
- *
  */
 class Form
 {

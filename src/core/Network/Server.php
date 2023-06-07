@@ -37,7 +37,7 @@ class Server extends Base implements Driver
     );
 
     /**
-     * @var \swoole_server
+     * @var \Swoole\Server
      */
     protected $sw;
     protected $pid_file;
@@ -314,7 +314,7 @@ class Server extends Base implements Driver
         if (self::$useSwooleHttpServer) {
             $this->sw = new \swoole_http_server($this->host, $this->port, self::$swooleMode, $flag);
         } else {
-            $this->sw = new \swoole_server($this->host, $this->port, self::$swooleMode, $flag);
+            $this->sw = new \Swoole\Server($this->host, $this->port, self::$swooleMode, $flag);
         }
 
         SPF\Error::$stop = false;

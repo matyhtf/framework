@@ -6,7 +6,7 @@ use SPF\Rpc\Formatter\FormatterFactory;
 use Throwable;
 
 /**
- * @property \swoole_server|\swoole_http_server|\swoole_websocket_server $server
+ * @property \Swoole\Server|\swoole_http_server|\swoole_websocket_server $server
  * @method \Symfony\Component\Console\Output\ConsoleOutput console()
  */
 trait TcpProtocol
@@ -19,7 +19,7 @@ trait TcpProtocol
     protected function createTcpServer($conn)
     {
         if (is_null($this->server)) {
-            $this->server = new \swoole_server($conn['host'], $conn['port'], $conn['mode'], $conn['type']);
+            $this->server = new \Swoole\Server($conn['host'], $conn['port'], $conn['mode'], $conn['type']);
             $this->server->on('Connect', [$this, 'onConnect']);
             $this->server->on('Receive', [$this, 'onReceive']);
             $this->server->on('Close', [$this, 'onClose']);
@@ -50,7 +50,7 @@ trait TcpProtocol
     /**
      * TCP连接建立连接
      */
-    public function onConnect(\swoole_server $server, int $fd, int $reactorId)
+    public function onConnect(\Swoole\Server $server, int $fd, int $reactorId)
     {
         // do something
     }
@@ -58,7 +58,7 @@ trait TcpProtocol
     /**
      * 接收Tcp消息
      */
-    public function onReceive(\swoole_server $server, int $fd, int $reactorId, string $data)
+    public function onReceive(\Swoole\Server $server, int $fd, int $reactorId, string $data)
     {
         try {
             $header = [
@@ -88,7 +88,7 @@ trait TcpProtocol
         }
     }
 
-    protected function beforeOnReceive(\swoole_server $server, int $fd, int $reactorId, string $data)
+    protected function beforeOnReceive(\Swoole\Server $server, int $fd, int $reactorId, string $data)
     {
         // do something
     }
@@ -96,7 +96,7 @@ trait TcpProtocol
     /**
      * TCP连接断开
      */
-    public function onClose(\swoole_server $server, int $fd, int $reactorId)
+    public function onClose(\Swoole\Server $server, int $fd, int $reactorId)
     {
         // do something
     }

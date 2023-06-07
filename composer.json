@@ -24,7 +24,7 @@
   "minimum-stability": "dev",
   "require": {
     "filp/whoops": "^2.2",
-    "symfony/console": "^4.1",
+    "symfony/console": "^5.4",
     "ext-swoole": ">=4.8",
     "ext-pdo": "*",
     "ext-mysqli": "*",

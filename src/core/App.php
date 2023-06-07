@@ -10,12 +10,6 @@ use Whoops\Handler\PrettyPageHandler;
 use Whoops\Run;
 
 /**
- * Swoole系统核心类，外部使用全局变量$php引用
- * Swoole框架系统的核心类，提供一个swoole对象引用树和基础的调用功能
- *
- * @package    SwooleSystem
- * @author     Tianfeng.Han
- * @subpackage base
  * @property Database $db
  * @property IFace\Cache $cache
  * @property Upload $upload
@@ -39,9 +33,6 @@ use Whoops\Run;
  */
 class App
 {
-    //所有全局对象都改为动态延迟加载
-    //如果希望启动加载,请使用Swoole::load()函数
-
     /**
      * @var Protocol\HttpServer
      */

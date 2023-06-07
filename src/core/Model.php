@@ -14,7 +14,7 @@ class Model
      * @var IDatabase
      */
     public $db;
-    public $swoole;
+    public $app;
 
     public $primary = "id";
     public $foreignkey = 'catid';
@@ -49,7 +49,7 @@ class Model
     {
         $this->db = $app->db($db_key);
         $this->dbs = new SelectDB($this->db);
-        $this->swoole = $app;
+        $this->app = $app;
     }
 
     /**

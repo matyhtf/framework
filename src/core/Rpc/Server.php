@@ -10,6 +10,7 @@ use Throwable;
 use Closure;
 use SPF\Rpc\Formatter\FormatterFactory;
 use SPF\Rpc\Tool\Helper;
+use Swoole;
 
 class Server
 {
@@ -23,7 +24,7 @@ class Server
     /**
      * Swoole Server对象
      *
-     * @var \swoole_server|\swoole_http_server|\swoole_websocket_server
+     * @var \Swoole\Server|\Swoole\Http\Server|\Swoole\WebSocket\Server
      */
     public $server = null;
 
@@ -134,7 +135,7 @@ class Server
         return ProtocolHeader::decode($request);
     }
 
-    protected function beforeStart(\swoole_server $server)
+    protected function beforeStart(\Swoole\Server $server)
     {
     }
 
@@ -175,7 +176,7 @@ class Server
             $this->server->addProcess($this->getHostReloadProcess($this->server));
             $this->console()->writeln("<comment>hot reload is enable, changed code will reload without manual reloading server</comment>");
         }
-        
+
         // 暴露hook
         $this->beforeStart($this->server);
 
@@ -187,7 +188,7 @@ class Server
     }
 
 
-    public function onStart(\swoole_server $server)
+    public function onStart(\Swoole\Server $server)
     {
         Helper::setProcessName("rpc-server: master");
 
@@ -199,7 +200,7 @@ class Server
         // do something
     }
 
-    public function onShutdown(\swoole_server $server)
+    public function onShutdown(\Swoole\Server $server)
     {
         // 移除PID文件
         $pidFile = Config::get('app.serverPid');
@@ -210,19 +211,19 @@ class Server
         // do something
     }
 
-    public function onManagerStart(\swoole_server $serv)
+    public function onManagerStart(\Swoole\Server $serv)
     {
         Helper::setProcessName("rpc-server: mamager");
 
         // do something
     }
 
-    public function onManagerStop(\swoole_server $serv)
+    public function onManagerStop(\Swoole\Server $serv)
     {
         // do something
     }
 
-    public function onWorkerStart(\swoole_server $server, int $workerId)
+    public function onWorkerStart(\Swoole\Server $server, int $workerId)
     {
         Helper::setProcessName("rpc-server: worker");
 
@@ -238,17 +239,17 @@ class Server
         // do something
     }
 
-    public function onWorkerStop(\swoole_server $server, int $workerId)
+    public function onWorkerStop(\Swoole\Server $server, int $workerId)
     {
         // do something
     }
 
-    public function onWorkerExit(\swoole_server $server, int $workerId)
+    public function onWorkerExit(\Swoole\Server $server, int $workerId)
     {
         // do something
     }
 
-    public function onWorkerError(\swoole_server $serv, int $workerId, int $workerPid, int $exitCode, int $signal)
+    public function onWorkerError(\Swoole\Server $serv, int $workerId, int $workerPid, int $exitCode, int $signal)
     {
         // do something
     }
@@ -296,12 +297,12 @@ class Server
     /**
      * @return \swoole_process
      */
-    protected function getHostReloadProcess(\swoole_server $server)
+    protected function getHostReloadProcess(\Swoole\Server $server)
     {
         $driver = Config::get('app.hotReload.driver');
         $hotReload = new $driver(Config::$rootPath, Config::get('app.hotReload', []));
         $enableLog = Config::get('app.hotReload.log', true);
-        
+
         $hotReload->setCallback(function ($logs) use ($enableLog, $server) {
             if ($enableLog) {
                 foreach ($logs as $log) {

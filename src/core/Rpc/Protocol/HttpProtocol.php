@@ -6,7 +6,7 @@ use SPF\Rpc\Formatter\FormatterFactory;
 use Throwable;
 
 /**
- * @property \swoole_server|\swoole_http_server|\swoole_websocket_server $server
+ * @property \Swoole\Server|\swoole_http_server|\swoole_websocket_server $server
  * @method \Symfony\Component\Console\Output\ConsoleOutput console()
  */
 trait HttpProtocol

@@ -69,39 +69,6 @@ function error($error_id, $stop = true)
     }
 }
 
-/**
- * 错误信息输出处理
- * @param $errno
- * @param $errstr
- * @param $errfile
- * @param $errline
- */
-function swoole_error_handler($errno, $errstr, $errfile, $errline)
-{
-    $info = '';
-    switch ($errno) {
-        case E_USER_ERROR:
-            $level = 'User Error';
-            break;
-        case E_USER_WARNING:
-            $level = 'Warnning';
-            break;
-        case E_USER_NOTICE:
-            $level = 'Notice';
-            break;
-        default:
-            $level = 'Unknow';
-            break;
-    }
-
-    $title = 'SPF ' . $level;
-    $info .= '<b>File:</b> ' . $errfile . "<br />\n";
-    $info .= '<b>Line:</b> ' . $errline . "<br />\n";
-    $info .= '<b>Info:</b> ' . $errstr . "<br />\n";
-    $info .= '<b>Code:</b> ' . $errno . "<br />\n";
-    echo SPF\Error::info($title, $info);
-}
-
 if (!function_exists('env')) {
     function env($key, $default = null)
     {

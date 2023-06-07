@@ -28,7 +28,7 @@ abstract class CometServer extends WebSocket
     protected $fd_session_map = array();
 
     /**
-     * @param $serv \swoole_server
+     * @param $serv \Swoole\Server
      */
     public function onStart($serv, $worker_id = 0)
     {

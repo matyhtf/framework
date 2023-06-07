@@ -1,4 +1,5 @@
 <?php
+
 namespace SPF\Router;
 
 use SPF\App;
@@ -33,7 +34,7 @@ class Original implements Router
                 Tool::$url_key_join = '-';
                 Tool::$url_param_join = '-';
                 Tool::$url_add_end = '.html';
-                Tool::$url_prefix = WEBROOT . "/{$request_uri[0]}/$request_uri[1]/";
+                Tool::$url_prefix = "/{$request_uri[0]}/$request_uri[1]/";
                 Tool::url_parse_into($request_uri[2], $request->get);
             }
             $_REQUEST = $request->request = array_merge($request->request, $request->get);

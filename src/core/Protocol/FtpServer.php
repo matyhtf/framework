@@ -9,7 +9,7 @@ class FtpServer extends Base
     public static $software = "swoole-ftp-server";
 
     /**
-     * @var \swoole_server
+     * @var \Swoole\Server
      */
     protected $serv;
     protected $connections = array();

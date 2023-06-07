@@ -9,13 +9,13 @@ namespace SPF;
  */
 class ModelLoader
 {
-    protected $swoole = null;
+    protected $app = null;
     protected $_models = array();
     protected $_tables = array();
 
-    public function __construct($swoole)
+    public function __construct(App $app)
     {
-        $this->swoole = $swoole;
+        $this->app = $app;
     }
 
     /**
@@ -52,7 +52,7 @@ class ModelLoader
     {
         if (!isset($this->_models[$db_key][$model_name])) {
             $model_class = '\\App\\Model\\' . $model_name;
-            $this->_models[$db_key][$model_name] = new $model_class($this->swoole, $db_key);
+            $this->_models[$db_key][$model_name] = new $model_class($this->app, $db_key);
         }
         return $this->_models[$db_key][$model_name];
     }
@@ -68,7 +68,7 @@ class ModelLoader
         if (isset($this->_tables[$db_key][$table_name])) {
             return $this->_tables[$db_key][$table_name];
         } else {
-            $model = new Model($this->swoole, $db_key);
+            $model = new Model($this->app, $db_key);
             $model->table = $table_name;
             $this->_tables[$db_key][$table_name] = $model;
             return $model;

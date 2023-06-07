@@ -1,4 +1,5 @@
 <?php
+
 namespace SPF;
 
 /**
@@ -12,20 +13,26 @@ class Env implements \ArrayAccess
 {
     public static $default_cache_life = 600;
     public $cache_prefix = 'swoole_env_';
-    public $swoole;
-    
-    public function __construct($swoole)
+    /**
+     * @var App
+     */
+    protected $app;
+
+    public function __construct($app)
     {
-        $this->swoole = $swoole;
+        $this->app = $app;
     }
+
     public function offsetGet($key)
     {
-        return $this->swoole->cache->get($this->cache_prefix.$key);
+        return $this->app->cache->get($this->cache_prefix . $key);
     }
+
     public function offsetSet($key, $value)
     {
-        $this->swoole->cache->set($this->cache_prefix.$key, $value, self::$default_cache_life);
+        $this->app->cache->set($this->cache_prefix . $key, $value, self::$default_cache_life);
     }
+
     public function offsetExists($key)
     {
         $v = $this->offsetGet($key);
@@ -35,10 +42,12 @@ class Env implements \ArrayAccess
             return false;
         }
     }
+
     public function offsetUnset($key)
     {
-        $this->swoole->cache->delete($this->cache_prefix.$key);
+        $this->app->cache->delete($this->cache_prefix . $key);
     }
+
     public function __toString()
     {
         return "This is a memory Object!";

@@ -49,7 +49,7 @@ class HttpServer extends SPF\Protocol\WebServer implements SPF\IFace\Protocol
     }
 
     /**
-     * @return \swoole_server
+     * @return \Swoole\Server
      */
     public function getSwooleServer()
     {
@@ -178,7 +178,7 @@ class HttpServer extends SPF\Protocol\WebServer implements SPF\IFace\Protocol
 
     /**
      * 接收到数据
-     * @param $serv \swoole_server
+     * @param $serv \Swoole\Server
      * @param $client_id
      * @param $tid
      * @param $data
