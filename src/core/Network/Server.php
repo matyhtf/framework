@@ -1,5 +1,10 @@
 <?php
+
 namespace SPF\Network;
+
+use GetOptionKit\OptionCollection;
+use GetOptionKit\OptionParser;
+use GetOptionKit\OptionPrinter\ConsoleOptionPrinter;
 
 use SPF;
 use SPF\Server\Base;
@@ -55,7 +60,7 @@ class Server extends Base implements Driver
      */
     static function killProcessByName($name, $signo = 9)
     {
-        $cmd = 'ps -eaf |grep "' . $name . '" | grep -v "grep"| awk "{print $2}"|xargs kill -'.$signo;
+        $cmd = 'ps -eaf |grep "' . $name . '" | grep -v "grep"| awk "{print $2}"|xargs kill -' . $signo;
         return exec($cmd);
     }
 
@@ -75,21 +80,16 @@ class Server extends Base implements Driver
      */
     static function addOption($specString, $description)
     {
-        if (!self::$optionKit)
-        {
-            SPF\App::getInstance()->loader->addNameSpace('GetOptionKit', dirname(dirname(__DIR__)) . '/module/GetOptionKit/src/GetOptionKit');
-            self::$optionKit = new \GetOptionKit\GetOptionKit;
+        if (!self::$optionKit) {
+            self::$optionKit = new OptionCollection;
         }
-        foreach (self::$defaultOptions as $k => $v)
-        {
-            if ($k[0] == $specString[0])
-            {
+        foreach (self::$defaultOptions as $k => $v) {
+            if ($k[0] == $specString[0]) {
                 throw new ServerOptionException("不能添加系统保留的选项名称");
             }
         }
         //解决Windows平台乱码问题
-        if (PHP_OS == 'WINNT')
-        {
+        if (PHP_OS == 'WINNT') {
             $description = iconv('utf-8', 'gbk', $description);
         }
         self::$optionKit->add($specString, $description);
@@ -127,21 +127,18 @@ class Server extends Base implements Driver
 
     static function getServerPid()
     {
-        if (empty(self::$pidFile))
-        {
+        if (empty(self::$pidFile)) {
             throw new \Exception("require pidFile.");
         }
         $pid_file = self::$pidFile;
-        if (is_file($pid_file))
-        {
+        if (is_file($pid_file)) {
             $server_pid = file_get_contents($pid_file);
-        }
-        else
-        {
+        } else {
             $server_pid = 0;
         }
         return $server_pid;
     }
+
     /**
      * 显示命令行指令
      * @param $startFunction
@@ -150,108 +147,82 @@ class Server extends Base implements Driver
      */
     static function start($startFunction, $usage = null)
     {
-        if (empty(self::$pidFile))
-        {
+        if (empty(self::$pidFile)) {
             throw new \Exception("require pidFile.");
         }
         $pid_file = self::$pidFile;
-        if (is_file($pid_file))
-        {
+        if (is_file($pid_file)) {
             $server_pid = file_get_contents($pid_file);
-        }
-        else
-        {
+        } else {
             $server_pid = 0;
         }
 
-        if (!self::$optionKit)
-        {
-            SPF\App::getInstance()->loader->addNameSpace('GetOptionKit', dirname(dirname(__DIR__)) . '/module/GetOptionKit/src/GetOptionKit');
-            self::$optionKit = new \GetOptionKit\GetOptionKit;
+        if (!self::$optionKit) {
+            self::$optionKit = new OptionCollection;
         }
 
         $kit = self::$optionKit;
-        foreach(self::$defaultOptions as $k => $v)
-        {
+        foreach (self::$defaultOptions as $k => $v) {
             //解决Windows平台乱码问题
-            if (PHP_OS == 'WINNT')
-            {
+            if (PHP_OS == 'WINNT') {
                 $v = iconv('utf-8', 'gbk', $v);
             }
             $kit->add($k, $v);
         }
         global $argv;
-        $opt = $kit->parse($argv);
-        if (empty($argv[1]) or isset($opt['help']))
-        {
+        $parser = new OptionParser($kit);
+        $opt = $parser->parse($argv);
+        if (empty($argv[1]) or isset($opt['help'])) {
             goto usage;
-        }
-        elseif ($argv[1] == 'reload')
-        {
-            if (empty($server_pid))
-            {
+        } elseif ($argv[1] == 'reload') {
+            if (empty($server_pid)) {
                 exit("Server is not running");
             }
-            if (self::$beforeReloadCallback)
-            {
+            if (self::$beforeReloadCallback) {
                 call_user_func(self::$beforeReloadCallback, $opt);
             }
             SPF\App::getInstance()->os->kill($server_pid, SIGUSR1);
             exit;
-        }
-        elseif ($argv[1] == 'stop')
-        {
-            if (empty($server_pid))
-            {
+        } elseif ($argv[1] == 'stop') {
+            if (empty($server_pid)) {
                 exit("Server is not running\n");
             }
-            if (self::$beforeStopCallback)
-            {
+            if (self::$beforeStopCallback) {
                 call_user_func(self::$beforeStopCallback, $opt);
             }
             SPF\App::getInstance()->os->kill($server_pid, SIGTERM);
             exit;
-        }
-        elseif ($argv[1] == 'start')
-        {
+        } elseif ($argv[1] == 'start') {
             //已存在ServerPID，并且进程存在
-            if (!empty($server_pid) and SPF\App::getInstance()->os->kill($server_pid, 0))
-            {
+            if (!empty($server_pid) and SPF\App::getInstance()->os->kill($server_pid, 0)) {
                 exit("Server is already running.\n");
             }
-        }
-        else
-        {
+        } else {
             usage:
-            if ($usage != null)
-            {
+            if ($usage != null) {
                 $tips = $usage;
-            }
-            else
-            {
+            } else {
                 $tips = "php {$argv[0]} start|stop|reload";
             }
-            $kit->specs->printOptions($tips);
+            $printer = new ConsoleOptionPrinter();
+            echo $tips . PHP_EOL;
+            echo $printer->render($kit);
             exit;
         }
-        self::$options = $opt;
-        $startFunction($opt);
+        self::$options = $opt->toArray();
+        $startFunction(self::$options);
     }
-
 
     static function startServer($isHttp = false)
     {
-        if ($isHttp)
-        {
+        if ($isHttp) {
             self::$useSwooleHttpServer = true;
         }
         $server_pid = self::getServerPid();
-        if (!empty($server_pid) and SPF\App::getInstance()->os->kill($server_pid, 0))
-        {
+        if (!empty($server_pid) and SPF\App::getInstance()->os->kill($server_pid, 0)) {
             return self::cmdStatus(1, "Server is running on PID: {$server_pid}");
         }
-        if (empty(self::$startFunction) or !is_callable(self::$startFunction))
-        {
+        if (empty(self::$startFunction) or !is_callable(self::$startFunction)) {
             throw new \Exception("startFunction is invalid");
         }
         $startFunction = self::$startFunction;
@@ -262,18 +233,15 @@ class Server extends Base implements Driver
     static function stop()
     {
         $pid = self::getServerPid();
-        if (empty($pid))
-        {
+        if (empty($pid)) {
             return self::cmdStatus(1, "get pid failed");
         }
 
-        if (!empty($pid) and !SPF\App::getInstance()->os->kill($pid, 0))
-        {
+        if (!empty($pid) and !SPF\App::getInstance()->os->kill($pid, 0)) {
             return self::cmdStatus(1, "Server is not running");
         }
 
-        if (self::$beforeStopCallback)
-        {
+        if (self::$beforeStopCallback) {
             call_user_func(self::$beforeStopCallback);
         }
         SPF\App::getInstance()->os->kill($pid, SIGTERM);
@@ -284,18 +252,15 @@ class Server extends Base implements Driver
     {
         $pid = self::getServerPid();
 
-        if (empty($pid))
-        {
+        if (empty($pid)) {
             return self::cmdStatus(1, "get pid failed");
         }
 
-        if (!empty($pid) and !SPF\App::getInstance()->os->kill($pid, 0))
-        {
+        if (!empty($pid) and !SPF\App::getInstance()->os->kill($pid, 0)) {
             return self::cmdStatus(1, "Server is not running");
         }
 
-        if (self::$beforeReloadCallback)
-        {
+        if (self::$beforeReloadCallback) {
             call_user_func(self::$beforeReloadCallback);
         }
         SPF\App::getInstance()->os->kill($pid, SIGUSR1);
@@ -320,16 +285,11 @@ class Server extends Base implements Driver
      */
     static function autoCreate($host, $port, $ssl = false)
     {
-        if (class_exists('\\Swoole\\Server', false))
-        {
+        if (class_exists('\\Swoole\\Server', false)) {
             return new self($host, $port, $ssl);
-        }
-        elseif (function_exists('event_base_new'))
-        {
+        } elseif (function_exists('event_base_new')) {
             return new EventTCP($host, $port, $ssl);
-        }
-        else
-        {
+        } else {
             return new SelectTCP($host, $port, $ssl);
         }
     }
@@ -337,32 +297,23 @@ class Server extends Base implements Driver
     function __construct($host, $port, $ssl = false)
     {
         $flag = $ssl ? (SWOOLE_SOCK_TCP | SWOOLE_SSL) : SWOOLE_SOCK_TCP;
-        if (!empty(self::$options['base']))
-        {
+        if (!empty(self::$options['base'])) {
             self::$swooleMode = SWOOLE_BASE;
-        }
-        elseif (extension_loaded('swoole'))
-        {
+        } elseif (extension_loaded('swoole')) {
             self::$swooleMode = SWOOLE_PROCESS;
         }
 
-        if (!empty(self::$options['host']) and !empty(self::$options['port']))
-        {
+        if (!empty(self::$options['host']) and !empty(self::$options['port'])) {
             $this->host = self::$options['host'];
             $this->port = self::$options['port'];
-        }
-        else
-        {
+        } else {
             $this->host = $host;
             $this->port = $port;
         }
 
-        if (self::$useSwooleHttpServer)
-        {
+        if (self::$useSwooleHttpServer) {
             $this->sw = new \swoole_http_server($this->host, $this->port, self::$swooleMode, $flag);
-        }
-        else
-        {
+        } else {
             $this->sw = new \swoole_server($this->host, $this->port, self::$swooleMode, $flag);
         }
 
@@ -391,24 +342,20 @@ class Server extends Base implements Driver
     function onMasterStart($serv)
     {
         SPF\Console::setProcessName($this->getProcessName() . ': master -host=' . $this->host . ' -port=' . $this->port);
-        if (!empty($this->runtimeSetting['pid_file']))
-        {
+        if (!empty($this->runtimeSetting['pid_file'])) {
             file_put_contents(self::$pidFile, $serv->master_pid);
         }
-        if (method_exists($this->protocol, 'onMasterStart'))
-        {
+        if (method_exists($this->protocol, 'onMasterStart')) {
             $this->protocol->onMasterStart($serv);
         }
     }
 
     function onMasterStop($serv)
     {
-        if (!empty($this->runtimeSetting['pid_file']))
-        {
+        if (!empty($this->runtimeSetting['pid_file'])) {
             unlink(self::$pidFile);
         }
-        if (method_exists($this->protocol, 'onMasterStop'))
-        {
+        if (method_exists($this->protocol, 'onMasterStop')) {
             $this->protocol->onMasterStop($serv);
         }
     }
@@ -416,16 +363,14 @@ class Server extends Base implements Driver
     function onManagerStart($server)
     {
         SPF\Console::setProcessName($this->getProcessName() . ': manager');
-        if (method_exists($this->protocol, 'onManagerStart'))
-        {
+        if (method_exists($this->protocol, 'onManagerStart')) {
             $this->protocol->onManagerStart($server);
         }
     }
 
     function onManagerStop($server)
     {
-        if (method_exists($this->protocol, 'onManagerStop'))
-        {
+        if (method_exists($this->protocol, 'onManagerStop')) {
             $this->protocol->onManagerStop($server);
         }
     }
@@ -435,32 +380,25 @@ class Server extends Base implements Driver
         /**
          * 清理Opcache缓存
          */
-        if (function_exists('opcache_reset'))
-        {
+        if (function_exists('opcache_reset')) {
             opcache_reset();
         }
         /**
          * 清理APC缓存
          */
-        if (function_exists('apc_clear_cache'))
-        {
+        if (function_exists('apc_clear_cache')) {
             apc_clear_cache();
         }
 
-        if ($worker_id >= $serv->setting['worker_num'])
-        {
+        if ($worker_id >= $serv->setting['worker_num']) {
             SPF\Console::setProcessName($this->getProcessName() . ': task');
-        }
-        else
-        {
+        } else {
             SPF\Console::setProcessName($this->getProcessName() . ': worker');
         }
-        if (method_exists($this->protocol, 'onStart'))
-        {
+        if (method_exists($this->protocol, 'onStart')) {
             $this->protocol->onStart($serv, $worker_id);
         }
-        if (method_exists($this->protocol, 'onWorkerStart'))
-        {
+        if (method_exists($this->protocol, 'onWorkerStart')) {
             $this->protocol->onWorkerStart($serv, $worker_id);
         }
     }
@@ -468,28 +406,23 @@ class Server extends Base implements Driver
     function run($setting = array())
     {
         $this->runtimeSetting = array_merge($this->runtimeSetting, $setting);
-        if (self::$pidFile)
-        {
+        if (self::$pidFile) {
             $this->runtimeSetting['pid_file'] = self::$pidFile;
         }
-        if (!empty(self::$options['daemon']))
-        {
+        if (!empty(self::$options['daemon'])) {
             $this->runtimeSetting['daemonize'] = true;
         }
-        if (!empty(self::$options['worker']))
-        {
+        if (!empty(self::$options['worker'])) {
             $this->runtimeSetting['worker_num'] = intval(self::$options['worker']);
         }
-        if (!empty(self::$options['thread']))
-        {
+        if (!empty(self::$options['thread'])) {
             $this->runtimeSetting['reator_num'] = intval(self::$options['thread']);
         }
-        if (!empty(self::$options['tasker']))
-        {
+        if (!empty(self::$options['tasker'])) {
             $this->runtimeSetting['task_worker_num'] = intval(self::$options['tasker']);
         }
 
-        $this->log("server settings=".var_export($this->runtimeSetting, true));
+        $this->log("server settings=" . var_export($this->runtimeSetting, true));
         $this->sw->set($this->runtimeSetting);
         $this->sw->on('Start', array($this, 'onMasterStart'));
         $this->sw->on('Shutdown', array($this, 'onMasterStop'));
@@ -497,37 +430,28 @@ class Server extends Base implements Driver
         $this->sw->on('ManagerStop', array($this, 'onManagerStop'));
         $this->sw->on('WorkerStart', array($this, 'onWorkerStart'));
 
-        if (is_callable(array($this->protocol, 'onConnect')))
-        {
+        if (is_callable(array($this->protocol, 'onConnect'))) {
             $this->sw->on('Connect', array($this->protocol, 'onConnect'));
         }
-        if (is_callable(array($this->protocol, 'onClose')))
-        {
+        if (is_callable(array($this->protocol, 'onClose'))) {
             $this->sw->on('Close', array($this->protocol, 'onClose'));
         }
-        if (self::$useSwooleHttpServer)
-        {
+        if (self::$useSwooleHttpServer) {
             $this->sw->on('Request', array($this->protocol, 'onRequest'));
-        }
-        else
-        {
+        } else {
             $this->sw->on('Receive', array($this->protocol, 'onReceive'));
         }
-        if (is_callable(array($this->protocol, 'WorkerStop')))
-        {
+        if (is_callable(array($this->protocol, 'WorkerStop'))) {
             $this->sw->on('WorkerStop', array($this->protocol, 'WorkerStop'));
         }
         //swoole-1.8已经移除了onTimer回调函数
-        if (version_compare(SWOOLE_VERSION, '1.8.0') < 0)
-        {
-            if (is_callable(array($this->protocol, 'onTimer')))
-            {
+        if (version_compare(SWOOLE_VERSION, '1.8.0') < 0) {
+            if (is_callable(array($this->protocol, 'onTimer'))) {
                 $this->sw->on('Timer', array($this->protocol, 'onTimer'));
             }
         }
 
-        if (is_callable(array($this->protocol, 'onTask')))
-        {
+        if (is_callable(array($this->protocol, 'onTask'))) {
             $this->sw->on('Task', array($this->protocol, 'onTask'));
             $this->sw->on('Finish', array($this->protocol, 'onFinish'));
         }
@@ -551,12 +475,9 @@ class Server extends Base implements Driver
      */
     function setProtocol($protocol)
     {
-        if (self::$useSwooleHttpServer)
-        {
+        if (self::$useSwooleHttpServer) {
             $this->protocol = $protocol;
-        }
-        else
-        {
+        } else {
             parent::setProtocol($protocol);
         }
     }
@@ -566,7 +487,7 @@ class Server extends Base implements Driver
         return $this->sw->send($client_id, $data);
     }
 
-    static function task($data,$func)
+    static function task($data, $func)
     {
         $params = array(
             'func' => $func,

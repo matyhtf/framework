@@ -5,6 +5,7 @@ namespace SPF;
 use Exception;
 use SPF\Exception\NotFound;
 use Symfony;
+use Dotenv\Dotenv;
 
 /**
  * Swoole系统核心类，外部使用全局变量$php引用
@@ -167,6 +168,7 @@ class App
     public $modelLoader;
     public $env;
 
+    protected $environmentVariables = null;
     protected $hooks = array();
     protected $router_function;
 
@@ -183,8 +185,6 @@ class App
             Error::$echo_html = true;
         }
 
-        require_once __DIR__.'/../helper/functions.php';
-
         $this->app_path = $dir;
 
         if (is_dir(!$this->app_path)) {
@@ -196,16 +196,25 @@ class App
         $this->config = new Config;
         $this->config->setPath($this->app_path . '/configs');
 
-        //将此目录作为App命名空间的根目录
+        // 将此目录作为App命名空间的根目录
         $this->loader->addNameSpace('App', $this->app_path . '/classes');
         spl_autoload_register([$this->loader, 'autoload']);
 
-        //添加默认路由器
+        // 添加默认路由器
         $this->addRouter(new Router\Rewrite());
         $this->addRouter(new Router\Original());
 
-        //设置路由函数
+        // 设置路由函数
         $this->router(array($this, 'urlRoute'));
+    }
+
+    function getEnv($key, $default = null)
+    {
+        if ($this->environmentVariables === null) {
+            $dotenv = Dotenv::createImmutable($this->getPath());
+            $this->environmentVariables = $dotenv->load();
+        }
+        return $this->environmentVariables[$key] ?? $default;
     }
 
     /**
@@ -227,7 +236,7 @@ class App
     /**
      * 获取 Application 的路径
      */
-    function getPath() : string
+    function getPath(): string
     {
         return $this->app_path;
     }
@@ -469,8 +478,8 @@ class App
      * 加载内置的Swoole模块
      * @param $module
      * @param $id
-     * @throws NotFound
      * @return mixed
+     * @throws NotFound
      */
     protected function loadModule($module, $id = 'master')
     {
@@ -512,8 +521,8 @@ class App
      * 卸载的Swoole模块
      * @param $module
      * @param $object_id
-     * @throws NotFound
      * @return bool
+     * @throws NotFound
      */
     function unloadModule($module, $object_id = 'all')
     {
@@ -860,14 +869,12 @@ class App
 
     function reloadController($mvc, $controller_file)
     {
-        if (extension_loaded('runkit') and $this->server->config['apps']['auto_reload'])
-        {
+        if (extension_loaded('runkit') and $this->server->config['apps']['auto_reload']) {
             clearstatcache();
             $fstat = stat($controller_file);
             //修改时间大于加载时的时间
-            if(isset($this->env['controllers'][$mvc['controller']]) && $fstat['mtime'] > $this->env['controllers'][$mvc['controller']]['time'])
-            {
-                runkit_import($controller_file, RUNKIT_IMPORT_CLASS_METHODS|RUNKIT_IMPORT_OVERRIDE);
+            if (isset($this->env['controllers'][$mvc['controller']]) && $fstat['mtime'] > $this->env['controllers'][$mvc['controller']]['time']) {
+                runkit_import($controller_file, RUNKIT_IMPORT_CLASS_METHODS | RUNKIT_IMPORT_OVERRIDE);
                 $this->env['controllers'][$mvc['controller']]['time'] = time();
             } else {
                 $this->env['controllers'][$mvc['controller']]['time'] = time();

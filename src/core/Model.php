@@ -485,4 +485,9 @@ class Model
     {
         return new QueryBuilder($this->db, $this->table, $fields);
     }
+
+    static function create(string $db_key = 'master')
+    {
+        return new static(App::getInstance(), $db_key);
+    }
 }

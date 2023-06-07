@@ -1,4 +1,5 @@
 <?php
+
 namespace SPF;
 
 class Console
@@ -8,19 +9,13 @@ class Console
         $cmd = trim($cmd);
         $args = explode(' ', $cmd);
         $return = array();
-        foreach ($args as &$arg)
-        {
+        foreach ($args as &$arg) {
             $arg = trim($arg);
-            if (empty($arg))
-            {
+            if (empty($arg)) {
                 unset($arg);
-            }
-            elseif ($arg[0] === '\\' or $arg[0] === '-')
-            {
+            } elseif ($arg[0] === '\\' or $arg[0] === '-') {
                 $return['opt'][] = substr($arg, 1);
-            }
-            else
-            {
+            } else {
                 $return['args'][] = $arg;
             }
         }
@@ -34,21 +29,17 @@ class Console
      */
     static function changeUser($user)
     {
-        if (!function_exists('posix_getpwnam'))
-        {
+        if (!function_exists('posix_getpwnam')) {
             trigger_error(__METHOD__ . ": require posix extension.");
 
             return false;
         }
         $user = posix_getpwnam($user);
-        if ($user)
-        {
+        if ($user) {
             posix_setuid($user['uid']);
             posix_setgid($user['gid']);
             return true;
-        }
-        else
-        {
+        } else {
             return false;
         }
     }
@@ -59,18 +50,12 @@ class Console
      */
     static function setProcessName($name)
     {
-        if (function_exists('cli_set_process_title'))
-        {
+        if (function_exists('cli_set_process_title')) {
             @cli_set_process_title($name);
-        }
-        else
-        {
-            if (function_exists('swoole_set_process_name'))
-            {
+        } else {
+            if (function_exists('swoole_set_process_name')) {
                 @swoole_set_process_name($name);
-            }
-            else
-            {
+            } else {
                 trigger_error(__METHOD__ . " failed. require cli_set_process_title or swoole_set_process_name.");
             }
         }

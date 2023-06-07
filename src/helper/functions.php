@@ -107,3 +107,9 @@ function swoole_error_handler($errno, $errstr, $errfile, $errline)
     $info .= '<b>Code:</b> ' . $errno . "<br />\n";
     echo SPF\Error::info($title, $info);
 }
+
+if (!function_exists('env')) {
+    function env($key, $default = null) {
+        return SPF\App::getInstance()->getEnv($key, $default);
+    }
+}
