@@ -322,29 +322,26 @@ class Model
 		}
 	}
 
-	/**
-	 * 获取一个键值对应的结构，键为表记录主键的值，值为记录数据或者其中一个字段的值
-	 * @param $gets
-	 * @param $field
-	 * @return array
-	 */
+    /**
+     * 获取一个键值对应的结构，键为表记录主键的值，值为记录数据或者其中一个字段的值
+     * @param $gets
+     * @param $field
+     * @return array
+     * @throws \Exception
+     */
     function getMap($gets, $field = null)
-	{
+    {
         $list = $this->gets($gets);
         $new = array();
-        foreach ($list as $li)
-        {
-            if (empty($field))
-            {
+        foreach ($list as $li) {
+            if (empty($field)) {
                 $new[$li[$this->primary]] = $li;
-            }
-            else
-            {
+            } else {
                 $new[$li[$this->primary]] = $li[$field];
             }
         }
         return $new;
-	}
+    }
 
 	/**
 	 * 获取一个2层的树状结构

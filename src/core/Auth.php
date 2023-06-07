@@ -1,4 +1,5 @@
 <?php
+
 namespace SPF;
 
 /**
@@ -50,16 +51,12 @@ class Auth
     function __construct($config)
     {
         $this->config = $config;
-        if (empty($config['login_table']))
-        {
+        if (empty($config['login_table'])) {
             throw new \Exception(__CLASS__ . ' request login_table config.');
         }
-        if (!empty($config['login_db']))
-        {
+        if (!empty($config['login_db'])) {
             $this->login_db = $config['login_db'];
-        }
-        else
-        {
+        } else {
             $this->login_db = 'master';
         }
 
@@ -68,11 +65,12 @@ class Auth
         $_SESSION[self::$session_prefix . 'save_key'] = array();
     }
 
-    function saveUserinfo($key='userinfo')
+    function saveUserinfo($key = 'userinfo')
     {
-        $_SESSION[self::$session_prefix.$key] = $this->user;
-        $_SESSION[self::$session_prefix.'save_key'][] = self::$session_prefix.$key;
+        $_SESSION[self::$session_prefix . $key] = $this->user;
+        $_SESSION[self::$session_prefix . 'save_key'][] = self::$session_prefix . $key;
     }
+
     /**
      * 更新用户信息
      * @param $set
@@ -80,8 +78,7 @@ class Auth
      */
     function updateStatus($set = null)
     {
-        if (empty($set))
-        {
+        if (empty($set)) {
             $set = array(
                 self::$lastlogin => date('Y-m-d H:i:s'),
                 self::$lastip => App::getInstance()->request->getClientIP()
@@ -102,7 +99,7 @@ class Auth
      */
     function getUid()
     {
-        return $_SESSION[self::$session_prefix.'user_id'];
+        return $_SESSION[self::$session_prefix . 'user_id'];
     }
 
     /**
@@ -147,8 +144,7 @@ class Auth
      */
     function isLogin()
     {
-        if (isset($_SESSION[self::$session_prefix . 'isLogin']) and $_SESSION[self::$session_prefix . 'isLogin'] == 1)
-        {
+        if (isset($_SESSION[self::$session_prefix . 'isLogin']) and $_SESSION[self::$session_prefix . 'isLogin'] == 1) {
             return true;
         }
         return false;
@@ -167,22 +163,18 @@ class Auth
         $table = table($this->login_table, $this->login_db);
         $table->primary = self::$userid_field;
         $_res = $table->gets(array('select' => self::$username_field . ',' . self::$password_field, 'limit' => 1, self::$userid_field => $uid));
-        if (count($_res) < 1)
-        {
+        if (count($_res) < 1) {
             $this->errMessage = '用户不存在';
             $this->errCode = 1;
             return false;
         }
 
         $user = $_res[0];
-        if ($user[self::$password_field] != self::makePasswordHash($user[self::$username_field], $old_pwd))
-        {
+        if ($user[self::$password_field] != self::makePasswordHash($user[self::$username_field], $old_pwd)) {
             $this->errMessage = '原密码不正确';
             $this->errCode = 2;
             return false;
-        }
-        else
-        {
+        } else {
             $table->set($uid, array(self::$password_field => self::makePasswordHash($user[self::$username_field], $new_pwd)), self::$userid_field);
             return true;
         }
@@ -197,24 +189,20 @@ class Auth
         /**
          * 启动Session
          */
-        if (!App::getInstance()->session->isStarted)
-        {
+        if (!App::getInstance()->session->isStarted) {
             App::getInstance()->session->start();
         }
         /**
          * 如果设置为true，退出登录时，销毁所有Session
          */
-        if (self::$session_destroy)
-        {
+        if (self::$session_destroy) {
             $_SESSION = array();
             return true;
         }
         unset($_SESSION[self::$session_prefix . 'isLogin']);
         unset($_SESSION[self::$session_prefix . 'user_id']);
-        if (!empty($_SESSION[self::$session_prefix . 'save_key']))
-        {
-            foreach ($_SESSION[self::$session_prefix . 'save_key'] as $sk)
-            {
+        if (!empty($_SESSION[self::$session_prefix . 'save_key'])) {
+            foreach ($_SESSION[self::$session_prefix . 'save_key'] as $sk) {
                 unset($_SESSION[$sk]);
             }
         }
@@ -256,39 +244,29 @@ class Auth
      * 产生一个密码串，连接用户名和密码，并使用sha1产生散列
      * @param $username
      * @param $password
-     * @throws \Exception
      * @return string
+     * @throws \Exception
      */
     public static function makePasswordHash($username, $password)
     {
         //sha1 用户名+密码
-        if (self::$password_hash == 'sha1')
-        {
+        if (self::$password_hash == 'sha1') {
             return sha1($username . $password);
-        }
-        //使用PHP内置的password
-        elseif(self::$password_hash == 'crypt')
-        {
-            if (!function_exists('password_hash'))
-            {
+        } //使用PHP内置的password
+        elseif (self::$password_hash == 'crypt') {
+            if (!function_exists('password_hash')) {
                 throw new \Exception("require password_hash function.");
             }
             $options = [
                 'cost' => self::$password_cost,
             ];
             return password_hash($password, PASSWORD_BCRYPT, $options);
-        }
-        //md5 用户名+密码
-        elseif (self::$password_hash == 'md5')
-        {
+        } //md5 用户名+密码
+        elseif (self::$password_hash == 'md5') {
             return md5($username . $password);
-        }
-        elseif (self::$password_hash == 'sha1_single')
-        {
+        } elseif (self::$password_hash == 'sha1_single') {
             return sha1($password);
-        }
-        elseif (self::$password_hash == 'md5_single')
-        {
+        } elseif (self::$password_hash == 'md5_single') {
             return md5($password);
         }
         return false;
@@ -303,19 +281,14 @@ class Auth
         /**
          * 启动Session
          */
-        if (!App::getInstance()->session->isStarted)
-        {
+        if (!App::getInstance()->session->isStarted) {
             App::getInstance()->session->start();
         }
         $user = App::getInstance()->user;
-        if (!$user->isLogin())
-        {
-            if (strpos($_SERVER["REQUEST_URI"], '?') === false and !empty($_SERVER['QUERY_STRING']))
-            {
+        if (!$user->isLogin()) {
+            if (strpos($_SERVER["REQUEST_URI"], '?') === false and !empty($_SERVER['QUERY_STRING'])) {
                 $url = $_SERVER["REQUEST_URI"] . '?' . $_SERVER['QUERY_STRING'];
-            }
-            else
-            {
+            } else {
                 $url = $_SERVER["REQUEST_URI"];
             }
             $login_url = $user->config['login_url'] . '?refer=' . urlencode($url);

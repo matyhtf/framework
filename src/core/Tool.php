@@ -286,37 +286,31 @@ class Tool
      * URL合并
      * @param $key
      * @param $value
-     * @param $ignore
+     * @param null $ignore
+     * @param null $urls
      * @return string
      */
     static function url_merge($key, $value, $ignore = null, $urls = null)
     {
-        $url = array();
-        if ($urls === null) $urls = $_GET;
+        if ($urls === null) {
+            $urls = App::getInstance()->request->get;
+        }
 
         $urls = array_merge($urls, array_combine(explode(',', $key), explode(',', $value)));
-        if ($ignore !== null)
-        {
+        if ($ignore !== null) {
             $ignores = explode(',', $ignore);
-            foreach ($ignores as $ig)
-            {
+            foreach ($ignores as $ig) {
                 unset($urls[$ig]);
             }
         }
-        if (self::$url_prefix == '')
-        {
+        if (self::$url_prefix == '') {
             $qm = strpos($_SERVER['REQUEST_URI'], '?');
-            if ($qm !== false)
-            {
+            if ($qm !== false) {
                 $prefix = substr($_SERVER['REQUEST_URI'], 0, $qm + 1);
-            }
-            else
-            {
+            } else {
                 $prefix = $_SERVER['REQUEST_URI'] . '?';
             }
-        }
-        else
-        {
+        } else {
             $prefix = self::$url_prefix;
         }
         return $prefix . http_build_query($urls) . self::$url_add_end;

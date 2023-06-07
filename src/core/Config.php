@@ -37,6 +37,7 @@ class Config extends ArrayObject
         return true;
     }
 
+    #[\ReturnTypeWillChange]
     function offsetGet($index)
     {
         if (!isset($this->config[$index])) {
@@ -67,16 +68,19 @@ class Config extends ArrayObject
         $this->config[$key] = $value;
     }
 
+    #[\ReturnTypeWillChange]
     function offsetSet($index, $newval)
     {
         $this->set($index, $newval);
     }
 
+    #[\ReturnTypeWillChange]
     function offsetUnset($index)
     {
         unset($this->config[$index]);
     }
 
+    #[\ReturnTypeWillChange]
     function offsetExists($index)
     {
         if (!isset($this->config[$index])) {

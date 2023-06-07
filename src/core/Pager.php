@@ -142,17 +142,16 @@ class Pager
 	/**
 	 * 获取显示“首页”的代码
 	 * @return string
-	 */
+     */
     protected function first_page()
     {
         $style = @$this->span_class['first'];
-        if ($this->page == 1)
-        {
+        if ($this->page == 1) {
             return '<span class="' . $style . '">' . $this->first_page . '</span>';
         }
 
         return $this->_get_link($this->_get_url(1), $this->first_page, $style);
-	}
+    }
 
 	/**
 	 * 获取显示“尾页”的代码
@@ -236,30 +235,24 @@ class Pager
 	 * @param int $mode
 	 * @return string
 	 */
-	function render($mode=null)
-	{
+    function render($mode = null)
+    {
         $pager_html = "<div class='pager'>";
-        if ($mode === null)
-        {
-            if (in_array('first', $this->span_open))
-            {
+        if ($mode === null) {
+            if (in_array('first', $this->span_open)) {
                 $pager_html .= $this->first_page();
             }
-            if (in_array('previous', $this->span_open))
-            {
+            if (in_array('previous', $this->span_open)) {
                 $pager_html .= $this->pre_page();
             }
             $pager_html .= $this->nowbar();
-            if (in_array('next', $this->span_open))
-            {
+            if (in_array('next', $this->span_open)) {
                 $pager_html .= $this->next_page();
             }
-            if (in_array('last', $this->span_open))
-            {
-				$pager_html.=$this->last_page();
-			}
-            if (in_array('pagesize', $this->span_open))
-            {
+            if (in_array('last', $this->span_open)) {
+                $pager_html .= $this->last_page();
+            }
+            if (in_array('pagesize', $this->span_open)) {
                 $pager_html .= $this->set_pagesize();
             }
             $pager_html .= '</div>';
@@ -267,7 +260,7 @@ class Pager
         }
         $pager_html .= '</div>';
         return $pager_html;
-	}
+    }
 	/*----------------private function (私有方法)-----------------------------------------------------------*/
 	/**
 	 * 设置当前页面
@@ -290,19 +283,16 @@ class Pager
 		}
 	}
 
-	/**
-	 * 为指定的页面返回地址值
-	 * @param int $pageno
-	 * @return string $url
-	 */
+    /**
+     * 为指定的页面返回地址值
+     * @param int $pageno
+     * @return string $url
+     */
     protected function _get_url($pageno = 1)
     {
-        if (empty($this->page_tpl))
-        {
+        if (empty($this->page_tpl)) {
             return Tool::url_merge('page', $pageno, 'mvc,q');
-        }
-        else
-        {
+        } else {
             return str_replace('{page}', $pageno, $this->page_tpl);
         }
     }
